@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Q-Bank data (decks, questions) is public-read in Supabase and fetched from the browser client; bookmarks/attempts are per-user via RLS — keeps the site static-friendly for Vercel without server functions.
+- Questions were imported once from the WordPress plugin's questions.json (note_id = questions.id); deck hierarchy lives in the `decks` table — re-import by upserting both.
+- Question stems/options/explanations are trusted Anki HTML rendered with dangerouslySetInnerHTML.
