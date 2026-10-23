@@ -30,7 +30,7 @@ export function Quiz({
   const [marks, setMarks] = useState(bookmarks);
   const [finished, setFinished] = useState(false);
   const t0 = useRef(Date.now());
-  const q = questions[i];
+  const q = questions[i] as Question;
 
   useEffect(() => {
     t0.current = Date.now();
@@ -128,7 +128,7 @@ export function Quiz({
       <div className="mt-6 space-y-3">
         {q.options.length ? (
           q.options.map((o, k) => {
-            const L = LETTERS[k];
+            const L = LETTERS[k] ?? String(k);
             const right = done && q.answer === L;
             const wrong = done && chosen === L && q.answer !== L;
             return (

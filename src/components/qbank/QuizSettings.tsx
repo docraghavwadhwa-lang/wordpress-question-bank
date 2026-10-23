@@ -16,7 +16,7 @@ export function QuizSettings({
   pick: Pick | null;
   initialTimer: number;
   loading: boolean;
-  message?: string;
+  message?: string | undefined;
   onCancel: () => void;
   onStart: (timer: number) => void;
 }) {
