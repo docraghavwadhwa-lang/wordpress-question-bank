@@ -21,9 +21,9 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Q-Banks | Nirmaya Care" },
+      { title: "MedQuiz by Nirmaya — Medical MCQ Practice" },
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
-      { property: "og:title", content: "Q-Banks | Nirmaya Care" },
+      { property: "og:title", content: "MedQuiz by Nirmaya — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
     ],
   }),
