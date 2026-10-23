@@ -67,29 +67,29 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.008 200);
-  --foreground: oklch(0.24 0.035 205);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.035 205);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.035 205);
-  --primary: oklch(0.33 0.06 205);
-  --primary-foreground: oklch(0.98 0.01 200);
-  --secondary: oklch(0.955 0.02 195);
-  --secondary-foreground: oklch(0.33 0.06 205);
-  --muted: oklch(0.955 0.015 195);
-  --muted-foreground: oklch(0.5 0.025 205);
-  --accent: oklch(0.65 0.08 190);
+  --radius: 0.625rem;
+  --background: oklch(0.975 0.012 85);
+  --foreground: oklch(0.22 0.025 165);
+  --card: oklch(0.993 0.005 85);
+  --card-foreground: oklch(0.22 0.025 165);
+  --popover: oklch(0.993 0.005 85);
+  --popover-foreground: oklch(0.22 0.025 165);
+  --primary: oklch(0.32 0.055 165);
+  --primary-foreground: oklch(0.975 0.012 85);
+  --secondary: oklch(0.945 0.02 120);
+  --secondary-foreground: oklch(0.32 0.055 165);
+  --muted: oklch(0.95 0.012 85);
+  --muted-foreground: oklch(0.5 0.02 120);
+  --accent: oklch(0.6 0.12 45);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.58 0.2 27);
   --destructive-foreground: oklch(0.98 0 0);
   --success: oklch(0.6 0.13 155);
   --success-soft: oklch(0.95 0.05 155);
   --danger-soft: oklch(0.95 0.04 25);
-  --border: oklch(0.9 0.018 200);
-  --input: oklch(0.9 0.018 200);
-  --ring: oklch(0.65 0.08 190);
+  --border: oklch(0.89 0.015 85);
+  --input: oklch(0.89 0.015 85);
+  --ring: oklch(0.6 0.12 45);
   --chart-1: oklch(0.65 0.08 190);
   --chart-2: oklch(0.33 0.06 205);
   --chart-3: oklch(0.6 0.13 155);
@@ -103,8 +103,8 @@
   --sidebar-accent-foreground: oklch(0.33 0.06 205);
   --sidebar-border: oklch(0.9 0.018 200);
   --sidebar-ring: oklch(0.65 0.08 190);
-  --face-display: "Fraunces", Georgia, serif;
-  --face-body: "Figtree", system-ui, sans-serif;
+  --face-display: "Newsreader", Georgia, serif;
+  --face-body: "Hanken Grotesk", system-ui, sans-serif;
 }
 
 .dark {
@@ -157,7 +157,10 @@
   }
   h1, h2, h3, h4 {
     font-family: var(--face-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
   }
+  body { -webkit-font-smoothing: antialiased; font-feature-settings: "ss01", "cv11"; }
   .qb-html img { max-width: 100%; height: auto; border-radius: 0.5rem; }
   .qb-html b, .qb-html strong { font-weight: 650; }
 }

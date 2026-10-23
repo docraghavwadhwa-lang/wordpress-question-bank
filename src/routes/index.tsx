@@ -21,9 +21,9 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Q-Banks | Nirmaya Care" },
+      { title: "MedQuiz by Nirmaya — Medical MCQ Practice" },
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
-      { property: "og:title", content: "Q-Banks | Nirmaya Care" },
+      { property: "og:title", content: "MedQuiz by Nirmaya — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
     ],
   }),
@@ -64,11 +64,11 @@ function Index() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <button type="button" onClick={() => setQuiz(null)} className="text-left">
-            <span className="font-display text-2xl text-primary">Nirmaya Care</span>
-            <span className="ml-2 text-sm font-medium uppercase tracking-widest text-accent">Q-Banks</span>
+            <span className="font-display text-3xl tracking-tight text-primary">MedQuiz</span>
+            <span className="ml-2 font-display text-lg italic text-muted-foreground">by Nirmaya</span>
           </button>
           {user ? (
             <div className="flex items-center gap-3">
@@ -103,8 +103,11 @@ function Index() {
                 <Link to="/auth" className="font-semibold underline underline-offset-4">Sign in</Link>
               </div>
             )}
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
-              <h1 className="text-4xl text-primary">Choose a subject</h1>
+            <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
+                <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
+              </div>
               {stats.data && stats.data.attempts > 0 && (
                 <p className="text-sm text-muted-foreground">
                   Your record: {stats.data.correct}/{stats.data.attempts} correct ({Math.round((100 * stats.data.correct) / stats.data.attempts)}%)

@@ -10,9 +10,9 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | Nirmaya Care Q-Banks" },
+      { title: "Sign in | MedQuiz by Nirmaya" },
       { name: "description", content: "Sign in to save your Q-Bank scores and bookmarks." },
-      { property: "og:title", content: "Sign in | Nirmaya Care Q-Banks" },
+      { property: "og:title", content: "Sign in | MedQuiz by Nirmaya" },
       { property: "og:description", content: "Sign in to save your Q-Bank scores and bookmarks." },
     ],
   }),
@@ -56,7 +56,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="font-display text-2xl text-primary">Nirmaya Care</Link>
+        <Link to="/" className="font-display text-3xl tracking-tight text-primary">MedQuiz <em className="text-xl text-muted-foreground">by Nirmaya</em></Link>
         <h1 className="mt-4 text-3xl">{mode === "in" ? "Welcome back" : "Create account"}</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 
