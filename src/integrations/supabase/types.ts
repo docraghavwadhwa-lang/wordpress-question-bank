@@ -14,7 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attempts: {
+        Row: {
+          chosen: string
+          correct: boolean
+          created_at: string
+          id: number
+          question_id: number
+          seconds: number
+          user_id: string
+        }
+        Insert: {
+          chosen: string
+          correct: boolean
+          created_at?: string
+          id?: number
+          question_id: number
+          seconds?: number
+          user_id: string
+        }
+        Update: {
+          chosen?: string
+          correct?: boolean
+          created_at?: string
+          id?: number
+          question_id?: number
+          seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookmarks: {
+        Row: {
+          created_at: string
+          question_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          question_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          question_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decks: {
+        Row: {
+          depth: number
+          path: string
+          question_count: number
+          sort_key: string
+          subject: string
+        }
+        Insert: {
+          depth: number
+          path: string
+          question_count?: number
+          sort_key?: string
+          subject: string
+        }
+        Update: {
+          depth?: number
+          path?: string
+          question_count?: number
+          sort_key?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          answer: string | null
+          deck_path: string
+          explanation: string | null
+          id: number
+          options: Json
+          sort_key: string
+          stem: string
+          subject: string
+        }
+        Insert: {
+          answer?: string | null
+          deck_path: string
+          explanation?: string | null
+          id: number
+          options?: Json
+          sort_key?: string
+          stem: string
+          subject: string
+        }
+        Update: {
+          answer?: string | null
+          deck_path?: string
+          explanation?: string | null
+          id?: number
+          options?: Json
+          sort_key?: string
+          stem?: string
+          subject?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
