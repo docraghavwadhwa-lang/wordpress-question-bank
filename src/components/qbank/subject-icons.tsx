@@ -11,6 +11,6 @@ const MAP: Record<string, LucideIcon> = {
 };
 
 export function subjectIcon(name: string): LucideIcon {
-  const key = name.toLowerCase().split(/[\s&]+/)[0];
+  const key = name.toLowerCase().split(/[\s&]+/)[0] ?? "";
   return MAP[key] ?? BookOpen;
 }
