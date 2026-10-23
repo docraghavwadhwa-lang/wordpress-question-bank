@@ -21,9 +21,9 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MedQuiz by Nirmaya — Medical MCQ Practice" },
+      { title: "MedQuiz by Nirmaya Care — Medical MCQ Practice" },
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
-      { property: "og:title", content: "MedQuiz by Nirmaya — Medical MCQ Practice" },
+      { property: "og:title", content: "MedQuiz by Nirmaya Care — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
     ],
   }),
@@ -68,7 +68,7 @@ function Index() {
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
           <button type="button" onClick={() => setQuiz(null)} className="text-left">
             <span className="font-display text-3xl tracking-tight text-primary">MedQuiz</span>
-            <span className="ml-2 font-display text-lg italic text-muted-foreground">by Nirmaya</span>
+            <span className="ml-2 font-display text-lg italic text-muted-foreground">by Nirmaya Care</span>
           </button>
           {user ? (
             <div className="flex items-center gap-3">
