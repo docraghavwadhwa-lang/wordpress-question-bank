@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Star } from "lucide-react";
+import { ChevronDown, ChevronRight, Bookmark } from "lucide-react";
+import { subjectIcon } from "./subject-icons";
 import type { Deck } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
 
@@ -12,11 +13,11 @@ export function SubjectGrid({ decks, signedIn, onPick }: { decks: Deck[]; signed
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {signedIn && (
-        <Tile label="Bookmarked" icon={<Star className="h-4 w-4 fill-current" />} onClick={() => onPick({ title: "Bookmarked questions", bookmarks: true })} />
+        <Tile label="Bookmarked" icon={<Bookmark className="h-5 w-5" strokeWidth={1.5} />} onClick={() => onPick({ title: "Bookmarked questions", bookmarks: true })} />
       )}
       {subjects.map((s) => (
         <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
-          <Tile label={s.path} active={open === s.path} onClick={() => setOpen(open === s.path ? null : s.path)} />
+          <Tile label={s.path} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} onClick={() => setOpen(open === s.path ? null : s.path)} />
           {open === s.path && <SubjectPanel subject={s} decks={decks} onPick={onPick} />}
         </div>
       ))}
@@ -30,14 +31,14 @@ function Tile({ label, icon, active, onClick }: { label: string; icon?: React.Re
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-h-16 w-full items-center gap-3 rounded-xl border bg-card px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-accent hover:shadow-md",
+        "group flex min-h-[4.5rem] w-full items-center gap-4 rounded-lg border bg-card px-4 py-3 text-left transition-all duration-200 hover:border-primary/40 hover:shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--primary)_35%,transparent)]",
         active && "border-primary bg-secondary",
       )}
     >
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-accent">
-        {icon ?? <span className="h-2 w-2 rounded-full bg-accent" />}
+      <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-md border bg-secondary text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground", active && "bg-primary text-primary-foreground")}>
+        {icon}
       </span>
-      <span className="min-w-0 flex-1 break-words font-medium leading-snug">{label}</span>
+      <span className="min-w-0 flex-1 break-words font-display text-lg leading-snug tracking-tight">{label}</span>
       <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", active && "rotate-90")} />
     </button>
   );
