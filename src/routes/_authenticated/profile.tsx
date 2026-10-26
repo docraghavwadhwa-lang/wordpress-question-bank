@@ -36,13 +36,13 @@ function ProfilePage() {
     if (profile.data) setForm(profile.data);
   }, [profile.data]);
 
-  const googlePhoto = (user?.user_metadata?.avatar_url || user?.user_metadata?.picture) as string | undefined;
+  const googlePhoto = (user?.user_metadata?.["avatar_url"] || user?.user_metadata?.["picture"]) as string | undefined;
   const set = (k: keyof Profile, v: unknown) => setForm((f) => ({ ...f, [k]: v }));
 
   async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
-    if (!f.type.startsWith("image/")) return toast.error("Please choose an image file.");
+    if (!f.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
     set("avatar_url", await photoToDataUrl(f));
   }
 
@@ -148,7 +148,7 @@ function ProfilePage() {
   );
 }
 
-function Field({ label, value, onChange, type = "text", placeholder }: { label: string; value?: string | null; onChange: (v: string) => void; type?: string; placeholder?: string }) {
+function Field({ label, value, onChange, type = "text", placeholder }: { label: string; value?: string | null | undefined; onChange: (v: string) => void; type?: string; placeholder?: string }) {
   return (
     <div className="space-y-1.5">
       <Label>{label}</Label>

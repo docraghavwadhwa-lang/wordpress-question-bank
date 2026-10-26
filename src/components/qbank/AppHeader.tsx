@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 
-export function UserAvatar({ src, name, size = 36 }: { src?: string | null; name?: string | null; size?: number }) {
+export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
   const initials = (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   return src ? (
     <img src={src} alt="" referrerPolicy="no-referrer" style={{ width: size, height: size }} className="rounded-full object-cover ring-2 ring-accent/60" />
@@ -53,7 +53,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
             </Link>
             <DropdownMenu>
               <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
-                <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.avatar_url as string | undefined)} name={name} />
+                <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
