@@ -24,16 +24,26 @@ export function SignupWizard({ onSignIn }: { onSignIn: () => void }) {
     {
       title: "Create your account",
       sub: "Start with your email and a password.",
-      ok: /^\S+@\S+\.\S+$/.test(d.email) && d.password.length >= 6,
+      ok: /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(d.email.trim()) && d.password.length >= 6,
       body: (
         <>
           <F label="Email"><Input type="email" autoFocus value={d.email} onChange={(e) => set("email", e.target.value)} /></F>
+          {d.email && !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(d.email.trim()) && <p className="text-xs text-destructive">Enter a valid email, like name@gmail.com</p>}
           <F label="Password (min 6 characters)"><Input type="password" value={d.password} onChange={(e) => set("password", e.target.value)} /></F>
         </>
       ),
     },
     { title: "What's your name?", sub: "This is how we'll greet you.", ok: d.full_name.trim().length > 1, body: <F label="Full name"><Input autoFocus value={d.full_name} maxLength={100} onChange={(e) => set("full_name", e.target.value)} /></F> },
-    { title: "Your phone number", sub: "We'll only use it for account help.", ok: /^\+?[\d\s-]{8,16}$/.test(d.phone.trim()), body: <F label="Phone"><Input type="tel" autoFocus placeholder="+91 98765 43210" value={d.phone} onChange={(e) => set("phone", e.target.value)} /></F> },
+    {
+      title: "Your phone number", sub: "We'll only use it for account help.",
+      ok: /^\+?[\d\s-]+$/.test(d.phone.trim()) && d.phone.replace(/\D/g, "").length >= 10 && d.phone.replace(/\D/g, "").length <= 15,
+      body: (
+        <>
+          <F label="Phone"><Input type="tel" autoFocus placeholder="+91 98765 43210" value={d.phone} onChange={(e) => set("phone", e.target.value)} /></F>
+          {d.phone && d.phone.replace(/\D/g, "").length < 10 && <p className="text-xs text-destructive">Phone number must have at least 10 digits.</p>}
+        </>
+      ),
+    },
     { title: "When were you born?", sub: "Scroll to pick your date of birth.", ok: true, body: <DateWheel value={d.dob} onChange={(v) => set("dob", v)} /> },
     { title: "Year of study", sub: "Where are you in your journey?", ok: !!d.study_year, body: <Choices list={YEARS} value={d.study_year} onPick={(v) => set("study_year", v)} /> },
     {
@@ -56,10 +66,16 @@ export function SignupWizard({ onSignIn }: { onSignIn: () => void }) {
     setBusy(true);
     try {
       const details = { full_name: d.full_name.trim(), phone: d.phone.trim(), dob: d.dob, study_year: d.study_year, college: d.college.trim(), city: d.city.trim() || null, target_exam: d.target_exam };
-      const { data, error } = await supabase.auth.signUp({ email: d.email.trim(), password: d.password, options: { emailRedirectTo: window.location.origin, data: { full_name: details.full_name } } });
+      const email = d.email.trim();
+      const { data, error } = await supabase.auth.signUp({ email, password: d.password, options: { data: { full_name: details.full_name } } });
       if (error) { toast.error(error.message); return; }
-      if (data.user && data.session) await updateProfile(data.user.id, details);
-      else toast.success("Check your email to confirm your account.");
+      let session = data.session;
+      if (!session) {
+        const r = await supabase.auth.signInWithPassword({ email, password: d.password });
+        if (r.error) { toast.error("Account created, but sign-in is blocked: email confirmation is still switched on in Supabase."); return; }
+        session = r.data.session;
+      }
+      if (session) await updateProfile(session.user.id, details);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

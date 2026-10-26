@@ -14,14 +14,16 @@ export function hash(s: string) {
   return h >>> 0;
 }
 
-/** Question-of-the-day subjects, weighted toward Medicine, Surgery and OBG. */
+/** Question-of-the-day subjects, weighted toward Surgery and OBG. */
 export const QOTD_SUBJECTS: { subject: string; weight: number }[] = [
-  { subject: "Medicine", weight: 3 },
   { subject: "Surgery", weight: 3 },
   { subject: "Obstetrics & Gyenacology", weight: 3 },
   { subject: "Pediatrics", weight: 1 },
   { subject: "ENT", weight: 1 },
   { subject: "Ophthalmology", weight: 1 },
+  { subject: "Physiology", weight: 1 },
+  { subject: "Biochemistry", weight: 1 },
+  { subject: "Dermatology", weight: 1 },
 ];
 
 export function subjectForDay(key: string) {
