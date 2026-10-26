@@ -75,8 +75,8 @@ export function DateWheel({ value, onChange }: { value: string; onChange: (v: st
   return (
     <div className="relative flex gap-2 rounded-2xl bg-secondary/60 px-3">
       <div className="pointer-events-none absolute inset-x-2 top-1/2 h-10 -translate-y-1/2 rounded-xl border border-accent/40 bg-card/70" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-background to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-background to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-card to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-card to-transparent" />
       <Wheel label="Day" items={Array.from({ length: days }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} value={d} onChange={(v) => set(y, m, v)} />
       <Wheel label="Month" items={MONTHS.map((l, i) => ({ label: l, value: i + 1 }))} value={m} onChange={(v) => set(y, v, d)} />
       <Wheel label="Year" items={years} value={y} onChange={(v) => set(v, m, d)} />
