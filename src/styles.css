@@ -168,3 +168,10 @@
   .qb-html img { max-width: 100%; height: auto; border-radius: 0.5rem; }
   .qb-html b, .qb-html strong { font-weight: 650; }
 }
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
