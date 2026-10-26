@@ -77,7 +77,6 @@ export function QuoteOfTheDay() {
       <Quote className="mx-auto h-8 w-8 text-accent" strokeWidth={1.5} />
       <blockquote className="mx-auto mt-5 max-w-2xl font-display text-2xl italic leading-snug sm:text-3xl">“{quote}”</blockquote>
       <div className="mx-auto mt-6 h-px w-16 bg-accent" />
-      <p className="mt-4 text-xs font-semibold uppercase tracking-[0.25em] opacity-70">Thought for today</p>
     </section>
   );
 }
