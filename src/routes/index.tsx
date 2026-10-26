@@ -1,13 +1,42 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { BookOpenCheck, Flame, LineChart } from "lucide-react";
 import { SubjectGrid, type Pick } from "@/components/qbank/SubjectGrid";
 import { QuizSettings } from "@/components/qbank/QuizSettings";
 import { Quiz } from "@/components/qbank/Quiz";
+import { AppHeader } from "@/components/qbank/AppHeader";
+import { Celebration } from "@/components/qbank/Celebration";
 import { useAuth } from "@/hooks/use-auth";
-import { supabase } from "@/integrations/supabase/client";
+import { useStreak } from "@/hooks/use-streak";
+import { tierFor } from "@/lib/streak";
+
+function Landing() {
+  return (
+    <div className="min-h-screen">
+      <AppHeader />
+      <main className="mx-auto max-w-3xl px-4 py-20 text-center">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">15,000+ medical MCQs</p>
+        <h1 className="text-5xl leading-tight text-primary sm:text-6xl">Practise daily. <em>Become</em> a great doctor.</h1>
+        <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">Every subject and chapter, with explanations, timers, bookmarks, daily streaks and subject-wise progress.</p>
+        <Link to="/auth" className="mt-8 inline-flex h-12 items-center rounded-md bg-primary px-8 font-medium text-primary-foreground hover:bg-primary/90">Sign in to start</Link>
+        <div className="mt-16 grid gap-4 text-left sm:grid-cols-3">
+          {[
+            { icon: BookOpenCheck, t: "18 subjects", d: "Chapter-wise question banks from Anatomy to Surgery." },
+            { icon: Flame, t: "Daily streaks", d: "Pick Achiever, Scholar or Topper and stay consistent." },
+            { icon: LineChart, t: "Your progress", d: "See how much of each subject you've completed." },
+          ].map((f) => (
+            <div key={f.t} className="rounded-xl border bg-card p-5">
+              <f.icon className="h-6 w-6 text-accent" strokeWidth={1.6} />
+              <h3 className="mt-3 font-display text-xl text-primary">{f.t}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{f.d}</p>
+            </div>
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
 import {
   fetchBookmarkIds,
   fetchBookmarkedQuestions,
