@@ -146,6 +146,10 @@
 }
 
 @layer base {
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 28%, transparent);
+    color: var(--primary);
+  }
   * {
     border-color: var(--color-border);
   }

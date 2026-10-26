@@ -42,7 +42,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
         <Link to="/" onClick={onHome} className="flex items-center gap-2 text-left">
-          <img src="/favicon.svg" alt="" className="h-8 w-8" />
           <span className="font-display text-3xl tracking-tight text-primary">MedQuiz</span>
           <span className="hidden font-display text-lg italic text-muted-foreground sm:inline">by Nirmaya Care</span>
         </Link>

@@ -194,7 +194,7 @@ function Gauge({ value, total }: { value: number; total: number }) {
         <span className="font-display text-4xl text-primary">{value}</span>
         <span className="text-sm text-muted-foreground">of {total}</span>
       </div>
-      <span className="absolute inset-x-0 bottom-1 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Q-Bank completed</span>
+      <span className="absolute inset-x-0 bottom-1 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Questions completed</span>
     </div>
   );
 }
