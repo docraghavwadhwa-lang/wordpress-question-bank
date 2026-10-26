@@ -31,17 +31,18 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { user } = useAuth();
-  const decks = useQuery({ queryKey: ["decks"], queryFn: fetchDecks });
+  const { user, ready } = useAuth();
+  const decks = useQuery({ queryKey: ["decks"], queryFn: fetchDecks, enabled: !!user });
   const stats = useQuery({ queryKey: ["stats", user?.id], queryFn: fetchStats, enabled: !!user });
+  const streak = useStreak(user?.id);
   const [pick, setPick] = useState<Pick | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [quiz, setQuiz] = useState<{ qs: Question[]; timer: number; marks: Set<number> } | null>(null);
-  const [savedTimer, setSavedTimer] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    return Number(localStorage.getItem("qb_timer") ?? 0) || 0;
-  });
+  const [savedTimer, setSavedTimer] = useState(0);
+  useEffect(() => {
+    setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
+  }, []);
 
   async function start(timer: number) {
     if (!pick) return;
@@ -62,34 +63,23 @@ function Index() {
     }
   }
 
+  if (!ready) return <div className="min-h-screen" />;
+  if (!user) return <Landing />;
+
+  const tier = tierFor(streak.goal);
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-          <button type="button" onClick={() => setQuiz(null)} className="text-left">
-            <span className="font-display text-3xl tracking-tight text-primary">MedQuiz</span>
-            <span className="ml-2 font-display text-lg italic text-muted-foreground">by Nirmaya Care</span>
-          </button>
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="hidden text-sm text-muted-foreground sm:inline">{user.email}</span>
-              <Button variant="ghost" size="sm" onClick={() => supabase.auth.signOut()}>
-                <LogOut className="h-4 w-4" /> Sign out
-              </Button>
-            </div>
-          ) : (
-            <Link to="/auth" className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">Sign in</Link>
-          )}
-        </div>
-      </header>
+      <AppHeader onHome={() => setQuiz(null)} />
+      <Celebration days={streak.celebrate} stats={streak.celebrationStats} onClose={streak.closeCelebration} />
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
         {quiz ? (
           <Quiz
             questions={quiz.qs}
             timer={quiz.timer}
-            userId={user?.id ?? null}
+            userId={user.id}
             bookmarks={quiz.marks}
+            onAnswered={() => void streak.refresh()}
             onExit={() => {
               setQuiz(null);
               void stats.refetch();
@@ -97,12 +87,18 @@ function Index() {
           />
         ) : (
           <>
-            {!user && (
-              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-secondary px-5 py-3 text-sm text-primary">
-                <span>Sign in to save your score and bookmark questions.</span>
-                <Link to="/auth" className="font-semibold underline underline-offset-4">Sign in</Link>
-              </div>
-            )}
+            <Link to="/stats" className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
+              <span className="flex items-center gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/15"><Flame className="h-5 w-5 text-accent" /></span>
+                <span>
+                  <span className="block font-display text-xl text-primary">{streak.streak.current}-day streak</span>
+                  <span className="text-sm text-muted-foreground">{tier.name} · today {Math.min(streak.streak.today, streak.goal)}/{streak.goal} questions</span>
+                </span>
+              </span>
+              <span className="h-2 w-40 overflow-hidden rounded-full bg-secondary">
+                <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (100 * streak.streak.today) / streak.goal)}%` }} />
+              </span>
+            </Link>
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
