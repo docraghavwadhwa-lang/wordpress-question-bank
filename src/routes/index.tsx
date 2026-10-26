@@ -10,6 +10,7 @@ import { Celebration } from "@/components/qbank/Celebration";
 import { useAuth } from "@/hooks/use-auth";
 import { useStreak } from "@/hooks/use-streak";
 import { tierFor } from "@/lib/streak";
+import { QuestionOfTheDay, QuoteOfTheDay } from "@/components/qbank/Daily";
 
 function Landing() {
   return (
@@ -128,6 +129,9 @@ function Index() {
                 <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (100 * streak.streak.today) / streak.goal)}%` }} />
               </span>
             </Link>
+            <div className="mb-12">
+              <QuestionOfTheDay />
+            </div>
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
@@ -142,6 +146,7 @@ function Index() {
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
             {decks.error && <p className="text-destructive">Couldn't load subjects. Please refresh.</p>}
             {decks.data && <SubjectGrid decks={decks.data} signedIn={!!user} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
+            <QuoteOfTheDay />
           </>
         )}
       </main>

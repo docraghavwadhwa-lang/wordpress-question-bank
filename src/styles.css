@@ -146,6 +146,10 @@
 }
 
 @layer base {
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 28%, transparent);
+    color: var(--primary);
+  }
   * {
     border-color: var(--color-border);
   }
@@ -163,4 +167,11 @@
   body { -webkit-font-smoothing: antialiased; font-feature-settings: "ss01", "cv11"; }
   .qb-html img { max-width: 100%; height: auto; border-radius: 0.5rem; }
   .qb-html b, .qb-html strong { font-weight: 650; }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

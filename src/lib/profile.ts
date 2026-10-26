@@ -10,6 +10,9 @@ export type Profile = {
   streak_goal: number;
   streak_target_days: number;
   last_celebrated_streak: number;
+  dob: string | null;
+  target_exam: string | null;
+  city: string | null;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
