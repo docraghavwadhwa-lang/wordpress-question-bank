@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       attempts: {
         Row: {
+          archived: boolean
           chosen: string
           correct: boolean
           created_at: string
@@ -25,6 +26,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived?: boolean
           chosen: string
           correct: boolean
           created_at?: string
@@ -34,6 +36,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived?: boolean
           chosen?: string
           correct?: boolean
           created_at?: string
@@ -102,6 +105,48 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          college: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          last_celebrated_streak: number
+          phone: string | null
+          streak_goal: number
+          streak_target_days: number
+          study_year: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          college?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          last_celebrated_streak?: number
+          phone?: string | null
+          streak_goal?: number
+          streak_target_days?: number
+          study_year?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          college?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          last_celebrated_streak?: number
+          phone?: string | null
+          streak_goal?: number
+          streak_target_days?: number
+          study_year?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           answer: string | null
@@ -140,7 +185,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      qb_daily_counts: {
+        Args: { _tz?: string }
+        Returns: {
+          correct: number
+          day: string
+          questions: number
+          seconds: number
+        }[]
+      }
+      qb_reset: { Args: { _subject?: string }; Returns: undefined }
+      qb_subject_stats: {
+        Args: never
+        Returns: {
+          attempted: number
+          correct: number
+          subject: string
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
