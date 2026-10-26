@@ -1,0 +1,1 @@
+alter table public.profiles add column if not exists dob date, add column if not exists target_exam text, add column if not exists city text;

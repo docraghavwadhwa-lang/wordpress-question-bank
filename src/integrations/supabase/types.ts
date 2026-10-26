@@ -108,8 +108,10 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          city: string | null
           college: string | null
           created_at: string
+          dob: string | null
           full_name: string | null
           id: string
           last_celebrated_streak: number
@@ -117,12 +119,15 @@ export type Database = {
           streak_goal: number
           streak_target_days: number
           study_year: string | null
+          target_exam: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          city?: string | null
           college?: string | null
           created_at?: string
+          dob?: string | null
           full_name?: string | null
           id: string
           last_celebrated_streak?: number
@@ -130,12 +135,15 @@ export type Database = {
           streak_goal?: number
           streak_target_days?: number
           study_year?: string | null
+          target_exam?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          city?: string | null
           college?: string | null
           created_at?: string
+          dob?: string | null
           full_name?: string | null
           id?: string
           last_celebrated_streak?: number
@@ -143,6 +151,7 @@ export type Database = {
           streak_goal?: number
           streak_target_days?: number
           study_year?: string | null
+          target_exam?: string | null
           updated_at?: string
         }
         Relationships: []
