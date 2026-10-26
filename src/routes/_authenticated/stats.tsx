@@ -243,8 +243,8 @@ function SubjectStats() {
         ))}
       </div>
       <div className="mt-4 rounded-2xl border bg-card p-6">
-        <div className="flex flex-wrap items-center justify-between gap-6">
-          <div className="grid flex-1 grid-cols-3 gap-4">
+        <div className="flex flex-col-reverse items-center gap-6 md:flex-row md:justify-between">
+          <div className="grid w-full min-w-0 flex-1 grid-cols-3 gap-x-3 gap-y-5">
             <Num label="Attempted" value={cur.attempted} />
             <Num label="Correct" value={cur.correct} />
             <Num label="Accuracy" value={`${acc}%`} />
@@ -284,9 +284,9 @@ function SubjectStats() {
 
 function Num({ label, value }: { label: string; value: number | string }) {
   return (
-    <div>
-      <div className="font-display text-3xl text-primary">{value}</div>
-      <div className="text-xs text-muted-foreground">{label}</div>
+    <div className="min-w-0">
+      <div className="truncate font-display text-2xl text-primary tabular-nums sm:text-3xl">{value}</div>
+      <div className="truncate text-xs text-muted-foreground">{label}</div>
     </div>
   );
 }

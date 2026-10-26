@@ -30,6 +30,7 @@ function ProfilePage() {
   const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => fetchProfile(user!.id), enabled: !!user });
   const [form, setForm] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
+  const [daysText, setDaysText] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -141,15 +142,17 @@ function ProfilePage() {
           <div className="mt-3 flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Or enter your own:</span>
             <Input
-              type="number"
-              min={1}
-              max={1000}
+              type="text"
+              inputMode="numeric"
               className="w-28"
-              value={form.streak_target_days ?? ""}
+              value={daysText ?? String(form.streak_target_days ?? "")}
               onChange={(e) => {
-                const n = Math.round(Number(e.target.value));
+                const t = e.target.value.replace(/\D/g, "").slice(0, 4);
+                setDaysText(t);
+                const n = Number(t);
                 if (n >= 1 && n <= 1000) set("streak_target_days", n);
               }}
+              onBlur={() => setDaysText(null)}
             />
             <span className="text-muted-foreground">days</span>
           </div>
