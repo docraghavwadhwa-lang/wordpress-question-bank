@@ -185,16 +185,18 @@ function Gauge({ value, total }: { value: number; total: number }) {
   const arc = c * 0.75;
   const pct = total ? Math.min(1, value / total) : 0;
   return (
-    <div className="relative h-44 w-44">
+    <div className="flex shrink-0 flex-col items-center">
+    <div className="relative h-40 w-40">
       <svg viewBox="0 0 180 180" className="h-full w-full rotate-[135deg]">
         <circle cx="90" cy="90" r={r} fill="none" stroke="var(--secondary)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${arc} ${c}`} />
         <circle cx="90" cy="90" r={r} fill="none" stroke="var(--primary)" strokeWidth="14" strokeLinecap="round" strokeDasharray={`${arc * pct} ${c}`} className="transition-all duration-700" />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-4xl text-primary">{value}</span>
-        <span className="text-sm text-muted-foreground">of {total}</span>
+        <span className="font-display text-3xl text-primary tabular-nums">{value}</span>
+        <span className="text-xs text-muted-foreground">of {total}</span>
       </div>
-      <span className="absolute inset-x-0 bottom-1 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Questions completed</span>
+    </div>
+      <span className="-mt-3 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Questions completed</span>
     </div>
   );
 }
@@ -244,7 +246,7 @@ function SubjectStats() {
       </div>
       <div className="mt-4 rounded-2xl border bg-card p-6">
         <div className="flex flex-col-reverse items-center gap-6 md:flex-row md:justify-between">
-          <div className="grid w-full min-w-0 flex-1 grid-cols-3 gap-x-3 gap-y-5">
+          <div className="grid w-full min-w-0 flex-1 grid-cols-2 gap-x-3 sm:grid-cols-3 gap-y-5">
             <Num label="Attempted" value={cur.attempted} />
             <Num label="Correct" value={cur.correct} />
             <Num label="Accuracy" value={`${acc}%`} />
@@ -285,7 +287,7 @@ function SubjectStats() {
 function Num({ label, value }: { label: string; value: number | string }) {
   return (
     <div className="min-w-0">
-      <div className="truncate font-display text-2xl text-primary tabular-nums sm:text-3xl">{value}</div>
+      <div className="break-words font-display text-2xl leading-tight text-primary tabular-nums sm:text-3xl">{value}</div>
       <div className="truncate text-xs text-muted-foreground">{label}</div>
     </div>
   );
