@@ -138,6 +138,21 @@ function ProfilePage() {
               </button>
             ))}
           </div>
+          <div className="mt-3 flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Or enter your own:</span>
+            <Input
+              type="number"
+              min={1}
+              max={1000}
+              className="w-28"
+              value={form.streak_target_days ?? ""}
+              onChange={(e) => {
+                const n = Math.round(Number(e.target.value));
+                if (n >= 1 && n <= 1000) set("streak_target_days", n);
+              }}
+            />
+            <span className="text-muted-foreground">days</span>
+          </div>
         </section>
 
         <div className="mt-6 flex justify-end">
