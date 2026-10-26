@@ -86,8 +86,8 @@ export async function recordAttempt(userId: string, questionId: number, chosen: 
 }
 
 export async function fetchStats(): Promise<{ attempts: number; correct: number }> {
-  const all = await supabase.from("attempts").select("id", { count: "exact", head: true });
-  const ok = await supabase.from("attempts").select("id", { count: "exact", head: true }).eq("correct", true);
+  const all = await supabase.from("attempts").select("id", { count: "exact", head: true }).eq("archived", false);
+  const ok = await supabase.from("attempts").select("id", { count: "exact", head: true }).eq("archived", false).eq("correct", true);
   return { attempts: all.count ?? 0, correct: ok.count ?? 0 };
 }
 

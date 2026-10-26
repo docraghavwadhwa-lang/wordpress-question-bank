@@ -12,12 +12,14 @@ export function Quiz({
   userId,
   bookmarks,
   onExit,
+  onAnswered,
 }: {
   questions: Question[];
   timer: number;
   userId: string | null;
   bookmarks: Set<number>;
   onExit: () => void;
+  onAnswered?: () => void;
 }) {
   const [i, setI] = useState(0);
   const [chosen, setChosen] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export function Quiz({
     const correct = !!letter && letter === q.answer;
     if (q.answer && (letter || timer)) setAnswered((a) => a + 1);
     if (correct) setScore((s) => s + 1);
-    if (userId && letter && q.answer) void recordAttempt(userId, q.id, letter, correct, secs);
+    if (userId && letter && q.answer) void recordAttempt(userId, q.id, letter, correct, secs).then(() => onAnswered?.());
   }
 
   function toggleMark() {
