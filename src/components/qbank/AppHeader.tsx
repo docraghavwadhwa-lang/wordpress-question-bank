@@ -71,7 +71,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         )}
       </div>
     </header>
-    {user && <div className="h-24" aria-hidden />}
     {user && <BottomNav onHome={onHome} />}
     </>
   );
