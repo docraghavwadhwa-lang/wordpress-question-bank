@@ -3,12 +3,12 @@ import { BarChart3, House, NotebookPen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Fixed bottom tab bar: Home, Q-Banks (subject list on home), Progress. */
-export function BottomNav({ onHome }: { onHome?: () => void }) {
+export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
   const { pathname, hash } = useLocation();
   const tabs = [
-    { label: "Home", icon: House, to: "/", hash: undefined, active: pathname === "/" && hash !== "qbanks" },
+    { label: "Home", icon: House, to: "/", hash: "", active: pathname === "/" && hash !== "qbanks" },
     { label: "Q-Banks", icon: NotebookPen, to: "/", hash: "qbanks", active: pathname === "/" && hash === "qbanks" },
-    { label: "Progress", icon: BarChart3, to: "/stats", hash: undefined, active: pathname.startsWith("/stats") },
+    { label: "Progress", icon: BarChart3, to: "/stats", hash: "", active: pathname.startsWith("/stats") },
   ] as const;
   return (
     <>
