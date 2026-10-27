@@ -55,6 +55,30 @@ export type Database = {
           },
         ]
       }
+      blitz_results: {
+        Row: {
+          created_at: string
+          day: string
+          score: number
+          seconds: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          score: number
+          seconds?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          score?: number
+          seconds?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -194,6 +218,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      qb_blitz_rank: {
+        Args: { _day: string }
+        Returns: {
+          my_rank: number
+          my_score: number
+          my_seconds: number
+          players: number
+        }[]
+      }
       qb_daily_counts: {
         Args: { _tz?: string }
         Returns: {
