@@ -2,49 +2,74 @@ import { useEffect, useRef, useState } from "react";
 import { Bookmark, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatAverage, recordAttempt, setBookmark, type Question } from "@/lib/qbank";
+import { answerFeedback } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
 
 const LETTERS = "ABCDE";
+
+export type QuizProgress = { index: number; score: number; answered: number; spent: { total: number; count: number } };
 
 export function Quiz({
   questions,
   timer,
   userId,
   bookmarks,
+  mode = "practice",
+  goal,
+  todayCount = 0,
+  initial,
+  onProgress,
+  onFinish,
   onExit,
   onAnswered,
+  finishedSlot,
 }: {
   questions: Question[];
   timer: number;
   userId: string | null;
   bookmarks: Set<number>;
+  mode?: "practice" | "blitz" | "review";
+  goal?: number;
+  todayCount?: number;
+  initial?: QuizProgress;
+  onProgress?: (p: QuizProgress) => void;
+  onFinish?: (r: { score: number; answered: number; seconds: number }) => void;
   onExit: () => void;
   onAnswered?: () => void;
+  finishedSlot?: React.ReactNode;
 }) {
-  const [i, setI] = useState(0);
+  const review = mode === "review";
+  const [i, setI] = useState(initial?.index ?? 0);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(review);
   const [timedOut, setTimedOut] = useState(false);
   const [left, setLeft] = useState(timer);
-  const [score, setScore] = useState(0);
-  const [answered, setAnswered] = useState(0);
-  const [spent, setSpent] = useState({ total: 0, count: 0 });
+  const [score, setScore] = useState(initial?.score ?? 0);
+  const [answered, setAnswered] = useState(initial?.answered ?? 0);
+  const [spent, setSpent] = useState(initial?.spent ?? { total: 0, count: 0 });
   const [marks, setMarks] = useState(bookmarks);
   const [finished, setFinished] = useState(false);
+  const [today, setToday] = useState(todayCount);
+  const [xp, setXp] = useState<number[]>([]);
   const t0 = useRef(Date.now());
   const q = questions[i] as Question;
 
   useEffect(() => {
     t0.current = Date.now();
     setChosen(null);
-    setDone(false);
+    setDone(review);
     setTimedOut(false);
     setLeft(timer);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [i, timer]);
+  }, [i, timer, review]);
 
   useEffect(() => {
-    if (!timer || done || finished) return;
+    if (!review) onProgress?.({ index: i, score, answered, spent });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i]);
+
+  useEffect(() => {
+    if (!timer || done || finished || review) return;
     if (left <= 0) {
       setTimedOut(true);
       answer(null);
@@ -55,6 +80,11 @@ export function Quiz({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left, timer, done, finished]);
 
+  function finish() {
+    setFinished(true);
+    onFinish?.({ score, answered, seconds: spent.total });
+  }
+
   function answer(letter: string | null) {
     if (done) return;
     setDone(true);
@@ -64,7 +94,16 @@ export function Quiz({
     setSpent((s) => ({ total: s.total + secs, count: s.count + 1 }));
     const correct = !!letter && letter === q.answer;
     if (q.answer && (letter || timer)) setAnswered((a) => a + 1);
-    if (correct) setScore((s) => s + 1);
+    if (letter && q.answer) {
+      answerFeedback(correct);
+      setToday((t) => t + 1);
+    }
+    if (correct) {
+      setScore((s) => s + 1);
+      const k = Date.now();
+      setXp((x) => [...x, k]);
+      setTimeout(() => setXp((x) => x.filter((v) => v !== k)), 1100);
+    }
     if (userId && letter && q.answer) void recordAttempt(userId, q.id, letter, correct, secs).then(() => onAnswered?.());
   }
 
@@ -82,10 +121,15 @@ export function Quiz({
     const pct = answered ? Math.round((100 * score) / answered) : 0;
     return (
       <div className="mx-auto max-w-lg rounded-2xl border bg-card p-8 text-center shadow-sm">
-        <h2 className="text-3xl text-primary">Session complete</h2>
-        <p className="mt-6 text-5xl font-semibold text-primary">{pct}%</p>
-        <p className="mt-2 text-lg">Score: {score} / {answered}</p>
-        <p className="mt-1 text-muted-foreground">Average time per question: {formatAverage(spent.total, spent.count)}</p>
+        <h2 className="text-3xl text-primary">{review ? "Review complete" : mode === "blitz" ? "Blitz complete" : "Session complete"}</h2>
+        {!review && (
+          <>
+            <p className="mt-6 text-5xl font-semibold text-primary">{pct}%</p>
+            <p className="mt-2 text-lg">Score: {score} / {answered}</p>
+            <p className="mt-1 text-muted-foreground">Average time per question: {formatAverage(spent.total, spent.count)}</p>
+          </>
+        )}
+        {finishedSlot}
         <Button className="mt-8" onClick={onExit}>Back to subjects</Button>
       </div>
     );
@@ -95,10 +139,17 @@ export function Quiz({
   const last = i + 1 === questions.length;
 
   return (
-    <div className="mx-auto max-w-3xl rounded-2xl border bg-card p-5 shadow-sm sm:p-8">
+    <div className="relative mx-auto max-w-3xl rounded-2xl border bg-card p-5 shadow-sm sm:p-8">
+      <div className="pointer-events-none absolute right-6 top-14 z-10">
+        {xp.map((k) => (
+          <span key={k} className="qb-xp absolute right-0 font-display text-xl font-semibold text-success">+10 XP</span>
+        ))}
+      </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span className="font-semibold text-primary">Question {i + 1} of {questions.length}</span>
-        {timer > 0 && (
+        <span className="font-semibold text-primary">
+          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}Question {i + 1} of {questions.length}
+        </span>
+        {timer > 0 && !review && (
           <span className={cn("inline-flex items-center gap-1 font-semibold", left <= 10 && "text-destructive")}>
             <Timer className="h-4 w-4" /> {left}s
           </span>
@@ -116,12 +167,20 @@ export function Quiz({
           </button>
         )}
       </div>
-      {timer > 0 && (
+      {timer > 0 && !review && (
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
             className={cn("h-full rounded-full bg-accent transition-all duration-1000 ease-linear", left <= 10 && "bg-destructive")}
             style={{ width: `${(100 * left) / timer}%` }}
           />
+        </div>
+      )}
+      {goal && !review && (
+        <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="shrink-0">Today {Math.min(today, goal)}/{goal}</span>
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
+            <span className="block h-full rounded-full bg-success transition-all duration-300 ease-out" style={{ width: `${Math.min(100, (100 * today) / goal)}%` }} />
+          </span>
         </div>
       )}
 
@@ -169,8 +228,11 @@ export function Quiz({
       )}
 
       <div className="mt-8 flex flex-wrap justify-between gap-3">
-        <Button variant="outline" onClick={() => setFinished(true)}>End session</Button>
-        <Button disabled={!done} onClick={() => (last ? setFinished(true) : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={finish}>End session</Button>
+          {review && i > 0 && <Button variant="outline" onClick={() => setI(i - 1)}>Previous</Button>}
+        </div>
+        <Button disabled={!done} onClick={() => (last ? finish() : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
       </div>
     </div>
   );
