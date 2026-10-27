@@ -41,7 +41,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
   return (
     <>
-    {user && <BottomNav onHome={onHome} />}
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
         <Link to="/" onClick={onHome} className="flex items-baseline gap-1.5 text-left">
@@ -72,6 +71,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         )}
       </div>
     </header>
+    {user && <BottomNav onHome={onHome} />}
     </>
   );
 }

@@ -12,7 +12,6 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
   ] as const;
   return (
     <>
-      <div className="h-20" aria-hidden />
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="mx-auto grid max-w-md grid-cols-3">
           {tabs.map((t) => (
@@ -21,8 +20,8 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
               to={t.to}
               hash={t.hash}
               onClick={() => {
-                if (t.label === "Home") { onHome?.(); window.scrollTo({ top: 0, behavior: "smooth" }); }
-                if (t.label === "Q-Banks") { onHome?.(); setTimeout(() => document.getElementById("qbanks")?.scrollIntoView({ behavior: "smooth" }), 50); }
+                if (t.label !== "Progress") onHome?.();
+                window.scrollTo({ top: 0 });
               }}
               className={cn("relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold uppercase tracking-wider", t.active ? "text-primary" : "text-muted-foreground")}
             >

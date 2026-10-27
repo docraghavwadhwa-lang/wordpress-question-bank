@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { BookOpenCheck, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
@@ -87,6 +87,7 @@ function Index() {
   const [paused, setPaused] = useState<SavedSession | null>(null);
   const [now, setNow] = useState(() => new Date());
   const day = todayKey(now);
+  const qbanks = useLocation().hash === "qbanks";
   useEffect(() => {
     setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
     setPaused(loadSession());
@@ -185,6 +186,23 @@ function Index() {
             finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : undefined}
             onExit={goHome}
           />
+        ) : qbanks ? (
+          <>
+            <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
+                <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
+              </div>
+              {stats.data && stats.data.attempts > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Your record: {stats.data.correct}/{stats.data.attempts} correct ({Math.round((100 * stats.data.correct) / stats.data.attempts)}%)
+                </p>
+              )}
+            </div>
+            {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
+            {decks.error && <p className="text-destructive">Couldn't load subjects. Please refresh.</p>}
+            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
+          </>
         ) : (
           <>
             {lateNight && (
@@ -229,20 +247,6 @@ function Index() {
                 </span>
               </div>
             )}
-            <div id="qbanks" className="mb-10 flex scroll-mt-24 flex-wrap items-end justify-between gap-4 border-b pb-8">
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
-                <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
-              </div>
-              {stats.data && stats.data.attempts > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Your record: {stats.data.correct}/{stats.data.attempts} correct ({Math.round((100 * stats.data.correct) / stats.data.attempts)}%)
-                </p>
-              )}
-            </div>
-            {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
-            {decks.error && <p className="text-destructive">Couldn't load subjects. Please refresh.</p>}
-            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
             <QuoteOfTheDay />
           </>
         )}
