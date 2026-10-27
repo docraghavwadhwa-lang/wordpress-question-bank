@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes" };
 type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
-export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?: MarkedSets; onPick: (p: Pick) => void }) {
+export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; onPick: (p: Pick) => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1), [decks]);
 
@@ -42,7 +42,7 @@ function Tile({ label, icon, active, onClick }: { label: string; icon?: React.Re
   );
 }
 
-function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks: Deck[]; marked?: MarkedSets; onPick: (p: Pick) => void }) {
+function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; onPick: (p: Pick) => void }) {
   const [openSec, setOpenSec] = useState<string | null>(null);
   const sections = decks.filter((d) => d.depth === 2 && d.subject === subject.path);
   return (
@@ -98,7 +98,7 @@ function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks
   );
 }
 
-function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; title: string; subtitle: string; marked?: MarkedSets; onPick: (p: Pick) => void }) {
+function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; title: string; subtitle: string; marked?: MarkedSets | undefined; onPick: (p: Pick) => void }) {
   if (!marked) return null;
   const b = inDeck(marked.bookmarks, path);
   const m = inDeck(marked.mistakes, path);

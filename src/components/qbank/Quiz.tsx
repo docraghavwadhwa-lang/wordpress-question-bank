@@ -31,7 +31,7 @@ export function Quiz({
   mode?: "practice" | "blitz" | "review";
   goal?: number;
   todayCount?: number;
-  initial?: QuizProgress;
+  initial?: QuizProgress | undefined;
   onProgress?: (p: QuizProgress) => void;
   onFinish?: (r: { score: number; answered: number; seconds: number }) => void;
   onExit: () => void;

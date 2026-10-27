@@ -70,7 +70,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress };
+type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined };
 
 function Index() {
   const { user, ready } = useAuth();
