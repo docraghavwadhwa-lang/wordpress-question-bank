@@ -18,7 +18,7 @@ export function QuizSettings({
   loading: boolean;
   message?: string | undefined;
   onCancel: () => void;
-  onStart: (timer: number) => void;
+  onStart: (timer: number, review?: boolean) => void;
 }) {
   const [timer, setTimer] = useState(initialTimer);
   return (
@@ -48,9 +48,16 @@ export function QuizSettings({
             ))}
           </div>
         </div>
-        <div className="flex justify-center gap-3 pt-2">
+        <div className="flex flex-wrap justify-center gap-3 pt-2">
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Start quiz"}</Button>
+          {pick?.kind === "bookmarks" ? (
+            <>
+              <Button disabled={loading} variant="secondary" onClick={() => onStart(0, true)}>Read solutions</Button>
+              <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Reattempt"}</Button>
+            </>
+          ) : (
+            <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Start quiz"}</Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
