@@ -104,7 +104,8 @@ export function Quiz({
       setXp((x) => [...x, k]);
       setTimeout(() => setXp((x) => x.filter((v) => v !== k)), 1100);
     }
-    if (userId && letter && q.answer) void recordAttempt(userId, q.id, letter, correct, secs).then(() => onAnswered?.());
+    // Blitz answers are scored separately and never count towards streaks.
+    if (mode !== "blitz" && userId && letter && q.answer) void recordAttempt(userId, q.id, letter, correct, secs).then(() => onAnswered?.());
   }
 
   function toggleMark() {
@@ -175,7 +176,7 @@ export function Quiz({
           />
         </div>
       )}
-      {goal && !review && (
+      {goal && !review && mode !== "blitz" && (
         <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
           <span className="shrink-0">Today {Math.min(today, goal)}/{goal}</span>
           <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">

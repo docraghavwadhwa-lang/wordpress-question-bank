@@ -41,9 +41,9 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   return (
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-        <Link to="/" onClick={onHome} className="flex items-center gap-2 text-left">
-          <span className="font-display text-3xl tracking-tight text-primary">MedQuiz</span>
-          <span className="hidden font-display text-lg italic text-muted-foreground sm:inline">by Nirmaya Care</span>
+        <Link to="/" onClick={onHome} className="flex items-baseline gap-1.5 text-left">
+          <span className="font-display text-2xl tracking-tight text-primary sm:text-3xl">MedQuiz</span>
+          <span className="font-display text-sm italic text-muted-foreground sm:text-lg">by Nirmaya Care</span>
         </Link>
         {user ? (
           <div className="flex items-center gap-1 sm:gap-3">
