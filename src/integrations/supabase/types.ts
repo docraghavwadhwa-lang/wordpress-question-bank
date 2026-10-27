@@ -180,6 +180,39 @@ export type Database = {
         }
         Relationships: []
       }
+      push_log: {
+        Row: {
+          day: string
+          sent_at: string
+        }
+        Insert: {
+          day: string
+          sent_at?: string
+        }
+        Update: {
+          day?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          token: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          token: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          token?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           answer: string | null

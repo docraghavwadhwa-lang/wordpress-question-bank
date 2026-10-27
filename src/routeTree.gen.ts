@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as ApiPublicPushQotdRouteImport } from './routes/api/public/push-qotd'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicPushQotdRoute = ApiPublicPushQotdRouteImport.update({
+  id: '/api/public/push-qotd',
+  path: '/api/public/push-qotd',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
+  '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/profile' | '/stats'
+  fullPaths: '/' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/profile' | '/stats'
+  to: '/' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
   id:
     | '__root__'
     | '/'
@@ -72,12 +81,14 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/profile'
     | '/_authenticated/stats'
+    | '/api/public/push-qotd'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicPushQotdRoute: typeof ApiPublicPushQotdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -117,6 +128,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/push-qotd': {
+      id: '/api/public/push-qotd'
+      path: '/api/public/push-qotd'
+      fullPath: '/api/public/push-qotd'
+      preLoaderRoute: typeof ApiPublicPushQotdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -137,6 +155,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicPushQotdRoute: ApiPublicPushQotdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -18,3 +18,4 @@
 - Signed-in-only pages live under src/routes/_authenticated/; the home page shows a sign-in landing when signed out.
 - Daily Blitz picks its questions deterministically from the date (same set for everyone) and ranks via the `qb_blitz_rank` security-definer RPC, which returns only the caller's own row — so ranks work without exposing other users' results.
 - An in-progress practice quiz is saved to localStorage (question ids + progress) so leaving the quiz pauses it; storing ids rather than full questions keeps it under storage limits.
+- Daily Question-of-the-Day push is sent by pg_cron at 02:30 UTC to /api/public/push-qotd; push_log makes it once-per-day so the public route needs no secret.
