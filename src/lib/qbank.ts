@@ -115,3 +115,71 @@ function escapeLike(s: string) {
 function quote(s: string) {
   return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
+
+/** Fetch questions by id, keeping the given order. */
+export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
+  const map = new Map<number, Question>();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200));
+    if (error) throw error;
+    ((data ?? []) as unknown as Question[]).forEach((q) => map.set(Number(q.id), q));
+  }
+  return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
+}
+
+export type Marked = { id: number; deck_path: string };
+
+/** Bookmarked questions and the mistake vault (latest attempt wrong), with each question's deck. */
+export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Marked[] }> {
+  const bookmarks: Marked[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase.from("bookmarks").select("question_id, questions(deck_path)").range(from, from + 999);
+    if (error) throw error;
+    (data ?? []).forEach((r) => bookmarks.push({ id: Number(r.question_id), deck_path: (r.questions as { deck_path: string } | null)?.deck_path ?? "" }));
+    if (!data || data.length < 1000) break;
+  }
+  const latest = new Map<number, Marked & { correct: boolean }>();
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("attempts")
+      .select("id, question_id, correct, questions(deck_path)")
+      .eq("archived", false)
+      .order("created_at")
+      .order("id")
+      .range(from, from + 999);
+    if (error) throw error;
+    (data ?? []).forEach((r) =>
+      latest.set(Number(r.question_id), { id: Number(r.question_id), correct: r.correct, deck_path: (r.questions as { deck_path: string } | null)?.deck_path ?? "" }),
+    );
+    if (!data || data.length < 1000) break;
+  }
+  const mistakes = [...latest.values()].filter((m) => !m.correct).map(({ id, deck_path }) => ({ id, deck_path }));
+  return { bookmarks, mistakes };
+}
+
+/** Questions in `list` that belong to deck `path` (or any deck below it). */
+export function inDeck(list: Marked[], path: string): number[] {
+  return list.filter((m) => m.deck_path === path || m.deck_path.startsWith(path + " > ")).map((m) => m.id);
+}
+
+export type SavedSession = {
+  title: string;
+  ids: number[];
+  timer: number;
+  index: number;
+  score: number;
+  answered: number;
+  spent: { total: number; count: number };
+};
+const SESSION_KEY = "qb_session";
+export function loadSession(): SavedSession | null {
+  try {
+    return JSON.parse(localStorage.getItem(SESSION_KEY) ?? "null");
+  } catch {
+    return null;
+  }
+}
+export function saveSession(s: SavedSession | null) {
+  if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+  else localStorage.removeItem(SESSION_KEY);
+}
