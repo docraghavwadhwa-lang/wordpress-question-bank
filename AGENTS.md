@@ -16,3 +16,5 @@
 - Streaks/stats come from the `attempts` table via SQL functions (qb_daily_counts, qb_subject_stats, qb_reset); reset sets `archived` instead of deleting so streak history survives resets.
 - Profile photos are stored as small data URLs in profiles.avatar_url because the workspace blocks public storage buckets.
 - Signed-in-only pages live under src/routes/_authenticated/; the home page shows a sign-in landing when signed out.
+- Daily Blitz picks its questions deterministically from the date (same set for everyone) and ranks via the `qb_blitz_rank` security-definer RPC, which returns only the caller's own row — so ranks work without exposing other users' results.
+- An in-progress practice quiz is saved to localStorage (question ids + progress) so leaving the quiz pauses it; storing ids rather than full questions keeps it under storage limits.

@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpenCheck, Flame, LineChart } from "lucide-react";
+import { BookOpenCheck, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { BlitzCard, BlitzRankLine } from "@/components/qbank/Blitz";
+import { BLITZ_TIMER, fetchBlitz, saveBlitz } from "@/lib/blitz";
+import { todayKey } from "@/lib/daily";
 import { SubjectGrid, type Pick } from "@/components/qbank/SubjectGrid";
 import { QuizSettings } from "@/components/qbank/QuizSettings";
 import { Quiz } from "@/components/qbank/Quiz";
@@ -40,13 +45,18 @@ function Landing() {
 }
 import {
   fetchBookmarkIds,
-  fetchBookmarkedQuestions,
   fetchDeckQuestions,
   fetchDecks,
+  fetchMarked,
+  fetchQuestionsByIds,
   fetchStats,
+  loadSession,
+  saveSession,
   shuffle,
   type Question,
+  type SavedSession,
 } from "@/lib/qbank";
+import type { QuizProgress } from "@/components/qbank/Quiz";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -60,34 +70,79 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined };
+
 function Index() {
   const { user, ready } = useAuth();
+  const qc = useQueryClient();
   const decks = useQuery({ queryKey: ["decks"], queryFn: fetchDecks, enabled: !!user });
   const stats = useQuery({ queryKey: ["stats", user?.id], queryFn: fetchStats, enabled: !!user });
+  const marked = useQuery({ queryKey: ["marked", user?.id], queryFn: fetchMarked, enabled: !!user });
   const streak = useStreak(user?.id);
   const [pick, setPick] = useState<Pick | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
-  const [quiz, setQuiz] = useState<{ qs: Question[]; timer: number; marks: Set<number> } | null>(null);
+  const [quiz, setQuiz] = useState<ActiveQuiz | null>(null);
   const [savedTimer, setSavedTimer] = useState(0);
+  const [paused, setPaused] = useState<SavedSession | null>(null);
+  const [now, setNow] = useState(() => new Date());
+  const day = todayKey(now);
   useEffect(() => {
     setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
+    setPaused(loadSession());
+    const id = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(id);
   }, []);
 
-  async function start(timer: number) {
+  function goHome() {
+    setQuiz(null);
+    setPaused(loadSession());
+    void stats.refetch();
+    void marked.refetch();
+  }
+
+  async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress) {
+    const marks = user ? await fetchBookmarkIds() : new Set<number>();
+    if (mode === "practice") {
+      saveSession({ title, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 } });
+    }
+    setQuiz({ qs, timer, marks, title, mode, initial });
+  }
+
+  async function start(timer: number, review?: boolean) {
     if (!pick) return;
     setLoading(true);
     try {
-      const qs = pick.bookmarks ? await fetchBookmarkedQuestions() : await fetchDeckQuestions(pick.path!);
+      const qs = pick.ids ? await fetchQuestionsByIds(pick.ids) : await fetchDeckQuestions(pick.path!);
       if (!qs.length) {
-        setMessage(pick.bookmarks ? "You have no bookmarked questions yet." : "No questions found.");
+        setMessage("No questions found.");
         return;
       }
-      const marks = user ? await fetchBookmarkIds() : new Set<number>();
       localStorage.setItem("qb_timer", String(timer));
       setSavedTimer(timer);
-      setQuiz({ qs: shuffle(qs), timer, marks });
+      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice");
       setPick(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resume(restart: boolean) {
+    if (!paused) return;
+    setLoading(true);
+    try {
+      const qs = await fetchQuestionsByIds(paused.ids);
+      if (restart) await launch(shuffle(qs), paused.timer, paused.title, "practice");
+      else await launch(qs, paused.timer, paused.title, "practice", paused);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function startBlitz() {
+    setLoading(true);
+    try {
+      await launch(await fetchBlitz(day), BLITZ_TIMER, "Daily Blitz", "blitz");
     } finally {
       setLoading(false);
     }
@@ -97,26 +152,64 @@ function Index() {
   if (!user) return <Landing />;
 
   const tier = tierFor(streak.goal);
+  const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
+  const needed = Math.max(0, streak.goal - streak.streak.today);
+  const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
   return (
     <div className="min-h-screen">
-      <AppHeader onHome={() => setQuiz(null)} />
+      <AppHeader onHome={goHome} />
       <Celebration days={streak.celebrate} stats={streak.celebrationStats} onClose={streak.closeCelebration} />
 
       <main className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
         {quiz ? (
           <Quiz
+            key={quiz.title + quiz.mode + (quiz.initial?.index ?? "new")}
             questions={quiz.qs}
             timer={quiz.timer}
             userId={user.id}
             bookmarks={quiz.marks}
+            mode={quiz.mode}
+            goal={streak.goal}
+            todayCount={streak.streak.today}
+            initial={quiz.initial}
             onAnswered={() => void streak.refresh()}
-            onExit={() => {
-              setQuiz(null);
-              void stats.refetch();
+            onProgress={(p) => {
+              const cur = loadSession();
+              if (quiz.mode === "practice" && cur) saveSession({ ...cur, ...p });
             }}
+            onFinish={(r) => {
+              if (quiz.mode === "practice") saveSession(null);
+              if (quiz.mode === "blitz")
+                void saveBlitz(user.id, day, r.score, r.seconds).then(() => qc.invalidateQueries({ queryKey: ["blitz-rank", day] }));
+            }}
+            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : undefined}
+            onExit={goHome}
           />
         ) : (
           <>
+            {lateNight && (
+              <div className="mb-4 flex items-center gap-3 rounded-xl border border-destructive/40 bg-danger-soft px-5 py-4">
+                <Clock className="h-5 w-5 shrink-0 text-destructive" />
+                <p className="font-medium text-foreground">
+                  Your {streak.streak.current}-day streak expires in {hoursLeft} {hoursLeft === 1 ? "hour" : "hours"} — complete {needed} {needed === 1 ? "question" : "questions"} to save it
+                </p>
+              </div>
+            )}
+            {paused && (
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
+                <span className="flex items-center gap-3">
+                  <PlayCircle className="h-6 w-6 text-accent" />
+                  <span>
+                    <span className="block font-display text-lg text-primary">Paused: {paused.title}</span>
+                    <span className="text-sm text-muted-foreground">Question {paused.index + 1} of {paused.ids.length}</span>
+                  </span>
+                </span>
+                <span className="flex gap-2">
+                  <Button variant="outline" disabled={loading} onClick={() => void resume(true)}>Restart</Button>
+                  <Button disabled={loading} onClick={() => void resume(false)}>Continue</Button>
+                </span>
+              </div>
+            )}
             <Link to="/stats" className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/15"><Flame className="h-5 w-5 text-accent" /></span>
@@ -129,6 +222,9 @@ function Index() {
                 <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (100 * streak.streak.today) / streak.goal)}%` }} />
               </span>
             </Link>
+            <div className="mb-4">
+              <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
+            </div>
             <div className="mb-12">
               <QuestionOfTheDay />
             </div>
@@ -145,7 +241,7 @@ function Index() {
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
             {decks.error && <p className="text-destructive">Couldn't load subjects. Please refresh.</p>}
-            {decks.data && <SubjectGrid decks={decks.data} signedIn={!!user} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
+            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
             <QuoteOfTheDay />
           </>
         )}
