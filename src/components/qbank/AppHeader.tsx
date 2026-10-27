@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
+import { BottomNav } from "@/components/qbank/BottomNav";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
   const initials = (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -39,6 +40,8 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   }
 
   return (
+    <>
+    {user && <BottomNav onHome={onHome} />}
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
         <Link to="/" onClick={onHome} className="flex items-baseline gap-1.5 text-left">
@@ -69,5 +72,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         )}
       </div>
     </header>
+    </>
   );
 }

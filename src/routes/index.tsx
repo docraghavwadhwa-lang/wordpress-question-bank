@@ -195,22 +195,7 @@ function Index() {
                 </p>
               </div>
             )}
-            {paused && (
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
-                <span className="flex items-center gap-3">
-                  <PlayCircle className="h-6 w-6 text-accent" />
-                  <span>
-                    <span className="block font-display text-lg text-primary">Paused: {paused.title}</span>
-                    <span className="text-sm text-muted-foreground">Question {paused.index + 1} of {paused.ids.length}</span>
-                  </span>
-                </span>
-                <span className="flex gap-2">
-                  <Button variant="outline" disabled={loading} onClick={() => void resume(true)}>Restart</Button>
-                  <Button disabled={loading} onClick={() => void resume(false)}>Continue</Button>
-                </span>
-              </div>
-            )}
-            <Link to="/stats" className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
+            <Link to="/stats" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/15"><Flame className="h-5 w-5 text-accent" /></span>
                 <span>
@@ -225,10 +210,26 @@ function Index() {
             <div className="mb-4">
               <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
             </div>
-            <div className="mb-12">
+            <div className={paused ? "mb-4" : "mb-12"}>
               <QuestionOfTheDay />
             </div>
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
+            {paused && (
+              <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
+                <span className="flex items-center gap-3">
+                  <PlayCircle className="h-6 w-6 text-accent" />
+                  <span>
+                    <span className="block font-display text-lg text-primary">Paused: {paused.title}</span>
+                    <span className="text-sm text-muted-foreground">Question {paused.index + 1} of {paused.ids.length}</span>
+                  </span>
+                </span>
+                <span className="flex gap-2">
+                  <Button variant="ghost" className="text-destructive" disabled={loading} onClick={() => { saveSession(null); setPaused(null); }}>Delete</Button>
+                  <Button variant="outline" disabled={loading} onClick={() => void resume(true)}>Restart</Button>
+                  <Button disabled={loading} onClick={() => void resume(false)}>Continue</Button>
+                </span>
+              </div>
+            )}
+            <div id="qbanks" className="mb-10 flex scroll-mt-24 flex-wrap items-end justify-between gap-4 border-b pb-8">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
                 <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
