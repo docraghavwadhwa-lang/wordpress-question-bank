@@ -1,17 +1,17 @@
 import { forwardRef } from "react";
 import {
-  Baby, Bone, Brain, Ear, Eye, FlaskConical, Fingerprint, HeartPulse, Microscope, Pill, Radiation, Scale,
-  Scissors, ShieldPlus, Skull, Stethoscope, Syringe, TestTubes, Users, BookOpen, type LucideIcon, type LucideProps,
+  Baby, Bone, Brain, Ear, Eye, FlaskConical, Fingerprint, HeartPulse, Microscope, Pill, Biohazard, Radiation, Scale,
+  Scissors, ShieldPlus, Skull, Stethoscope, Syringe, Users, BookOpen, type LucideIcon, type LucideProps,
 } from "lucide-react";
 
 // Line-art pregnant woman in profile, drawn to match lucide's 24px stroke style.
 const PregnantWoman = forwardRef<SVGSVGElement, LucideProps>(({ className, strokeWidth = 2, ...rest }, ref) => (
   <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true" {...(rest as object)}>
-    <circle cx="10" cy="3.5" r="2" />
-    <path d="M9.5 7.5c-1.5.5-2 2-2 3.5v3.5" />
-    <path d="M11 7.5c1 .7 1.3 1.8 1.2 2.8 2.8.6 4.3 2.6 4.3 4.7 0 2-1.7 3.3-4 3.3H10" />
-    <path d="M9 14.5 8.5 22" />
-    <path d="M11.5 18.5 12 22" />
+    <circle cx="11" cy="3.5" r="2.2" />
+    <path d="M9 7.5c-1.4 1-2 2.6-2 4.5v2.5h2" />
+    <path d="M12.5 7.5c.8.8 1.2 1.8 1.1 3 2.6.7 4.1 2.6 4.1 4.6 0 2.3-2 3.4-4.4 3.4H9.5" />
+    <path d="M9.5 18.5V22" /><path d="M13 18.5V22" />
+    <path d="M9 12h3" />
   </svg>
 ));
 PregnantWoman.displayName = "PregnantWoman";
@@ -19,7 +19,7 @@ PregnantWoman.displayName = "PregnantWoman";
 const MAP: Record<string, LucideIcon> = {
   anaesthesia: Syringe, anatomy: Skull, biochemistry: FlaskConical, dermatology: Fingerprint, ent: Ear,
   fmt: Scale, forensic: Scale, medicine: Stethoscope, microbiology: Microscope, obstetrics: PregnantWoman as LucideIcon, ophthalmology: Eye,
-  orthopaedics: Bone, pathology: TestTubes, pediatrics: Baby, paediatrics: Baby, pharmacology: Pill, physiology: HeartPulse,
+  orthopaedics: Bone, pathology: Biohazard, pediatrics: Baby, paediatrics: Baby, pharmacology: Pill, physiology: HeartPulse,
   psm: Users, psychiatry: Brain, surgery: Scissors, community: ShieldPlus, radiology: Radiation,
 };
 

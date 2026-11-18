@@ -23,13 +23,13 @@ function Landing() {
     <div className="min-h-screen">
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">15,000+ medical MCQs</p>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">16,000+ medical MCQs</p>
         <h1 className="text-5xl leading-tight text-primary sm:text-6xl">Practise daily. <em>Become</em> a great doctor.</h1>
         <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">Every subject and chapter, with explanations, timers, bookmarks, daily streaks and subject-wise progress.</p>
         <Link to="/auth" className="mt-8 inline-flex h-12 items-center rounded-md bg-primary px-8 font-medium text-primary-foreground hover:bg-primary/90">Sign in to start</Link>
         <div className="mt-16 grid gap-4 text-left sm:grid-cols-3">
           {[
-            { icon: BookOpenCheck, t: "18 subjects", d: "Chapter-wise question banks from Anatomy to Surgery." },
+            { icon: BookOpenCheck, t: "19 subjects", d: "Chapter-wise question banks from Anatomy to Surgery." },
             { icon: Flame, t: "Daily streaks", d: "Pick Achiever, Scholar or Topper and stay consistent." },
             { icon: LineChart, t: "Your progress", d: "See how much of each subject you've completed." },
           ].map((f) => (
