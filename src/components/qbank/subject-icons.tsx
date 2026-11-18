@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import {
-  Baby, Bone, Brain, Ear, Eye, FlaskConical, Fingerprint, HeartPulse, Microscope, Pill, Biohazard, Radiation, Scale,
+  Baby, Bone, Brain, Ear, Eye, FlaskConical, Sparkles, HeartPulse, Microscope, Pill, TestTubes, Radiation, Scale,
   Scissors, ShieldPlus, Skull, Stethoscope, Syringe, Users, BookOpen, type LucideIcon, type LucideProps,
 } from "lucide-react";
 
@@ -17,9 +17,9 @@ const PregnantWoman = forwardRef<SVGSVGElement, LucideProps>(({ className, strok
 PregnantWoman.displayName = "PregnantWoman";
 
 const MAP: Record<string, LucideIcon> = {
-  anaesthesia: Syringe, anatomy: Skull, biochemistry: FlaskConical, dermatology: Fingerprint, ent: Ear,
+  anaesthesia: Syringe, anatomy: Skull, biochemistry: FlaskConical, dermatology: Sparkles, ent: Ear,
   fmt: Scale, forensic: Scale, medicine: Stethoscope, microbiology: Microscope, obstetrics: PregnantWoman as LucideIcon, ophthalmology: Eye,
-  orthopaedics: Bone, pathology: Biohazard, pediatrics: Baby, paediatrics: Baby, pharmacology: Pill, physiology: HeartPulse,
+  orthopaedics: Bone, pathology: TestTubes, pediatrics: Baby, paediatrics: Baby, pharmacology: Pill, physiology: HeartPulse,
   psm: Users, psychiatry: Brain, surgery: Scissors, community: ShieldPlus, radiology: Radiation,
 };
 
