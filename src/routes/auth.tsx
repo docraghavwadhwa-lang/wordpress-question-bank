@@ -30,16 +30,10 @@ function AuthPage() {
     if (error) toast.error(error.message);
   }
 
-  async function apple() {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "apple", options: { redirectTo: window.location.origin } });
-    if (error) toast.error(error.message);
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
         <Link to="/" className="font-display text-3xl tracking-tight text-primary">MedQuiz <em className="text-xl text-muted-foreground">by Nirmaya Care</em></Link>
-        <>
         <h1 className="mt-4 text-3xl">Welcome</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 
@@ -53,10 +47,6 @@ function AuthPage() {
           Continue with Google
         </Button>
 
-        <Button variant="outline" className="mt-3 w-full border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background" onClick={apple}>
-          Continue with Apple
-        </Button>
-        </>
       </div>
     </div>
   );
