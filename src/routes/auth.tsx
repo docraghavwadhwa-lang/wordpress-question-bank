@@ -1,12 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { SignupWizard } from "@/components/qbank/SignupWizard";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -23,10 +20,6 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"in" | "up">("in");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (user) void navigate({ to: "/" });
@@ -37,29 +30,17 @@ function AuthPage() {
     if (error) toast.error(error.message);
   }
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      if (mode === "in") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) toast.error(error.message);
-      } else {
-        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
-        if (error) toast.error(error.message);
-        else if (!data.session) toast.success("Check your email to confirm your account.");
-      }
-    } finally {
-      setBusy(false);
-    }
+  async function apple() {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "apple", options: { redirectTo: window.location.origin } });
+    if (error) toast.error(error.message);
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
         <Link to="/" className="font-display text-3xl tracking-tight text-primary">MedQuiz <em className="text-xl text-muted-foreground">by Nirmaya Care</em></Link>
-        {mode === "up" ? <SignupWizard onSignIn={() => setMode("in")} /> : (<>
-        <h1 className="mt-4 text-3xl">Welcome back</h1>
+        <>
+        <h1 className="mt-4 text-3xl">Welcome</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 
         <Button variant="outline" className="mt-6 w-full" onClick={google}>
@@ -72,29 +53,10 @@ function AuthPage() {
           Continue with Google
         </Button>
 
-        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-        </div>
-
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <Button type="submit" className="w-full" disabled={busy}>{mode === "in" ? "Sign in" : "Sign up"}</Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {mode === "in" ? "New here? " : "Already have an account? "}
-          <button type="button" className="font-semibold text-primary underline underline-offset-4" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-            {mode === "in" ? "Create an account" : "Sign in"}
-          </button>
-        </p>
-        </>)}
+        <Button variant="outline" className="mt-3 w-full border-foreground bg-foreground text-background hover:bg-foreground/90 hover:text-background" onClick={apple}>
+          Continue with Apple
+        </Button>
+        </>
       </div>
     </div>
   );
