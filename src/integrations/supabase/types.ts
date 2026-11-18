@@ -45,15 +45,7 @@ export type Database = {
           seconds?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "attempts_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       blitz_results: {
         Row: {
@@ -95,15 +87,7 @@ export type Database = {
           question_id?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "bookmarks_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       decks: {
         Row: {

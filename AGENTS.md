@@ -11,7 +11,7 @@
 
 ## Project rules
 - Q-Bank data (decks, questions) is public-read in Supabase and fetched from the browser client; bookmarks/attempts are per-user via RLS — keeps the site static-friendly for Vercel without server functions.
-- Questions were imported once from the WordPress plugin's questions.json (note_id = questions.id); deck hierarchy lives in the `decks` table — re-import by upserting both.
+- Questions come from the Prepladder .apkg (note_id = questions.id, deck root "Prepladder" dropped, General Medicine→Medicine, OBG→"Obstetrics & Gyenacology"); images are webp in public/qimg because public storage buckets are blocked; attempts/bookmarks have no FK to questions so history survives re-imports.
 - Question stems/options/explanations are trusted Anki HTML rendered with dangerouslySetInnerHTML.
 - Streaks/stats come from the `attempts` table via SQL functions (qb_daily_counts, qb_subject_stats, qb_reset); reset sets `archived` instead of deleting so streak history survives resets.
 - Profile photos are stored as small data URLs in profiles.avatar_url because the workspace blocks public storage buckets.
