@@ -131,30 +131,36 @@ export type Marked = { id: number; deck_path: string };
 
 /** Bookmarked questions and the mistake vault (latest attempt wrong), with each question's deck. */
 export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Marked[] }> {
-  const bookmarks: Marked[] = [];
+  const bIds: number[] = [];
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from("bookmarks").select("question_id, questions(deck_path)").range(from, from + 999);
+    const { data, error } = await supabase.from("bookmarks").select("question_id").range(from, from + 999);
     if (error) throw error;
-    (data ?? []).forEach((r) => bookmarks.push({ id: Number(r.question_id), deck_path: (r.questions as { deck_path: string } | null)?.deck_path ?? "" }));
+    (data ?? []).forEach((r) => bIds.push(Number(r.question_id)));
     if (!data || data.length < 1000) break;
   }
-  const latest = new Map<number, Marked & { correct: boolean }>();
+  const latest = new Map<number, boolean>();
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabase
       .from("attempts")
-      .select("id, question_id, correct, questions(deck_path)")
+      .select("id, question_id, correct")
       .eq("archived", false)
       .order("created_at")
       .order("id")
       .range(from, from + 999);
     if (error) throw error;
-    (data ?? []).forEach((r) =>
-      latest.set(Number(r.question_id), { id: Number(r.question_id), correct: r.correct, deck_path: (r.questions as { deck_path: string } | null)?.deck_path ?? "" }),
-    );
+    (data ?? []).forEach((r) => latest.set(Number(r.question_id), r.correct));
     if (!data || data.length < 1000) break;
   }
-  const mistakes = [...latest.values()].filter((m) => !m.correct).map(({ id, deck_path }) => ({ id, deck_path }));
-  return { bookmarks, mistakes };
+  const wrong = [...latest].filter(([, ok]) => !ok).map(([id]) => id);
+  const decks = new Map<number, string>();
+  const all = [...new Set([...bIds, ...wrong])];
+  for (let i = 0; i < all.length; i += 200) {
+    const { data, error } = await supabase.from("questions").select("id, deck_path").in("id", all.slice(i, i + 200));
+    if (error) throw error;
+    (data ?? []).forEach((q) => decks.set(Number(q.id), q.deck_path));
+  }
+  const pick = (ids: number[]) => ids.filter((id) => decks.has(id)).map((id) => ({ id, deck_path: decks.get(id)! }));
+  return { bookmarks: pick(bIds), mistakes: pick(wrong) };
 }
 
 /** Questions in `list` that belong to deck `path` (or any deck below it). */
