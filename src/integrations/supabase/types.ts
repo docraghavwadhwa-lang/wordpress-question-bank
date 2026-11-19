@@ -230,6 +230,48 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_reviews: {
+        Row: {
+          answered: number
+          choices: Json
+          completed_at: string
+          created_at: string
+          id: string
+          question_ids: number[]
+          quiz_key: string
+          score: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answered?: number
+          choices?: Json
+          completed_at?: string
+          created_at?: string
+          id: string
+          question_ids: number[]
+          quiz_key: string
+          score?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answered?: number
+          choices?: Json
+          completed_at?: string
+          created_at?: string
+          id?: string
+          question_ids?: number[]
+          quiz_key?: string
+          score?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
