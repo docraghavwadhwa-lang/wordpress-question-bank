@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["mobile/**", "public/icon-*.png", "public/qimg/**", ".github/workflows/build-apk.yml"]
+    paths: ["mobile/**", "public/icon-*.png", "public/manifest.json", "public/qimg/**", ".github/workflows/build-apk.yml"]
 permissions:
   contents: write
 jobs:
@@ -39,21 +39,42 @@ jobs:
             cp ../../../../../../public/icon-192.png "$d/ic_launcher_round.png"
             rm -f "$d/ic_launcher_foreground.png"
           done
-          # Branded splash instead of the default Capacitor mark
-          for d in drawable*; do [ -f "$d/splash.png" ] && cp ../../../../../../public/icon-512.png "$d/splash.png"; done
+          # Splash: logo centred on teal (never stretched)
+          find . -name 'splash.png' -delete
+          mkdir -p drawable-nodpi && cp ../../../../../splash_logo.png drawable-nodpi/splash_logo.png
+          cp ../../../../../splash.xml drawable/splash.xml
           sed -i 's#<item name="android:background">@drawable/splash</item>#<item name="android:background">@drawable/splash</item><item name="android:windowBackground">@drawable/splash</item>#' values/styles.xml || true
       - name: Build APK
         working-directory: mobile/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug bundleRelease --no-daemon
           cp app/build/outputs/apk/debug/app-debug.apk ../../MedQuiz.apk
+      # Google Play bundle (.aab). Signed with your upload key when the
+      # ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS secrets exist.
+      - name: Sign Play bundle
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          cp mobile/android/app/build/outputs/bundle/release/app-release.aab Elixir.aab
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > upload.jks
+            jarsigner -keystore upload.jks -storepass "$KS_PASS" Elixir.aab "$KS_ALIAS"
+          fi
       - uses: actions/upload-artifact@v4
-        with: { name: MedQuiz-apk, path: MedQuiz.apk }
+        with:
+          name: Elixir-android
+          path: |
+            MedQuiz.apk
+            Elixir.aab
       # Public download link used by the website's "Get the app" page
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
           name: Elixir Android (latest)
-          files: MedQuiz.apk
+          files: |
+            MedQuiz.apk
+            Elixir.aab
           make_latest: true

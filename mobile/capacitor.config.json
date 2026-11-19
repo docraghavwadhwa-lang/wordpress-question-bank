@@ -5,17 +5,22 @@
   "server": {
     "errorPath": "offline.html",
     "androidScheme": "https",
-    "url": "https://subject-spark-question-bank.lovable.app"
+    "url": "https://elixir.nirmayacare.com",
+    "allowNavigation": [
+      "elixir.nirmayacare.com",
+      "subject-spark-question-bank.lovable.app",
+      "*.supabase.co"
+    ]
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#F9F8F4"
+    "backgroundColor": "#178C8E"
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 1500,
+      "launchShowDuration": 800,
       "launchAutoHide": true,
-      "backgroundColor": "#F9F8F4",
+      "backgroundColor": "#178C8E",
       "showSpinner": false
     }
   }
