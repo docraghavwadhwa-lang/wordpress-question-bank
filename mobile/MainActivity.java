@@ -8,14 +8,22 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebResourceError;
 import android.webkit.WebView;
 import android.webkit.JavascriptInterface;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.BridgeWebViewClient;
@@ -47,17 +55,33 @@ public class MainActivity extends BridgeActivity {
     LinearLayout status = new LinearLayout(this);
     status.setOrientation(LinearLayout.VERTICAL);
     status.setGravity(Gravity.CENTER);
-    ProgressBar progress = new ProgressBar(this);
-    progress.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
-    status.addView(progress, new LinearLayout.LayoutParams(dp(22), dp(22)));
+    View spinner = new View(this);
+    spinner.setBackground(new ArcSpinner(dp(4)));
+    LinearLayout.LayoutParams spinnerParams = new LinearLayout.LayoutParams(dp(30), dp(30));
+    spinnerParams.gravity = Gravity.CENTER_HORIZONTAL;
+    status.addView(spinner, spinnerParams);
+    RotateAnimation spin = new RotateAnimation(0f, 360f,
+        Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+    spin.setDuration(850L);
+    spin.setRepeatCount(Animation.INFINITE);
+    spin.setInterpolator(new LinearInterpolator());
+    spinner.startAnimation(spin);
     TextView label = new TextView(this);
     label.setText("Loading modules…");
-    label.setTextColor(Color.WHITE);
-    label.setTextSize(12);
-    label.setPadding(0, dp(12), 0, 0);
-    status.addView(label);
-    FrameLayout.LayoutParams statusParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(70), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
-    statusParams.bottomMargin = dp(64);
+    label.setTextColor(Color.argb(222, 255, 255, 255));
+    label.setTextSize(13);
+    label.setLetterSpacing(0.18f);
+    label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+    label.setGravity(Gravity.CENTER);
+    LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    labelParams.gravity = Gravity.CENTER_HORIZONTAL;
+    labelParams.topMargin = dp(24);
+    status.addView(label, labelParams);
+    FrameLayout.LayoutParams statusParams = new FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+        Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+    statusParams.bottomMargin = dp(108);
     opening.addView(status, statusParams);
     addContentView(opening, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
     bridge.getWebView().addJavascriptInterface(new Object() {
@@ -66,6 +90,32 @@ public class MainActivity extends BridgeActivity {
       }
     }, "ElixirLaunch");
   }
+
+  /** Bold launch spinner: a faint full ring with a thick white arc sweeping round it. */
+  private static final class ArcSpinner extends Drawable {
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    ArcSpinner(int stroke) {
+      paint.setStyle(Paint.Style.STROKE);
+      paint.setStrokeWidth(stroke);
+      paint.setStrokeCap(Paint.Cap.ROUND);
+    }
+
+    @Override public void draw(Canvas canvas) {
+      RectF ring = new RectF(getBounds());
+      float inset = paint.getStrokeWidth() / 2f + 1f;
+      ring.inset(inset, inset);
+      paint.setColor(Color.argb(48, 255, 255, 255));
+      canvas.drawArc(ring, 0f, 360f, false, paint);
+      paint.setColor(Color.WHITE);
+      canvas.drawArc(ring, -90f, 110f, false, paint);
+    }
+
+    @Override public void setAlpha(int alpha) { }
+    @Override public void setColorFilter(android.graphics.ColorFilter colorFilter) { }
+    @Override public int getOpacity() { return android.graphics.PixelFormat.TRANSLUCENT; }
+  }
+
   private WebResourceResponse local(WebResourceRequest r) {
     String p = r.getUrl().getPath();
     if (p == null || !p.startsWith("/qimg/")) return null;
