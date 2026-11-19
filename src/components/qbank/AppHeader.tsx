@@ -48,7 +48,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     <>
     {isApp && user && loc.pathname === "/" && loc.hash !== "qbanks" && <section aria-label="Your study dashboard" className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))]">
       <div className="flex min-w-0 items-center gap-3">
-      <img src="/icon-512.png" alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-2xl object-cover" />
+      <img src="/icon-512.png" alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-[14px] object-cover" />
       <div className="min-w-0">
         <h1 className="truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
       </div>
