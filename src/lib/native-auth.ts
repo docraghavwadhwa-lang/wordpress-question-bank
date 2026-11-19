@@ -49,5 +49,5 @@ export function initNativeAuth() {
   if (wired || !isNativeApp() || !app) return;
   wired = true;
   app.addListener("appUrlOpen", ({ url }) => void handleUrl(url));
-  void app.getLaunchUrl?.().then((r) => r?.url && handleUrl(r.url));
+  void app.getLaunchUrl?.().then((r) => { if (r?.url) void handleUrl(r.url); });
 }
