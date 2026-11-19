@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const LETTERS = "ABCDE";
 
-export type QuizProgress = { index: number; score: number; answered: number; spent: { total: number; count: number } };
+export type QuizProgress = { index: number; score: number; answered: number; spent: { total: number; count: number }; choices?: Record<string, string | null> };
 
 export function Quiz({
   questions,
@@ -23,6 +23,7 @@ export function Quiz({
   onExit,
   onAnswered,
   finishedSlot,
+  reviewChoices,
 }: {
   questions: Question[];
   timer: number;
@@ -33,10 +34,11 @@ export function Quiz({
   todayCount?: number;
   initial?: QuizProgress | undefined;
   onProgress?: (p: QuizProgress) => void;
-  onFinish?: (r: { score: number; answered: number; seconds: number }) => void;
+  onFinish?: (r: { score: number; answered: number; seconds: number; choices: Record<string, string | null>; completed: boolean }) => void;
   onExit: () => void;
   onAnswered?: () => void;
   finishedSlot?: React.ReactNode;
+  reviewChoices?: Record<string, string | null> | undefined;
 }) {
   const review = mode === "review";
   const [i, setI] = useState(initial?.index ?? 0);
@@ -47,6 +49,7 @@ export function Quiz({
   const [score, setScore] = useState(initial?.score ?? 0);
   const [answered, setAnswered] = useState(initial?.answered ?? 0);
   const [spent, setSpent] = useState(initial?.spent ?? { total: 0, count: 0 });
+  const [choices, setChoices] = useState<Record<string, string | null>>(initial?.choices ?? {});
   const [marks, setMarks] = useState(bookmarks);
   const [finished, setFinished] = useState(false);
   const [today, setToday] = useState(todayCount);
@@ -56,17 +59,18 @@ export function Quiz({
 
   useEffect(() => {
     t0.current = Date.now();
-    setChosen(null);
-    setDone(review);
+    const saved = review ? reviewChoices : choices;
+    setChosen(saved?.[q?.id] ?? null);
+    setDone(review || Object.prototype.hasOwnProperty.call(saved ?? {}, q?.id));
     setTimedOut(false);
     setLeft(timer);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [i, timer, review]);
 
   useEffect(() => {
-    if (!review) onProgress?.({ index: i, score, answered, spent });
+    if (!review) onProgress?.({ index: i, score, answered, spent, choices });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i]);
+  }, [i, score, answered, spent, choices]);
 
   useEffect(() => {
     if (!timer || done || finished || review) return;
@@ -82,13 +86,14 @@ export function Quiz({
 
   function finish() {
     setFinished(true);
-    onFinish?.({ score, answered, seconds: spent.total });
+    onFinish?.({ score, answered, seconds: spent.total, choices, completed: i + 1 === questions.length && done });
   }
 
   function answer(letter: string | null) {
     if (done) return;
     setDone(true);
     setChosen(letter);
+    setChoices(c => ({ ...c, [q.id]: letter }));
     let secs = (Date.now() - t0.current) / 1000;
     if (timer) secs = Math.min(secs, timer);
     setSpent((s) => ({ total: s.total + secs, count: s.count + 1 }));
@@ -218,6 +223,7 @@ export function Quiz({
 
       {done && (
         <div className="mt-6 space-y-3">
+          {review && reviewChoices && <p className="text-sm font-medium text-primary">Your answer: {chosen ?? "Not answered"} · Correct answer: {q.answer ?? "Not set"}</p>}
           {timedOut && <p className="font-semibold text-destructive">Time's up!</p>}
           {!q.answer && (
             <p className="rounded-lg bg-muted px-4 py-2 text-sm">No answer key is set for this question. Read the explanation.</p>

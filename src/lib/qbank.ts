@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { writeOrQueue } from "@/lib/offline";
+import { readQueue, writeOrQueue } from "@/lib/offline";
 import { filterDeckQuestions, isNetworkError, loadOfflineData, pickByIds } from "@/lib/offline-data";
 
 export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number };
@@ -67,28 +67,42 @@ export async function fetchDeckQuestions(path: string): Promise<Question[]> {
 }
 
 export async function fetchBookmarkedQuestions(): Promise<Question[]> {
-  const ids = [...(await fetchBookmarkIds())];
-  const out: Question[] = [];
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data, error } = await supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200));
-    if (error) throw error;
-    out.push(...((data ?? []) as unknown as Question[]));
-  }
-  return out;
+  return fetchQuestionsByIds([...(await fetchBookmarkIds())]);
 }
 
 export async function fetchBookmarkIds(): Promise<Set<number>> {
+  const { data: session } = await supabase.auth.getSession();
+  const userId = session.session?.user.id;
+  if (!userId) return new Set();
+  const key = `qb_bookmarks:${userId}`;
   const ids = new Set<number>();
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from("bookmarks").select("question_id").range(from, from + 999);
-    if (error) throw error;
-    (data ?? []).forEach((r) => ids.add(Number(r.question_id)));
-    if (!data || data.length < 1000) break;
+  try {
+    if (!navigator.onLine) throw new TypeError("Offline");
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase.from("bookmarks").select("question_id").eq("user_id", userId).range(from, from + 999);
+      if (error) throw error;
+      (data ?? []).forEach((r) => ids.add(Number(r.question_id)));
+      if (!data || data.length < 1000) break;
+    }
+  } catch (error) {
+    if (!isNetworkError(error)) throw error;
+    try { for (const id of JSON.parse(localStorage.getItem(key) ?? "[]")) ids.add(Number(id)); } catch { /* no saved bookmarks */ }
   }
+  for (const write of readQueue()) {
+    if (write.kind === "unbookmark" && write.user_id === userId) ids.delete(write.question_id);
+    else if (write.kind === "insert" && write.table === "bookmarks" && write.row['user_id'] === userId) ids.add(Number(write.row['question_id']));
+  }
+  localStorage.setItem(key, JSON.stringify([...ids]));
   return ids;
 }
 
 export async function setBookmark(userId: string, questionId: number, on: boolean) {
+  const key = `qb_bookmarks:${userId}`;
+  let saved: number[] = [];
+  try { saved = JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { /* empty cache */ }
+  const ids = new Set(saved);
+  if (on) ids.add(questionId); else ids.delete(questionId);
+  localStorage.setItem(key, JSON.stringify([...ids]));
   if (on) await writeOrQueue({ kind: "insert", table: "bookmarks", row: { user_id: userId, question_id: questionId } });
   else await writeOrQueue({ kind: "unbookmark", user_id: userId, question_id: questionId });
 }
@@ -153,14 +167,10 @@ export type Marked = { id: number; deck_path: string };
 
 /** Bookmarked questions and the mistake vault (latest attempt wrong), with each question's deck. */
 export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Marked[] }> {
-  const bIds: number[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase.from("bookmarks").select("question_id").range(from, from + 999);
-    if (error) throw error;
-    (data ?? []).forEach((r) => bIds.push(Number(r.question_id)));
-    if (!data || data.length < 1000) break;
-  }
+  const bIds = [...await fetchBookmarkIds()];
   const latest = new Map<number, boolean>();
+  try {
+  if (!navigator.onLine) throw new TypeError("Offline");
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabase
       .from("attempts")
@@ -173,15 +183,14 @@ export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Ma
     (data ?? []).forEach((r) => latest.set(Number(r.question_id), r.correct));
     if (!data || data.length < 1000) break;
   }
+  } catch (error) { if (!isNetworkError(error)) throw error; }
   const wrong = [...latest].filter(([, ok]) => !ok).map(([id]) => id);
-  const decks = new Map<number, string>();
   const all = [...new Set([...bIds, ...wrong])];
-  for (let i = 0; i < all.length; i += 200) {
-    const { data, error } = await supabase.from("questions").select("id, deck_path").in("id", all.slice(i, i + 200));
-    if (error) throw error;
-    (data ?? []).forEach((q) => decks.set(Number(q.id), q.deck_path));
-  }
-  const pick = (ids: number[]) => ids.filter((id) => decks.has(id)).map((id) => ({ id, deck_path: decks.get(id)! }));
+  const decks = new Map((await fetchQuestionsByIds(all)).map(q => [q.id, q.deck_path]));
+  const pick = (ids: number[]): Marked[] => ids.flatMap(id => {
+    const deck_path = decks.get(id);
+    return deck_path ? [{ id, deck_path }] : [];
+  });
   return { bookmarks: pick(bIds), mistakes: pick(wrong) };
 }
 
@@ -190,7 +199,21 @@ export function inDeck(list: Marked[], path: string): number[] {
   return list.filter((m) => m.deck_path === path || m.deck_path.startsWith(path + " > ")).map((m) => m.id);
 }
 
+export function groupBookmarks(list: Marked[]): { subject: string; ids: number[] }[] {
+  const groups = new Map<string, Set<number>>();
+  for (const question of list) {
+    const subject = question.deck_path.split(" > ")[0];
+    if (!subject) continue;
+    const ids = groups.get(subject) ?? new Set<number>();
+    ids.add(question.id);
+    groups.set(subject, ids);
+  }
+  return [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([subject, ids]) => ({ subject, ids: [...ids] }));
+}
+
 export type SavedSession = {
+  quizKey?: string;
+  choices?: Record<string, string | null>;
   title: string;
   ids: number[];
   timer: number;

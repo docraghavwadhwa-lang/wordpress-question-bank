@@ -13,6 +13,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Sign in to save your Q-Bank scores and bookmarks." },
       { property: "og:title", content: "Sign in | MedQuiz by Nirmaya Care" },
       { property: "og:description", content: "Sign in to save your Q-Bank scores and bookmarks." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AuthPage,

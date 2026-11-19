@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /** Writes made while offline wait here (localStorage) and are replayed once the device reconnects. */
 export type QueuedWrite =
-  | { kind: "insert"; table: "attempts" | "bookmarks" | "blitz_results"; row: Record<string, unknown> }
+  | { kind: "insert"; table: "attempts" | "bookmarks" | "blitz_results" | "quiz_reviews"; row: Record<string, unknown> }
   | { kind: "unbookmark"; user_id: string; question_id: number };
 
 const KEY = "qb_offline_queue";

@@ -31,6 +31,8 @@ export const Route = createFileRoute("/_authenticated/stats")({
       { name: "description", content: "Your daily streak, learning timeline and subject-wise Q-Bank progress." },
       { property: "og:title", content: "Progress & streak | MedQuiz by Nirmaya Care" },
       { property: "og:description", content: "Your daily streak, learning timeline and subject-wise Q-Bank progress." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: StatsPage,

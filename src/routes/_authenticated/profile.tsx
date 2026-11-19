@@ -19,6 +19,8 @@ export const Route = createFileRoute("/_authenticated/profile")({
       { name: "description", content: "Edit your photo, personal details and daily streak goal." },
       { property: "og:title", content: "Your profile | MedQuiz by Nirmaya Care" },
       { property: "og:description", content: "Edit your photo, personal details and daily streak goal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ProfilePage,

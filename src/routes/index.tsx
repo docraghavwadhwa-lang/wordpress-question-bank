@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpenCheck, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
+import { BookOpenCheck, Bookmark, History, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BlitzCard, BlitzRankLine } from "@/components/qbank/Blitz";
@@ -18,6 +18,9 @@ import { tierFor } from "@/lib/streak";
 import { QuestionOfTheDay, QuoteOfTheDay } from "@/components/qbank/Daily";
 import { PushToggle } from "@/components/qbank/PushToggle";
 import { OfflineDownload } from "@/components/qbank/OfflineDownload";
+import { Bookmarks } from "@/components/qbank/Bookmarks";
+import { fetchQuizReviews, latestReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
+import { toast } from "sonner";
 
 function Landing() {
   return (
@@ -67,12 +70,14 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
       { property: "og:title", content: "MedQuiz by Nirmaya Care — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Index,
 });
 
-type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined };
+type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; quizKey: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined; reviewChoices?: Record<string, string | null> | undefined };
 
 function Index() {
   const { user, ready } = useAuth();
@@ -80,6 +85,7 @@ function Index() {
   const decks = useQuery({ queryKey: ["decks"], queryFn: fetchDecks, enabled: !!user });
   const stats = useQuery({ queryKey: ["stats", user?.id], queryFn: fetchStats, enabled: !!user });
   const marked = useQuery({ queryKey: ["marked", user?.id], queryFn: fetchMarked, enabled: !!user });
+  const reviews = useQuery({ queryKey: ["quiz-reviews", user?.id], queryFn: () => user ? fetchQuizReviews(user.id) : Promise.resolve([]), enabled: !!user });
   const streak = useStreak(user?.id);
   const [pick, setPick] = useState<Pick | null>(null);
   const [loading, setLoading] = useState(false);
@@ -87,6 +93,7 @@ function Index() {
   const [quiz, setQuiz] = useState<ActiveQuiz | null>(null);
   const [savedTimer, setSavedTimer] = useState(0);
   const [paused, setPaused] = useState<SavedSession | null>(null);
+  const [showBookmarks, setShowBookmarks] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const day = todayKey(now);
   const qbanks = useLocation().hash === "qbanks";
@@ -102,29 +109,32 @@ function Index() {
     setPaused(loadSession());
     void stats.refetch();
     void marked.refetch();
+    void reviews.refetch();
   }
 
-  async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress) {
+  async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress, quizKey = title, reviewChoices?: Record<string, string | null>) {
     const marks = user ? await fetchBookmarkIds() : new Set<number>();
     if (mode === "practice") {
-      saveSession({ title, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 } });
+      saveSession({ title, quizKey, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 }, choices: initial?.choices ?? {} });
     }
-    setQuiz({ qs, timer, marks, title, mode, initial });
+    setQuiz({ qs, timer, marks, title, mode, initial, quizKey, reviewChoices });
   }
 
   async function start(timer: number, review?: boolean) {
     if (!pick) return;
     setLoading(true);
     try {
-      const qs = pick.ids ? await fetchQuestionsByIds(pick.ids) : await fetchDeckQuestions(pick.path!);
+      const qs = pick.ids ? await fetchQuestionsByIds(pick.ids) : pick.path ? await fetchDeckQuestions(pick.path) : [];
       if (!qs.length) {
         setMessage("No questions found.");
         return;
       }
       localStorage.setItem("qb_timer", String(timer));
       setSavedTimer(timer);
-      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice");
+      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, pick.path ?? `${pick.kind}:${pick.subtitle ?? pick.title}`);
       setPick(null);
+    } catch {
+      setMessage("Couldn't open these questions. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -135,8 +145,8 @@ function Index() {
     setLoading(true);
     try {
       const qs = await fetchQuestionsByIds(paused.ids);
-      if (restart) await launch(shuffle(qs), paused.timer, paused.title, "practice");
-      else await launch(qs, paused.timer, paused.title, "practice", paused);
+      if (restart) await launch(shuffle(qs), paused.timer, paused.title, "practice", undefined, paused.quizKey ?? paused.title);
+      else await launch(qs, paused.timer, paused.title, "practice", paused, paused.quizKey ?? paused.title);
     } finally {
       setLoading(false);
     }
@@ -151,6 +161,21 @@ function Index() {
     }
   }
 
+  async function openReview(row: QuizReview) {
+    if (!user || !latestReviews([row], user.id).length) {
+      toast.error("This review has expired.");
+      void reviews.refetch();
+      return;
+    }
+    setLoading(true);
+    try {
+      const qs = await fetchQuestionsByIds(row.question_ids);
+      if (qs.length !== row.question_ids.length) throw new Error("Questions unavailable");
+      await launch(qs, 0, row.title, "review", undefined, row.quiz_key, row.choices);
+    } catch { toast.error("Couldn't open this review. Please try again."); }
+    finally { setLoading(false); }
+  }
+
   if (!ready) return <div className="min-h-screen" />;
   if (!user) return <Landing />;
 
@@ -158,6 +183,7 @@ function Index() {
   const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
+  const recent = latestReviews(reviews.data ?? [], user.id, now.getTime());
   return (
     <div className="min-h-screen">
       <AppHeader onHome={goHome} />
@@ -175,6 +201,7 @@ function Index() {
             goal={streak.goal}
             todayCount={streak.streak.today}
             initial={quiz.initial}
+            reviewChoices={quiz.reviewChoices}
             onAnswered={() => void streak.refresh()}
             onProgress={(p) => {
               const cur = loadSession();
@@ -182,6 +209,10 @@ function Index() {
             }}
             onFinish={(r) => {
               if (quiz.mode === "practice") saveSession(null);
+              if (quiz.mode === "practice" && r.completed) {
+                const row: QuizReview = { id: crypto.randomUUID(), user_id: user.id, quiz_key: quiz.quizKey, title: quiz.title, question_ids: quiz.qs.map(q => q.id), choices: r.choices, score: r.score, answered: r.answered, completed_at: new Date().toISOString() };
+                void saveQuizReview(row).then(() => qc.invalidateQueries({ queryKey: ["quiz-reviews", user.id] })).catch(() => toast.error("Review saved on this device; online sync failed."));
+              }
               if (quiz.mode === "blitz")
                 void saveBlitz(user.id, day, r.score, r.seconds).then(() => qc.invalidateQueries({ queryKey: ["blitz-rank", day] }));
             }}
@@ -232,9 +263,24 @@ function Index() {
             </div>
             <div className={paused ? "mb-4" : "mb-12"}>
               <QuestionOfTheDay />
+              <Button variant="outline" className="mt-4" onClick={() => setShowBookmarks(v => !v)} aria-expanded={showBookmarks}>
+                <Bookmark className="h-4 w-4 text-accent" /> Bookmarked{marked.data ? ` (${marked.data.bookmarks.length})` : ""}
+              </Button>
+              {showBookmarks && <Bookmarks marked={marked.data?.bookmarks} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
               {user && <PushToggle userId={user.id} />}
               <OfflineDownload />
             </div>
+            <section className="mb-8 border-t pt-6">
+              <h2 className="mb-4 flex items-center gap-2 font-display text-2xl text-primary"><History className="h-5 w-5 text-accent" />Latest attempts</h2>
+              {reviews.isLoading ? <p className="text-muted-foreground">Loading reviews…</p> : reviews.error ? <p className="text-destructive">Couldn't load recent attempts. Please try again.</p> : !recent.length ? <p className="text-sm text-muted-foreground">No completed attempts from the last 72 hours.</p> : (
+                <div className="divide-y">
+                  {recent.map(row => <div key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+                    <div className="min-w-0"><h3 className="break-words font-display text-lg text-primary">{row.title}</h3><p className="text-sm text-muted-foreground">{row.score}/{row.answered} correct · {new Date(row.completed_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left to review</p></div>
+                    <Button variant="outline" disabled={loading} onClick={() => void openReview(row)}><BookOpenCheck className="h-4 w-4" />Review attempt</Button>
+                  </div>)}
+                </div>
+              )}
+            </section>
             {paused && (
               <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
                 <span className="flex items-center gap-3">

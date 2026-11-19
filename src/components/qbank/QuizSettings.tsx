@@ -52,8 +52,8 @@ export function QuizSettings({
           <Button variant="outline" onClick={onCancel}>Cancel</Button>
           {pick?.kind === "bookmarks" ? (
             <>
-              <Button disabled={loading} variant="secondary" onClick={() => onStart(0, true)}>Read solutions</Button>
-              <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Reattempt"}</Button>
+              <Button disabled={loading} variant="secondary" onClick={() => onStart(0, true)}>Review questions & solutions</Button>
+              <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Attempt bookmarked questions"}</Button>
             </>
           ) : (
             <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Start quiz"}</Button>
