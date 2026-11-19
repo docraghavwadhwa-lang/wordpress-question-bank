@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { OfflineBanner } from "@/components/qbank/OfflineBanner";
 import { registerAppServiceWorker } from "@/lib/sw-register";
+import { initNativeAuth } from "@/lib/native-auth";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -125,6 +126,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
     void registerAppServiceWorker();
+    initNativeAuth();
   }, []);
 
   return (

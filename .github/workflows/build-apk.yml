@@ -17,9 +17,12 @@ jobs:
         working-directory: mobile
         run: |
           npm init -y >/dev/null
-          npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7
+          npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7 @capacitor/app@7
           npx cap add android
           npx cap sync android
+          # Deep link so Google sign-in returns to the app
+          sed -i 's#</activity>#<intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" /><data android:scheme="com.nirmayacare.medquiz" android:host="auth" /></intent-filter></activity>#' android/app/src/main/AndroidManifest.xml
+          grep -q 'com.nirmayacare.medquiz' android/app/src/main/AndroidManifest.xml
       - name: App icons
         working-directory: mobile/android/app/src/main/res
         run: |

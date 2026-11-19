@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { isNativeApp, nativeGoogleSignIn } from "@/lib/native-auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -26,6 +27,10 @@ function AuthPage() {
   }, [user, navigate]);
 
   async function google() {
+    if (isNativeApp()) {
+      try { await nativeGoogleSignIn(); } catch (e) { toast.error((e as Error).message); }
+      return;
+    }
     const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
     if (error) toast.error(error.message);
   }

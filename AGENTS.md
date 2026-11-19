@@ -21,3 +21,4 @@
 - Daily Question-of-the-Day push is sent by pg_cron at 02:30 UTC to /api/public/push-qotd; push_log makes it once-per-day so the public route needs no secret.
 - Offline: vite-plugin-pwa generateSW at /sw.js (registered only via src/lib/sw-register.ts, never in preview) runtime-caches pages, /assets, /qimg and Supabase REST GETs; writes go through writeOrQueue in src/lib/offline.ts and replay on reconnect. Firebase messaging worker uses its own scope so it doesn't collide with /sw.js.
 - Android app: Capacitor shell in mobile/ loads the live site (server.url) and relies on the site's service worker for offline; GitHub Actions (.github/workflows/build-apk.yml) builds the APK so no Android SDK is needed locally.
+- Android app: Google sign-in in the app uses redirect com.nirmayacare.medquiz://auth/callback (intent filter added in build-apk.yml, handled by src/lib/native-auth.ts via @capacitor/app) so login returns to the app, not Chrome.
