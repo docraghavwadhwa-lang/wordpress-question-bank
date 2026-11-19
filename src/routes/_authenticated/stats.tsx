@@ -23,6 +23,7 @@ import { fetchSubjectStats, resetProgress } from "@/lib/profile";
 import { formatAverage } from "@/lib/qbank";
 import { addDays, dayKey, parseKey, tierFor } from "@/lib/streak";
 import { cn } from "@/lib/utils";
+import { compareSubjects, subjectLabel } from "@/lib/subjects";
 
 export const Route = createFileRoute("/_authenticated/stats")({
   head: () => ({
@@ -207,14 +208,14 @@ function verdict(acc: number, attempted: number) {
   if (!attempted) return { t: "Let's begin", d: "Start a chapter to see how you're doing.", tone: "bg-secondary" };
   if (acc >= 80) return { t: "Excellent", d: "Your performance is brilliant — you're on your way to owning your dream.", tone: "bg-success-soft" };
   if (acc >= 60) return { t: "Good going", d: "Solid work. Revise the explanations of the ones you missed.", tone: "bg-success-soft" };
-  return { t: "Keep pushing", d: "Every wrong answer is a lesson. Re-attempt this subject after revision.", tone: "bg-danger-soft" };
+  return { t: "Keep pushing", d: "Every wrong answer is a lesson. Re-attempt this subject after revision.", tone: "bg-secondary/60" };
 }
 
 function SubjectStats() {
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["subject-stats"], queryFn: fetchSubjectStats });
   const [tab, setTab] = useState<string>("Overall");
-  const rows = q.data ?? [];
+  const rows = [...(q.data ?? [])].sort((a, b) => compareSubjects(a.subject, b.subject));
   const cur = useMemo(() => {
     if (tab === "Overall")
       return rows.reduce((a, r) => ({ total: a.total + r.total, attempted: a.attempted + r.attempted, correct: a.correct + r.correct }), { total: 0, attempted: 0, correct: 0 });
@@ -241,24 +242,24 @@ function SubjectStats() {
       <p className="text-sm text-muted-foreground">Based on your latest answer to each question.</p>
       <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-2">
         {["Overall", ...rows.map((r) => r.subject)].map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)} className={cn("shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors", tab === t ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/50")}>
-            {t}
-          </button>
+          <Button variant="study" key={t} type="button" onClick={() => setTab(t)} className={cn("shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors", tab === t ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:border-primary/50")}>
+            {t === "Overall" ? t : subjectLabel(t)}
+          </Button>
         ))}
       </div>
       <div className="mt-4 rounded-2xl border bg-card p-6">
         <div className="flex flex-col-reverse items-center gap-6 md:flex-row md:justify-between">
           <div className="grid w-full min-w-0 flex-1 grid-cols-2 gap-x-3 sm:grid-cols-3 gap-y-5">
             <Num label="Attempted" value={cur.attempted} />
-            <Num label="Correct" value={cur.correct} />
-            <Num label="Accuracy" value={`${acc}%`} />
-            <Num label="Wrong" value={cur.attempted - cur.correct} />
+            <Num label="Correct" value={cur.correct} tone="success" />
+            <Num label="Accuracy" value={`${acc}%`} hero />
+            <Num label="Wrong" value={cur.attempted - cur.correct} tone="wrong" />
             <Num label="Remaining" value={Math.max(0, cur.total - cur.attempted)} />
             <Num label="Completed" value={`${cur.total ? Math.round((100 * cur.attempted) / cur.total) : 0}%`} />
           </div>
           <Gauge value={cur.attempted} total={cur.total} />
         </div>
-        <div className={cn("mt-6 rounded-xl px-5 py-4", v.tone)}>
+        <div className={cn("mt-6 border-l-2 border-primary/50 px-5 py-4", v.tone)}>
           <div className="text-xs font-semibold uppercase tracking-wider text-primary">{v.t}</div>
           <p className="text-sm text-foreground">{v.d}</p>
         </div>
@@ -286,10 +287,10 @@ function SubjectStats() {
   );
 }
 
-function Num({ label, value }: { label: string; value: number | string }) {
+function Num({ label, value, tone, hero }: { label: string; value: number | string; tone?: "success" | "wrong"; hero?: boolean }) {
   return (
-    <div className="min-w-0">
-      <div className="break-words font-display text-2xl leading-tight text-primary tabular-nums sm:text-3xl">{value}</div>
+    <div className={cn("min-w-0 rounded-md px-3 py-2", tone === "success" && "bg-success-soft", tone === "wrong" && "bg-danger-soft")} >
+      <div className={cn("break-words font-display leading-tight tabular-nums", hero ? "text-4xl text-primary" : "text-2xl sm:text-3xl", tone === "success" ? "text-success" : tone === "wrong" ? "text-destructive" : "text-primary")}>{value}</div>
       <div className="truncate text-xs text-muted-foreground">{label}</div>
     </div>
   );

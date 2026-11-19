@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpenCheck, Bookmark, History, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
+import { BookOpenCheck, Bookmark, CircleAlert, History, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BlitzCard, BlitzRankLine } from "@/components/qbank/Blitz";
@@ -94,7 +94,7 @@ function Index() {
   const [quiz, setQuiz] = useState<ActiveQuiz | null>(null);
   const [savedTimer, setSavedTimer] = useState(0);
   const [paused, setPaused] = useState<SavedSession | null>(null);
-  const [showBookmarks, setShowBookmarks] = useState(false);
+  const [studyTool, setStudyTool] = useState<"bookmarks" | "mistakes" | null>(null);
   const [now, setNow] = useState(() => new Date());
   const day = todayKey(now);
   const qbanks = useLocation().hash === "qbanks";
@@ -268,11 +268,18 @@ function Index() {
             </div>
             <div className={paused ? "mb-4" : "mb-12"}>
               <QuestionOfTheDay />
-              <Button variant="outline" className="mt-4" onClick={() => setShowBookmarks(v => !v)} aria-expanded={showBookmarks}>
-                <Bookmark className="h-4 w-4 text-accent" /> Bookmarked{marked.data ? ` (${marked.data.bookmarks.length})` : ""}
-              </Button>
-              {showBookmarks && <Bookmarks marked={marked.data?.bookmarks} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
-              {user && <PushToggle userId={user.id} />}
+              <div className="mt-4 grid gap-3 sm:grid-cols-3" aria-label="Study tools">
+                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
+                </Button>
+                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
+                </Button>
+                <PushToggle userId={user.id} />
+              </div>
+              {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
               <OfflineDownload />
             </div>
             <section className="mb-8 border-t pt-6">

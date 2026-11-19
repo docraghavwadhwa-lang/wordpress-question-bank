@@ -39,22 +39,22 @@ export function OfflineDownload() {
   const pct = progress && progress.total ? Math.round((100 * progress.done) / progress.total) : 0;
 
   return (
-    <section className="mt-4 rounded-2xl border bg-card p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/15">
-            {savedAt ? <ShieldCheck className="h-5 w-5 text-accent" /> : <CloudDownload className="h-5 w-5 text-accent" />}
+    <section className={savedAt ? "mt-4 border-y bg-secondary/60 px-4 py-3" : "mt-4 rounded-lg border bg-card p-5"}>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-secondary">
+            {savedAt ? <ShieldCheck className="h-5 w-5 text-success" /> : <CloudDownload className="h-5 w-5 text-accent" />}
           </span>
-          <span>
-            <span className="block font-display text-lg text-primary">Offline mode</span>
-            <span className="text-sm text-muted-foreground">
+          <span className="min-w-0">
+            <span className="block font-medium text-primary">{savedAt ? "Ready for offline practice" : "Offline mode"}</span>
+            <span className="block text-xs text-muted-foreground">
               {savedAt
                 ? `${count.toLocaleString()} questions saved on this device · ${new Date(savedAt).toLocaleDateString()}`
                 : "Download all questions once — then practise with no internet at all"}
             </span>
           </span>
         </span>
-        <Button variant={savedAt ? "outline" : "default"} disabled={busy} onClick={() => void download()}>
+        <Button variant={savedAt ? "ghost" : "default"} className="h-auto min-h-9 max-w-32 whitespace-normal text-center" disabled={busy} onClick={() => void download()}>
           {busy ? (
             `Downloading… ${pct}%`
           ) : savedAt ? (

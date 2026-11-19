@@ -73,10 +73,10 @@ export function QuestionOfTheDay() {
 export function QuoteOfTheDay() {
   const quote = quoteForDay(todayKey());
   return (
-    <section className="relative mt-16 overflow-hidden rounded-2xl bg-primary px-8 py-14 text-center text-primary-foreground sm:px-16">
-      <Quote className="mx-auto h-8 w-8 text-accent" strokeWidth={1.5} />
-      <blockquote className="mx-auto mt-5 max-w-2xl font-display text-2xl italic leading-snug sm:text-3xl">“{quote}”</blockquote>
-      <div className="mx-auto mt-6 h-px w-16 bg-accent" />
+    <section className="relative mt-10 border-l-2 border-primary bg-secondary/60 px-6 py-7 text-primary sm:px-10">
+      <Quote className="h-6 w-6 text-gold" strokeWidth={1.5} />
+      <blockquote className="mt-3 max-w-3xl font-display text-2xl italic leading-snug sm:text-3xl">“{quote}”</blockquote>
+      <div className="mt-4 h-px w-12 bg-primary/30" />
     </section>
   );
 }

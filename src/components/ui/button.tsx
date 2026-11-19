@@ -9,6 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        study: "border border-border bg-card text-card-foreground shadow-none hover:border-primary/40 hover:bg-secondary data-[active=true]:border-primary data-[active=true]:bg-secondary",
         default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

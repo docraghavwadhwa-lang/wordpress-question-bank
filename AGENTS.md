@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
+- Subject ordering and display aliases live in the browser-safe subjects module; preserve stored deck paths so downloads and quiz history keep working.
+- Home study tools reuse the study Button variant and subject-grouped selection; keep reminder behavior and offline-download activation unchanged during visual changes.
 - Q-Bank data (decks, questions) is public-read in Supabase and fetched from the browser client; bookmarks/attempts are per-user via RLS — keeps the site static-friendly for Vercel without server functions.
 - Questions come from the Prepladder .apkg (note_id = questions.id, deck root "Prepladder" dropped, General Medicine→Medicine, OBG→"Obstetrics & Gyenacology"); images are webp in public/qimg because public storage buckets are blocked; attempts/bookmarks have no FK to questions so history survives re-imports.
 - Question stems/options/explanations are trusted Anki HTML rendered with dangerouslySetInnerHTML.

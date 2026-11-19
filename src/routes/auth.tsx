@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import logo from "@/assets/medquiz-logo.asset.json";
 import { isNativeApp, nativeGoogleSignIn } from "@/lib/native-auth";
 
 export const Route = createFileRoute("/auth")({
@@ -40,7 +41,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="font-display text-3xl tracking-tight text-primary">MedQuiz <em className="text-xl text-muted-foreground">by Nirmaya Care</em></Link>
+        <Link to="/" className="flex items-center gap-3 text-primary"><img src={logo.url} alt="" className="h-14 w-14 shrink-0 rounded-md" /><span><span className="block font-display text-3xl">MedQuiz</span><span className="block text-sm text-muted-foreground">by Nirmaya Care</span></span></Link>
         <h1 className="mt-4 text-3xl">Welcome</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 

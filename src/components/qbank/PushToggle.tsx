@@ -29,12 +29,10 @@ export function PushToggle({ userId }: { userId: string }) {
     }
   }
 
-  if (on) return (
-    <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground"><BellRing className="h-4 w-4 text-accent" /> Daily 8 AM reminder is on for this device.</p>
-  );
   return (
-    <Button variant="outline" size="sm" className="mt-3" onClick={enable} disabled={busy}>
-      <Bell className="h-4 w-4" /> {busy ? "Turning on…" : "Notify me daily at 8 AM"}
+    <Button variant="study" className="h-auto min-h-24 w-full justify-start gap-3 whitespace-normal px-4 py-4 text-left" onClick={enable} disabled={busy || on}>
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent">{on ? <BellRing /> : <Bell />}</span>
+      <span className="min-w-0"><span className="block font-display text-lg text-primary">Daily reminder</span><span className="block text-xs font-normal text-muted-foreground">{on ? "8 AM · On for this device" : busy ? "Turning on…" : "8 AM · Enable notifications"}</span></span>
     </Button>
   );
 }

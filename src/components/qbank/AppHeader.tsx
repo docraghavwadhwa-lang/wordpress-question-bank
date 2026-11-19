@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
+import logo from "@/assets/medquiz-logo.asset.json";
 import { BottomNav } from "@/components/qbank/BottomNav";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
@@ -30,7 +31,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => fetchProfile(user!.id), enabled: !!user });
+  const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => user ? fetchProfile(user.id) : Promise.resolve(null), enabled: !!user });
   const isApp = isNativeApp();
   const name = profile.data?.full_name || user?.email;
 
@@ -44,19 +45,19 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   return (
     <>
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
-        <Link to="/" onClick={onHome} className="flex items-baseline gap-1.5 text-left">
-          <span className="font-display text-2xl tracking-tight text-primary sm:text-3xl">MedQuiz</span>
-          <span className="font-display text-sm italic text-muted-foreground sm:text-lg">by Nirmaya Care</span>
+      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-4">
+        <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
+          <img src={logo.url} alt="" className="h-11 w-11 shrink-0 rounded-md object-contain" />
+          <span className="min-w-0"><span className="block font-display text-2xl leading-none text-primary sm:text-3xl">MedQuiz</span><span className="block text-xs text-muted-foreground sm:text-sm">by Nirmaya Care</span></span>
         </Link>
-        <div className="flex items-center gap-1 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {!isApp && (
-          <Link to="/app" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-primary hover:bg-secondary" activeProps={{ className: "bg-secondary" }}>
-            <Smartphone className="h-4 w-4" /> Get the app
+          <Link to="/app" aria-label="Get the app" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-primary hover:bg-secondary" activeProps={{ className: "bg-secondary" }}>
+            <Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Get the app</span>
           </Link>
         )}
         {user ? (
-          <div className="flex items-center gap-1 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-primary hover:bg-secondary sm:flex" activeProps={{ className: "bg-secondary" }}>
               <BarChart3 className="h-4 w-4" /> Progress
             </Link>
