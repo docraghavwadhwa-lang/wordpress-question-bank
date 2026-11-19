@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["mobile/**", "public/icon-*.png", ".github/workflows/build-apk.yml"]
+    paths: ["mobile/**", "public/icon-*.png", "public/qimg/**", ".github/workflows/build-apk.yml"]
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -18,11 +18,16 @@ jobs:
         run: |
           npm init -y >/dev/null
           npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7 @capacitor/app@7
+          # Bundle every question image inside the APK for offline use
+          rm -rf www/qimg && cp -r ../public/qimg www/qimg
           npx cap add android
           npx cap sync android
           # Deep link so Google sign-in returns to the app
           sed -i 's#</activity>#<intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" /><data android:scheme="com.nirmayacare.medquiz" android:host="auth" /></intent-filter></activity>#' android/app/src/main/AndroidManifest.xml
           grep -q 'com.nirmayacare.medquiz' android/app/src/main/AndroidManifest.xml
+          # Native image server: answers /qimg/* from the bundled files
+          cp MainActivity.java android/app/src/main/java/com/nirmayacare/medquiz/MainActivity.java
+          ls android/app/src/main/assets/public/qimg | wc -l
       - name: App icons
         working-directory: mobile/android/app/src/main/res
         run: |
