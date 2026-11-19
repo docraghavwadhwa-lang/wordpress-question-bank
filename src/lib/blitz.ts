@@ -1,3 +1,4 @@
+import { writeOrQueue } from "@/lib/offline";
 import { supabase } from "@/integrations/supabase/client";
 import { hash } from "./daily";
 import type { Question } from "./qbank";
@@ -37,5 +38,5 @@ export async function fetchBlitzRank(day: string): Promise<BlitzRank | null> {
 }
 
 export async function saveBlitz(userId: string, day: string, score: number, seconds: number) {
-  await supabase.from("blitz_results").insert({ user_id: userId, day, score, seconds: Math.round(seconds) });
+  await writeOrQueue({ kind: "insert", table: "blitz_results", row: { user_id: userId, day, score, seconds: Math.round(seconds) } });
 }

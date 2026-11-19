@@ -25,7 +25,7 @@ export async function enablePush(userId: string): Promise<PushResult> {
   if (window.top !== window.self) return { status: "open-in-new-tab" };
   const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
   if (permission !== "granted") return { status: "denied" };
-  const reg = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${new URLSearchParams(config)}`);
+  const reg = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${new URLSearchParams(config)}`, { scope: "/firebase-cloud-messaging-push-scope" });
   const app = getApps()[0] ?? initializeApp(config);
   const token = await getToken(getMessaging(app), { vapidKey, serviceWorkerRegistration: reg });
   if (!token) return { status: "denied" };

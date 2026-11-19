@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useOnline } from "@/lib/offline";
 import { BLITZ_SIZE, BLITZ_TIMER, fetchBlitzRank } from "@/lib/blitz";
 
 export function BlitzCard({ day, loading, onStart }: { day: string; loading: boolean; onStart: () => void }) {
@@ -26,7 +27,9 @@ export function BlitzCard({ day, loading, onStart }: { day: string; loading: boo
 }
 
 export function BlitzRankLine({ day }: { day: string }) {
-  const rank = useQuery({ queryKey: ["blitz-rank", day], queryFn: () => fetchBlitzRank(day), refetchInterval: (q) => (q.state.data ? false : 1500) });
+  const online = useOnline();
+  const rank = useQuery({ queryKey: ["blitz-rank", day], queryFn: () => fetchBlitzRank(day), enabled: online, refetchInterval: (q) => (q.state.data ? false : 1500) });
+  if (!online && !rank.data) return <p className="mt-4 text-sm text-muted-foreground">Your rank will appear once you're back online.</p>;
   if (!rank.data) return <p className="mt-4 text-sm text-muted-foreground">Calculating your rank…</p>;
   return (
     <p className="mt-4 rounded-lg bg-secondary px-4 py-3 font-display text-xl text-primary">

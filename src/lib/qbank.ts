@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { writeOrQueue } from "@/lib/offline";
 
 export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number };
 export type Question = {
@@ -75,14 +76,16 @@ export async function fetchBookmarkIds(): Promise<Set<number>> {
 }
 
 export async function setBookmark(userId: string, questionId: number, on: boolean) {
-  if (on) await supabase.from("bookmarks").insert({ user_id: userId, question_id: questionId });
-  else await supabase.from("bookmarks").delete().eq("user_id", userId).eq("question_id", questionId);
+  if (on) await writeOrQueue({ kind: "insert", table: "bookmarks", row: { user_id: userId, question_id: questionId } });
+  else await writeOrQueue({ kind: "unbookmark", user_id: userId, question_id: questionId });
 }
 
 export async function recordAttempt(userId: string, questionId: number, chosen: string, correct: boolean, seconds: number) {
-  await supabase
-    .from("attempts")
-    .insert({ user_id: userId, question_id: questionId, chosen, correct, seconds: Math.round(seconds) });
+  await writeOrQueue({
+    kind: "insert",
+    table: "attempts",
+    row: { user_id: userId, question_id: questionId, chosen, correct, seconds: Math.round(seconds), created_at: new Date().toISOString() },
+  });
 }
 
 export async function fetchStats(): Promise<{ attempts: number; correct: number }> {

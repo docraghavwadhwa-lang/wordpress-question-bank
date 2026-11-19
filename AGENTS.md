@@ -19,3 +19,4 @@
 - Daily Blitz picks its questions deterministically from the date (same set for everyone) and ranks via the `qb_blitz_rank` security-definer RPC, which returns only the caller's own row — so ranks work without exposing other users' results.
 - An in-progress practice quiz is saved to localStorage (question ids + progress) so leaving the quiz pauses it; storing ids rather than full questions keeps it under storage limits.
 - Daily Question-of-the-Day push is sent by pg_cron at 02:30 UTC to /api/public/push-qotd; push_log makes it once-per-day so the public route needs no secret.
+- Offline: vite-plugin-pwa generateSW at /sw.js (registered only via src/lib/sw-register.ts, never in preview) runtime-caches pages, /assets, /qimg and Supabase REST GETs; writes go through writeOrQueue in src/lib/offline.ts and replay on reconnect. Firebase messaging worker uses its own scope so it doesn't collide with /sw.js.
