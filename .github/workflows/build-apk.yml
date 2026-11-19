@@ -1,0 +1,39 @@
+name: Build Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["mobile/**", "public/icon-*.png", ".github/workflows/build-apk.yml"]
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: Create Android project
+        working-directory: mobile
+        run: |
+          npm init -y >/dev/null
+          npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7
+          npx cap add android
+          npx cap sync android
+      - name: App icons
+        working-directory: mobile/android/app/src/main/res
+        run: |
+          rm -rf mipmap-anydpi-v26
+          for d in mipmap-*; do
+            cp ../../../../../../public/icon-192.png "$d/ic_launcher.png"
+            cp ../../../../../../public/icon-192.png "$d/ic_launcher_round.png"
+            rm -f "$d/ic_launcher_foreground.png"
+          done
+      - name: Build APK
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../../MedQuiz.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: MedQuiz-apk, path: MedQuiz.apk }

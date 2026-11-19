@@ -1,0 +1,11 @@
+{
+  "appId": "com.nirmayacare.medquiz",
+  "appName": "MedQuiz",
+  "webDir": "www",
+  "server": {
+    "url": "https://subject-spark-question-bank.lovable.app",
+    "errorPath": "offline.html",
+    "androidScheme": "https"
+  },
+  "android": { "allowMixedContent": false }
+}
