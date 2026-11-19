@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { writeOrQueue } from "@/lib/offline";
+import { filterDeckQuestions, isNetworkError, loadOfflineData, pickByIds } from "@/lib/offline-data";
 
 export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number };
 export type Question = {
@@ -19,38 +20,50 @@ export const TIMERS = [
 ];
 
 export async function fetchDecks(): Promise<Deck[]> {
-  const out: Deck[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase
-      .from("decks")
-      .select("path, subject, depth, sort_key, question_count")
-      .order("sort_key")
-      .range(from, from + 999);
-    if (error) throw error;
-    out.push(...((data ?? []) as Deck[]));
-    if (!data || data.length < 1000) break;
+  try {
+    const out: Deck[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("decks")
+        .select("path, subject, depth, sort_key, question_count")
+        .order("sort_key")
+        .range(from, from + 999);
+      if (error) throw error;
+      out.push(...((data ?? []) as Deck[]));
+      if (!data || data.length < 1000) break;
+    }
+    return out;
+  } catch (e) {
+    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    if (offline) return offline.decks;
+    throw e;
   }
-  return out;
 }
 
 const COLS = "id, deck_path, stem, options, answer, explanation";
 
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
-  const out: Question[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase
-      .from("questions")
-      .select(COLS)
-      .or(`deck_path.eq.${quote(path)},deck_path.like.${quote(escapeLike(path) + " > %")}`)
-      .order("sort_key")
-      .order("id")
-      .range(from, from + 999);
-    if (error) throw error;
-    out.push(...((data ?? []) as unknown as Question[]));
-    if (!data || data.length < 1000) break;
+  try {
+    const out: Question[] = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from("questions")
+        .select(COLS)
+        .or(`deck_path.eq.${quote(path)},deck_path.like.${quote(escapeLike(path) + " > %")}`)
+        .order("sort_key")
+        .order("id")
+        .range(from, from + 999);
+      if (error) throw error;
+      out.push(...((data ?? []) as unknown as Question[]));
+      if (!data || data.length < 1000) break;
+    }
+    return out;
+  } catch (e) {
+    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    if (offline) return filterDeckQuestions(offline.questions, path);
+    throw e;
   }
-  return out;
 }
 
 export async function fetchBookmarkedQuestions(): Promise<Question[]> {
@@ -121,13 +134,19 @@ function quote(s: string) {
 
 /** Fetch questions by id, keeping the given order. */
 export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
-  const map = new Map<number, Question>();
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data, error } = await supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200));
-    if (error) throw error;
-    ((data ?? []) as unknown as Question[]).forEach((q) => map.set(Number(q.id), q));
+  try {
+    const map = new Map<number, Question>();
+    for (let i = 0; i < ids.length; i += 200) {
+      const { data, error } = await supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200));
+      if (error) throw error;
+      ((data ?? []) as unknown as Question[]).forEach((q) => map.set(Number(q.id), q));
+    }
+    return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
+  } catch (e) {
+    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    if (offline) return pickByIds(offline.questions, ids);
+    throw e;
   }
-  return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
 }
 
 export type Marked = { id: number; deck_path: string };

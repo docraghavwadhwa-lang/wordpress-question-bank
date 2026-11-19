@@ -17,6 +17,7 @@ import { useStreak } from "@/hooks/use-streak";
 import { tierFor } from "@/lib/streak";
 import { QuestionOfTheDay, QuoteOfTheDay } from "@/components/qbank/Daily";
 import { PushToggle } from "@/components/qbank/PushToggle";
+import { OfflineDownload } from "@/components/qbank/OfflineDownload";
 
 function Landing() {
   return (
@@ -232,6 +233,7 @@ function Index() {
             <div className={paused ? "mb-4" : "mb-12"}>
               <QuestionOfTheDay />
               {user && <PushToggle userId={user.id} />}
+              <OfflineDownload />
             </div>
             {paused && (
               <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">

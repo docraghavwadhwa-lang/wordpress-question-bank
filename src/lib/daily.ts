@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { isNetworkError, loadOfflineData, subjectById } from "@/lib/offline-data";
 import quotes from "./quotes.json";
 import type { Question } from "./qbank";
 
@@ -43,16 +44,25 @@ export function quoteForDay(key: string): string {
 
 export async function fetchQuestionOfDay(key: string): Promise<Question & { subject: string }> {
   const subject = subjectForDay(key);
-  const { count, error } = await supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject);
-  if (error) throw error;
-  const n = hash(key + "q") % Math.max(1, count ?? 1);
-  const { data, error: e2 } = await supabase
-    .from("questions")
-    .select("id, deck_path, stem, options, answer, explanation")
-    .eq("subject", subject)
-    .order("id")
-    .range(n, n)
-    .single();
-  if (e2) throw e2;
-  return { ...(data as unknown as Question), subject };
+  try {
+    const { count, error } = await supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject);
+    if (error) throw error;
+    const n = hash(key + "q") % Math.max(1, count ?? 1);
+    const { data, error: e2 } = await supabase
+      .from("questions")
+      .select("id, deck_path, stem, options, answer, explanation")
+      .eq("subject", subject)
+      .order("id")
+      .range(n, n)
+      .single();
+    if (e2) throw e2;
+    return { ...(data as unknown as Question), subject };
+  } catch (e) {
+    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    if (!offline) throw e;
+    const pool = subjectById(offline.questions, subject);
+    if (!pool.length) throw e;
+    const n = hash(key + "q") % pool.length;
+    return { ...pool[n]!, subject };
+  }
 }
