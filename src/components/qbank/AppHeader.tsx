@@ -47,7 +47,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-4">
         <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
-          <img src={logo.url} alt="MedQuiz by Nirmaya Care" width={915} height={310} className="h-auto w-44 max-w-full object-contain sm:w-56" />
+          <img src={logo.url} alt="MedQuiz by Nirmaya Care" width={1588} height={535} className="h-auto w-44 max-w-full object-contain sm:w-56" />
         </Link>
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {!isApp && (

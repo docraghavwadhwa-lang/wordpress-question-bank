@@ -275,7 +275,7 @@ function Index() {
                 </Button>
                 <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
-                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit · last 72h</span></span>
                 </Button>
                 <PushToggle userId={user.id} />
               </div>

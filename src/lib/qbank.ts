@@ -179,6 +179,9 @@ export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
   }
 }
 
+/** Mistakes stay in the vault for 72 hours after the wrong attempt. */
+export const MISTAKE_WINDOW_MS = 72 * 60 * 60 * 1000;
+
 export type Marked = { id: number; deck_path: string };
 
 /** Bookmarked questions and the mistake vault (latest attempt wrong), with each question's deck. */
@@ -192,6 +195,7 @@ export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Ma
       .from("attempts")
       .select("id, question_id, correct")
       .eq("archived", false)
+      .gte("created_at", new Date(Date.now() - MISTAKE_WINDOW_MS).toISOString())
       .order("created_at")
       .order("id")
       .range(from, from + 999));

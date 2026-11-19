@@ -39,6 +39,9 @@ jobs:
             cp ../../../../../../public/icon-192.png "$d/ic_launcher_round.png"
             rm -f "$d/ic_launcher_foreground.png"
           done
+          # Branded splash instead of the default Capacitor mark
+          for d in drawable*; do [ -f "$d/splash.png" ] && cp ../../../../../../public/icon-512.png "$d/splash.png"; done
+          sed -i 's#<item name="android:background">@drawable/splash</item>#<item name="android:background">@drawable/splash</item><item name="android:windowBackground">@drawable/splash</item>#' values/styles.xml || true
       - name: Build APK
         working-directory: mobile/android
         run: |

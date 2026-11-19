@@ -49,8 +49,8 @@ export function OfflineDownload() {
             <span className="block font-medium text-primary">{savedAt ? "Ready for offline practice" : "Offline mode"}</span>
             <span className="block text-xs text-muted-foreground">
               {savedAt
-                ? `${count.toLocaleString()} questions saved on this device · ${new Date(savedAt).toLocaleDateString()}`
-                : "Download all questions once — then practise with no internet at all"}
+                ? `${count.toLocaleString()} questions saved`
+                : "Practise without internet"}
             </span>
           </span>
         </span>
@@ -62,7 +62,7 @@ export function OfflineDownload() {
               <RefreshCw className="mr-2 h-4 w-4" /> Update
             </>
           ) : (
-            "Download for offline"
+            "Download"
           )}
         </Button>
       </div>

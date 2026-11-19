@@ -3,9 +3,20 @@
   "appName": "MedQuiz",
   "webDir": "www",
   "server": {
-    "url": "https://subject-spark-question-bank.lovable.app",
     "errorPath": "offline.html",
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "url": "https://subject-spark-question-bank.lovable.app"
   },
-  "android": { "allowMixedContent": false }
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#F9F8F4"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#F9F8F4",
+      "showSpinner": false
+    }
+  }
 }

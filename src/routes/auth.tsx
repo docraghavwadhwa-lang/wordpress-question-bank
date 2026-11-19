@@ -41,8 +41,8 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="block"><img src={logo.url} alt="MedQuiz by Nirmaya Care" width={915} height={310} className="h-auto w-full object-contain" /></Link>
-        <h1 className="mt-4 text-3xl">Welcome</h1>
+        <Link to="/" className="block"><img src={logo.url} alt="MedQuiz by Nirmaya Care" width={1588} height={535} className="h-auto w-full object-contain" /></Link>
+        <h1 className="mt-10 text-3xl">Welcome</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 
         <Button variant="outline" className="mt-6 w-full" onClick={google}>
