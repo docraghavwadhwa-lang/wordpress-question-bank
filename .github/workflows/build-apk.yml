@@ -19,7 +19,7 @@ jobs:
         working-directory: mobile
         run: |
           npm init -y >/dev/null
-          npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7 @capacitor/app@7 @capacitor/local-notifications@7
+          npm i @capacitor/cli@7 @capacitor/core@7 @capacitor/android@7 @capacitor/app@7 @capacitor/local-notifications@7 @capacitor/splash-screen@7
           # Bundle every question image inside the APK for offline use
           rm -rf www/qimg && cp -r ../public/qimg www/qimg
           npx cap add android

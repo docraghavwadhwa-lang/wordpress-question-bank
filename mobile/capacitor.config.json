@@ -14,13 +14,13 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#178C8E"
+    "backgroundColor": "#43A9AF"
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 0,
-      "launchAutoHide": true,
-      "backgroundColor": "#178C8E",
+      "launchShowDuration": 3000,
+      "launchAutoHide": false,
+      "backgroundColor": "#43A9AF",
       "showSpinner": false,
       "launchFadeOutDuration": 0
     }

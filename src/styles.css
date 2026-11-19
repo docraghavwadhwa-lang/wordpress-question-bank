@@ -62,6 +62,7 @@
   --color-gold: var(--gold);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-header: var(--header);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger-soft: var(--danger-soft);
@@ -72,6 +73,7 @@
 :root {
   --brand: oklch(0.5537 0.0897 200.89);
   --brand-foreground: oklch(1 0 0);
+  --header: #43a9af;
   --background: oklch(0.9761 0.0040 91.46);
   --foreground: oklch(0.2391 0.0293 206.74);
   --card: oklch(1.000000 0.000000 89.876);

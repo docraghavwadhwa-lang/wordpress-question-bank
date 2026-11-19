@@ -126,6 +126,8 @@ function RootComponent() {
   useEffect(() => {
     void registerAppServiceWorker();
     initNativeAuth();
+    // Android app: hide the native logo screen the moment the real page is ready (no white gap).
+    (window as unknown as { Capacitor?: { Plugins?: { SplashScreen?: { hide: (o?: object) => Promise<void> } } } }).Capacitor?.Plugins?.SplashScreen?.hide({ fadeOutDuration: 0 }).catch(() => {});
   }, []);
 
   return (

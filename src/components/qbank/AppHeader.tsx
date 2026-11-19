@@ -46,12 +46,13 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
   return (
     <>
-    {!hideTop && <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-brand">
-      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-2">
-        <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
-          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className="h-auto w-52 max-w-full object-contain sm:w-60" />
+    {!hideTop && <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-header">
+      <div className={`mx-auto grid max-w-5xl items-center gap-2 px-4 py-2 ${isApp ? "grid-cols-[1fr_auto_1fr]" : "grid-cols-[minmax(0,1fr)_auto]"}`}>
+        {isApp && <span />}
+        <Link to="/" onClick={onHome} className={`flex min-w-0 items-center gap-2.5 ${isApp ? "justify-center" : "text-left"}`}>
+          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className={`h-auto max-w-full object-contain ${isApp ? "w-36" : "w-52 sm:w-60"}`} />
         </Link>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+        <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-3">
         {!isApp && (
           <Link to="/app" aria-label="Get the app" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10" activeProps={{ className: "bg-brand-foreground/15" }}>
             <Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Get the app</span>
