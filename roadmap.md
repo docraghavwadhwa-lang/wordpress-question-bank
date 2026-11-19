@@ -1,4 +1,5 @@
 # Tasks
+- [x] Replace website branding and all install/browser icons with the supplied logo; verified Home, sign-in and app-download pages on desktop/mobile, plus the Android icon artwork. Installed APK requires rebuild/reinstall.
 - [x] Apply the reference navy-and-paper palette and matching logo.
 - [x] Order the 19 subjects and balance Home tools, offline status, quote and Statistics.
 - [x] Test subject order and verify desktop/mobile presentation; public screens and isolated Home/Statistics sample-data checks passed. Real signed-in checks remain unavailable with external Google authentication.

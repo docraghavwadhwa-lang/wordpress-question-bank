@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
+- Website branding imports the shared full-logo asset pointer; install icons and favicon derive from its matching symbol, with versioned icon URLs to refresh cached branding.
 - Subject ordering and display aliases live in the browser-safe subjects module; preserve stored deck paths so downloads and quiz history keep working.
 - Home study tools reuse the study Button variant and subject-grouped selection; keep reminder behavior and offline-download activation unchanged during visual changes.
 - Q-Bank data (decks, questions) is public-read in Supabase and fetched from the browser client; bookmarks/attempts are per-user via RLS — keeps the site static-friendly for Vercel without server functions.
