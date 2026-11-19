@@ -29,9 +29,9 @@ import { OpeningScreen } from "@/components/qbank/OpeningScreen";
 function Landing() {
   return (
     <main data-sign-in-landing className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
-      <img src="/elixir-landing-logo.webp" alt="Elixir by Nirmaya Care" width={801} height={738} className="h-auto w-64 max-w-[70vw] sm:w-80" />
-      <p className="mt-14 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
-      <GoogleSignInButton className="mt-14 rounded-full px-8 shadow-lg" />
+      <img src="/elixir-landing-logo.webp" alt="Elixir by Nirmaya Care" width={801} height={738} className="h-auto w-56 max-w-[70vw] sm:w-72" />
+      <p className="mt-6 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
+      <GoogleSignInButton className="mt-[118px] rounded-full px-8 shadow-lg" />
     </main>
   );
 }
