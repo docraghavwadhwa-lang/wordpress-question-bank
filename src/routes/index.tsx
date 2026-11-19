@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpenCheck, Bookmark, CircleAlert, History, Flame, LineChart, Clock, PlayCircle } from "lucide-react";
+import { BookOpenCheck, Bookmark, CircleAlert, History, Clock, Flame, PlayCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { BlitzCard, BlitzRankLine } from "@/components/qbank/Blitz";
@@ -21,32 +21,18 @@ import { OfflineDownload } from "@/components/qbank/OfflineDownload";
 import { Bookmarks } from "@/components/qbank/Bookmarks";
 import { fetchQuizReviews, latestReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
 import { toast } from "sonner";
+import darkLogo from "@/assets/elixir-logo-dark.asset.json";
+import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
 
 function Landing() {
   return (
-    <div className="min-h-screen">
-      <AppHeader />
-      <main className="mx-auto max-w-3xl px-4 py-20 text-center">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">16,000+ medical MCQs</p>
-        <h1 className="text-5xl leading-tight text-primary sm:text-6xl">Practise daily. <em>Become</em> a great doctor.</h1>
-        <p className="mx-auto mt-5 max-w-xl text-lg text-muted-foreground">Every subject and chapter, with explanations, timers, bookmarks, daily streaks and subject-wise progress.</p>
-        <Link to="/auth" className="mt-8 inline-flex h-12 items-center rounded-md bg-primary px-8 font-medium text-primary-foreground hover:bg-primary/90">Sign in to start</Link>
-        <div className="mt-16 grid gap-4 text-left sm:grid-cols-3">
-          {[
-            { icon: BookOpenCheck, t: "19 subjects", d: "Chapter-wise question banks from Anatomy to Surgery." },
-            { icon: Flame, t: "Daily streaks", d: "Pick Achiever, Scholar or Topper and stay consistent." },
-            { icon: LineChart, t: "Your progress", d: "See how much of each subject you've completed." },
-          ].map((f) => (
-            <div key={f.t} className="rounded-xl border bg-card p-5">
-              <f.icon className="h-6 w-6 text-accent" strokeWidth={1.6} />
-              <h3 className="mt-3 font-display text-xl text-primary">{f.t}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{f.d}</p>
-            </div>
-          ))}
-        </div>
-      </main>
-    </div>
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
+      <img src={darkLogo.url} alt="Elixir by Nirmaya Care" width={1254} height={1254} className="h-auto w-72 max-w-[80vw] sm:w-96" />
+      <p className="-mt-4 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
+      <Link to="/auth" className="mt-10 inline-flex h-12 items-center rounded-full bg-brand-foreground px-10 font-medium text-brand shadow-lg transition-transform hover:scale-[1.03]">Sign in to start</Link>
+    </main>
   );
 }
 import {
@@ -67,9 +53,9 @@ import type { QuizProgress } from "@/components/qbank/Quiz";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MedQuiz by Nirmaya Care — Medical MCQ Practice" },
+      { title: "Elixir by Nirmaya Care — Medical MCQ Practice" },
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
-      { property: "og:title", content: "MedQuiz by Nirmaya Care — Medical MCQ Practice" },
+      { property: "og:title", content: "Elixir by Nirmaya Care — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -98,6 +84,8 @@ function Index() {
   const [now, setNow] = useState(() => new Date());
   const day = todayKey(now);
   const qbanks = useLocation().hash === "qbanks";
+  const [isApp, setIsApp] = useState(false);
+  useEffect(() => setIsApp(isNativeApp()), []);
   useEffect(() => {
     setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
     setPaused(loadSession());
@@ -231,11 +219,6 @@ function Index() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
                 <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
               </div>
-              {stats.data && stats.data.attempts > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Your record: {stats.data.correct}/{stats.data.attempts} correct ({Math.round((100 * stats.data.correct) / stats.data.attempts)}%)
-                </p>
-              )}
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
             {decks.error && <p className="text-destructive">{offlineErrorMessage(decks.error, "Couldn't load subjects. Please refresh.")}</p>}
@@ -268,7 +251,7 @@ function Index() {
             </div>
             <div className={paused ? "mb-4" : "mb-12"}>
               <QuestionOfTheDay />
-              <div className="mt-4 grid gap-3 sm:grid-cols-3" aria-label="Study tools">
+              <div className={`mt-4 grid gap-3 ${isApp ? "sm:grid-cols-3" : "sm:grid-cols-2"}`} aria-label="Study tools">
                 <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
@@ -277,7 +260,7 @@ function Index() {
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit · last 72h</span></span>
                 </Button>
-                <PushToggle userId={user.id} />
+                {isApp && <PushToggle />}
               </div>
               {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
               <OfflineDownload />

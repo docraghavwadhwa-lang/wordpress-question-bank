@@ -28,9 +28,9 @@ import { compareSubjects, subjectLabel } from "@/lib/subjects";
 export const Route = createFileRoute("/_authenticated/stats")({
   head: () => ({
     meta: [
-      { title: "Progress & streak | MedQuiz by Nirmaya Care" },
+      { title: "Progress & streak | Elixir by Nirmaya Care" },
       { name: "description", content: "Your daily streak, learning timeline and subject-wise Q-Bank progress." },
-      { property: "og:title", content: "Progress & streak | MedQuiz by Nirmaya Care" },
+      { property: "og:title", content: "Progress & streak | Elixir by Nirmaya Care" },
       { property: "og:description", content: "Your daily streak, learning timeline and subject-wise Q-Bank progress." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

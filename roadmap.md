@@ -8,3 +8,6 @@
 - [x] Verify rules, offline saving, and public desktop/mobile rendering; external Google sign-in prevents authenticated end-to-end testing here.
 - [x] Replace the offline blob with indexed batch downloads and direct chapter/daily reads.
 - [x] Test retries, interrupted updates, missing-download guidance and offline chapter opening; real Chromium downloaded all 16,214 live questions and read the affected 13-question chapter, QOTD and Blitz without internet. Signed-in Android UI checks remain unavailable with external Google authentication.
+- [x] Rebrand to Elixir: teal colours, new logos/icons, teal sign-in welcome, 15s logo intro (app), topic search, QOTD 5 subjects, app-only reminder, removed "Your record".
+- [ ] Connect elixir.nirmayacare.com — waiting on DNS records at the user's domain provider.
+- [ ] Google Play .aab — needs a signing key and Play Console account from the user.

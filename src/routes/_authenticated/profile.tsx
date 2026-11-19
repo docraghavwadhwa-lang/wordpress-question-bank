@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Your profile | MedQuiz by Nirmaya Care" },
+      { title: "Your profile | Elixir by Nirmaya Care" },
       { name: "description", content: "Edit your photo, personal details and daily streak goal." },
-      { property: "og:title", content: "Your profile | MedQuiz by Nirmaya Care" },
+      { property: "og:title", content: "Your profile | Elixir by Nirmaya Care" },
       { property: "og:description", content: "Edit your photo, personal details and daily streak goal." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

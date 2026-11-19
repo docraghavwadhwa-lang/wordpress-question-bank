@@ -31,3 +31,4 @@
 - Android APK is published to GitHub release tag android-latest by build-apk.yml; the /app page links to its fixed download URL so the link never changes.
 
 - Offline bank downloads use versioned IndexedDB rows in batches of 1,000 with deck/subject indexes; activate metadata only after a complete verified download, preserving the previous bank on failure and avoiding full-bank HTML reads. Old Cache API downloads require a fresh download rather than a memory-heavy migration.
+- Android daily reminder uses @capacitor/local-notifications via window.Capacitor.Plugins (installed in build-apk.yml), because web push doesn't work inside the WebView.

@@ -1,26 +1,31 @@
 import { useEffect, useState } from "react";
-import symbol from "@/assets/medquiz-symbol.asset.json";
+import light from "@/assets/elixir-logo-light.asset.json";
+import dark from "@/assets/elixir-logo-dark.asset.json";
 import { isNativeApp } from "@/lib/native-auth";
 
-/** Brief logo entry animation when the Android app opens. */
+const TOTAL = 15000;
+
+/** 15-second opening: the light Elixir logo slowly transforms into the dark-teal one. Tap to skip. */
 export function AppSplash() {
-  const [phase, setPhase] = useState<"off" | "in" | "out">("off");
+  const [phase, setPhase] = useState<"off" | "on" | "out">("off");
   useEffect(() => {
-    if (!isNativeApp() || sessionStorage.getItem("mq-splash")) return;
-    sessionStorage.setItem("mq-splash", "1");
-    setPhase("in");
-    const a = setTimeout(() => setPhase("out"), 1100);
-    const b = setTimeout(() => setPhase("off"), 1500);
+    if (!isNativeApp() || sessionStorage.getItem("el-splash")) return;
+    sessionStorage.setItem("el-splash", "1");
+    setPhase("on");
+    const a = setTimeout(() => setPhase("out"), TOTAL - 600);
+    const b = setTimeout(() => setPhase("off"), TOTAL);
     return () => { clearTimeout(a); clearTimeout(b); };
   }, []);
   if (phase === "off") return null;
   return (
-    <div className={`fixed inset-0 z-[100] grid place-items-center bg-background transition-opacity duration-400 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
-      <div className="flex flex-col items-center animate-in fade-in zoom-in-90 duration-700">
-        <img src={symbol.url} alt="" className="h-28 w-28 object-contain" />
-        <p className="mt-4 font-display text-3xl text-primary">MedQuiz</p>
-        <p className="mt-1 text-xs tracking-[0.2em] text-muted-foreground">BY NIRMAYA CARE</p>
-      </div>
-    </div>
+    <button type="button" aria-label="Skip intro" onClick={() => setPhase("off")}
+      className={`fixed inset-0 z-[100] grid place-items-center overflow-hidden bg-background transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
+      <span className="absolute inset-0 bg-brand animate-[elixir-fill_15s_ease-in-out_forwards]" />
+      <span className="relative h-[min(78vw,420px)] w-[min(78vw,420px)] animate-[elixir-breathe_5s_ease-in-out_infinite]">
+        <img src={light.url} alt="" className="absolute inset-0 h-full w-full object-contain animate-[elixir-out_15s_ease-in-out_forwards]" />
+        <img src={dark.url} alt="Elixir by Nirmaya Care" className="absolute inset-0 h-full w-full object-contain opacity-0 animate-[elixir-in_15s_ease-in-out_forwards]" />
+      </span>
+      <span className="absolute bottom-10 text-xs tracking-[0.2em] text-muted-foreground animate-[elixir-out_15s_ease-in-out_forwards]">TAP TO SKIP</span>
+    </button>
   );
 }

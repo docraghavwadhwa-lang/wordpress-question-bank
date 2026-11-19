@@ -1,6 +1,6 @@
 {
   "appId": "com.nirmayacare.medquiz",
-  "appName": "MedQuiz",
+  "appName": "Elixir",
   "webDir": "www",
   "server": {
     "errorPath": "offline.html",

@@ -4,15 +4,15 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import logo from "@/assets/medquiz-logo.asset.json";
+import logo from "@/assets/elixir-logo-light.asset.json";
 import { isNativeApp, nativeGoogleSignIn } from "@/lib/native-auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in | MedQuiz by Nirmaya Care" },
+      { title: "Sign in | Elixir by Nirmaya Care" },
       { name: "description", content: "Sign in to save your Q-Bank scores and bookmarks." },
-      { property: "og:title", content: "Sign in | MedQuiz by Nirmaya Care" },
+      { property: "og:title", content: "Sign in | Elixir by Nirmaya Care" },
       { property: "og:description", content: "Sign in to save your Q-Bank scores and bookmarks." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -41,7 +41,7 @@ function AuthPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl border bg-card p-8 shadow-sm">
-        <Link to="/" className="block"><img src={logo.url} alt="MedQuiz by Nirmaya Care" width={1588} height={535} className="h-auto w-full object-contain" /></Link>
+        <Link to="/" className="block"><img src={logo.url} alt="Elixir by Nirmaya Care" width={1254} height={1254} className="mx-auto h-auto w-48 object-contain" /></Link>
         <h1 className="mt-10 text-3xl">Welcome</h1>
         <p className="mt-1 text-sm text-muted-foreground">Save your scores and bookmark questions.</p>
 
