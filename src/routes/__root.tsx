@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import { AppSplash } from "@/components/qbank/AppSplash";
 import { OfflineBanner } from "@/components/qbank/OfflineBanner";
 import { registerAppServiceWorker } from "@/lib/sw-register";
 import { initNativeAuth } from "@/lib/native-auth";
@@ -131,7 +130,6 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AppSplash />
       <OfflineBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
