@@ -27,3 +27,19 @@ export function compareSubjects(a: string, b: string): number {
   };
   return rank(a) - rank(b) || a.localeCompare(b);
 }
+
+/** Bank identifiers use ` > `; tolerate old Anki separators for presentation only. */
+export function deckParts(path: string): string[] {
+  return path.split(/\s*>\s*|::/).map(part => part.trim()).filter(Boolean);
+}
+
+export function searchDecks<T extends { path: string; depth: number; sort_key: string; question_count: number }>(decks: T[], query: string): T[] {
+  const normalize = (value: string) => value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const words = normalize(query).split(" ").filter(Boolean);
+  if (!words.length) return [];
+  return decks.filter(deck => {
+    const parts = deckParts(deck.path);
+    const text = normalize([...parts, subjectLabel(parts[0] ?? deck.path)].join(" "));
+    return deck.question_count > 0 && words.every(word => text.includes(word));
+  }).sort((a, b) => compareSubjects(deckParts(a.path)[0] ?? a.path, deckParts(b.path)[0] ?? b.path) || a.sort_key.localeCompare(b.sort_key));
+}

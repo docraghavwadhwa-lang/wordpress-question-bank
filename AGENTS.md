@@ -32,3 +32,6 @@
 
 - Offline bank downloads use versioned IndexedDB rows in batches of 1,000 with deck/subject indexes; activate metadata only after a complete verified download, preserving the previous bank on failure and avoiding full-bank HTML reads. Old Cache API downloads require a fresh download rather than a memory-heavy migration.
 - Android daily reminder uses @capacitor/local-notifications via window.Capacitor.Plugins (installed in build-apk.yml), because web push doesn't work inside the WebView.
+- Bank search tokenizes the full stored deck hierarchy and display aliases without changing quiz paths, so topics and subtopics remain directly selectable offline.
+- Android launch branding uses a bundled, aspect-preserving native overlay dismissed by the home page when session and deck loading finish; never add a branding timer or delay real module loading.
+- Native screens omit the website logo bar; Home uses a compact personal study toolbar while website branding remains unchanged.

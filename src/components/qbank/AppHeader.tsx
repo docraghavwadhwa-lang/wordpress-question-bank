@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogOut, Smartphone, UserRound } from "lucide-react";
+import { BarChart3, Flame, LogOut, Smartphone, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,8 +34,8 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const isApp = isNativeApp();
   const name = profile.data?.full_name || user?.email;
   const loc = useLocation();
-  // Inside the Android app the Q-Banks and Progress screens go edge-to-edge (bottom nav stays).
-  const hideTop = isApp && !!user && (loc.pathname === "/stats" || loc.hash === "qbanks");
+  // Native screens have no website logo bar; Home gets a personal study toolbar.
+  const hideTop = isApp;
 
   async function signOut() {
     await qc.cancelQueries();
@@ -46,11 +46,21 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
   return (
     <>
+    {isApp && user && loc.pathname === "/" && loc.hash !== "qbanks" && <section aria-label="Your study dashboard" className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))]">
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-accent">Medical Q-Bank</p>
+        <h1 className="mt-1 truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        <Link to="/stats" aria-label="Your streak and progress" title="Your streak and progress" className="grid h-10 w-10 place-items-center rounded-full border bg-card text-gold"><Flame className="h-5 w-5" /></Link>
+        <Link to="/profile" aria-label="Your profile" title="Your profile"><UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} /></Link>
+      </div>
+    </section>}
     {!hideTop && <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-header">
       <div className={`mx-auto grid max-w-5xl items-center gap-2 px-4 py-2 ${isApp ? "grid-cols-[1fr_auto_1fr]" : "grid-cols-[minmax(0,1fr)_auto]"}`}>
         {isApp && <span />}
         <Link to="/" onClick={onHome} className={`flex min-w-0 items-center gap-2.5 ${isApp ? "justify-center" : "text-left"}`}>
-          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className={`h-auto max-w-full object-contain ${isApp ? "w-36" : "w-52 sm:w-60"}`} />
+          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className="h-auto w-40 max-w-full object-contain sm:w-48" />
         </Link>
         <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-3">
         {!isApp && (

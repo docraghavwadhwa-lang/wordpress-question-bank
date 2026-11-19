@@ -1,4 +1,7 @@
 # Tasks
+- [x] Replace app logo bar with a compact personal study dashboard and revision tools; reduce website logo size.
+- [x] Search stored subjects, topics and subtopics with working question selection; live subtopic returned 13 matching questions and 21 tests passed.
+- [x] Centre supplied opening branding with live loading indication and no artificial delay; website, phone-sized opening artwork and live search verified. Installed Android launch and signed-in dashboard need a rebuilt APK/device; external Google authentication prevents signed-in checks here.
 - [x] Replace the header with the latest supplied logo and keep the signed-out welcome teal through the bottom of the page.
 - [x] Replace website branding and all install/browser icons with the supplied logo; verified Home, sign-in and app-download pages on desktop/mobile, plus the Android icon artwork. Installed APK requires rebuild/reinstall.
 - [x] Apply the reference navy-and-paper palette and matching logo.

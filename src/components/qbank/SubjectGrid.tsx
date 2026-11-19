@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search } from "lucide
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
-import { compareSubjects, subjectLabel } from "@/lib/subjects";
+import { compareSubjects, subjectLabel, deckParts, searchDecks } from "@/lib/subjects";
 import { Button } from "@/components/ui/button";
 
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes" };
@@ -14,22 +14,23 @@ export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?:
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
-  const hits = useMemo(() => !term ? [] : decks.filter((d) => (d.depth === 1 ? subjectLabel(d.path) : d.path.split("::").slice(1).join(" ")).toLowerCase().includes(term)).sort((a, b) => compareSubjects(a.path, b.path) || a.sort_key.localeCompare(b.sort_key)).slice(0, 40), [decks, term]);
+  const hits = useMemo(() => searchDecks(decks, term), [decks, term]);
 
   return (
     <>
     <label className="mb-5 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search subjects or topics" aria-label="Search subjects or topics" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search subjects, topics, subtopics" aria-label="Search subjects, topics, subtopics" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
     </label>
     {term ? (
-      hits.length ? <div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
-        const parts = d.path.split("::"); const title = d.depth === 1 ? subjectLabel(d.path) : parts[parts.length - 1]!;
-        return <button key={d.path} type="button" onClick={() => onPick(d.depth === 1 ? { title, path: d.path, total: d.question_count } : { title, subtitle: subjectLabel(parts[0]!), path: d.path, total: d.question_count })} className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary">
-          <span className="min-w-0"><span className="block truncate font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block truncate text-xs text-muted-foreground">{subjectLabel(parts[0]!)}{parts.length > 2 ? ` › ${parts.slice(1, -1).join(" › ")}` : ""}</span>}</span>
-          <span className="shrink-0 text-xs text-muted-foreground">{d.question_count} Qs</span>
-        </button>;
-      })}</div> : <p className="text-sm text-muted-foreground">No subjects or topics match “{q}”.</p>
+      hits.length ? <><p className="mb-3 text-xs text-muted-foreground">{hits.length} matches</p><div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
+        const parts = deckParts(d.path); const title = d.depth === 1 ? subjectLabel(d.path) : parts.at(-1) ?? d.path;
+        const subtitle = [subjectLabel(parts[0] ?? d.subject), ...parts.slice(1, -1)].join(" › ");
+        return <Button variant="ghost" key={d.path} type="button" onClick={() => onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
+          <span className="min-w-0"><span className="block break-words font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block break-words text-xs font-normal text-muted-foreground">{subtitle}</span>}</span>
+          <span className="shrink-0 text-xs font-normal text-muted-foreground">{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
+        </Button>;
+      })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (

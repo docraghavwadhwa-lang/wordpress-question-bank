@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
 import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
+import { OpeningScreen } from "@/components/qbank/OpeningScreen";
 
 function Landing() {
   return (
@@ -86,6 +87,10 @@ function Index() {
   const qbanks = useLocation().hash === "qbanks";
   const [isApp, setIsApp] = useState(false);
   useEffect(() => setIsApp(isNativeApp()), []);
+  useEffect(() => {
+    if (!ready || (user && decks.isPending)) return;
+    (window as unknown as { ElixirLaunch?: { ready: () => void } }).ElixirLaunch?.ready();
+  }, [ready, user, decks.isPending]);
   useEffect(() => {
     setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
     setPaused(loadSession());
@@ -169,7 +174,8 @@ function Index() {
     finally { setLoading(false); }
   }
 
-  if (!ready) return <div className="min-h-screen" />;
+  if (!ready) return <OpeningScreen />;
+  if (isApp && user && decks.isPending) return <OpeningScreen />;
   if (!user) return <Landing />;
 
   const tier = tierFor(streak.goal);
@@ -182,7 +188,7 @@ function Index() {
       <AppHeader onHome={goHome} />
       <Celebration days={streak.celebrate} stats={streak.celebrationStats} onClose={streak.closeCelebration} />
 
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
+      <main className={`mx-auto max-w-5xl px-4 ${isApp ? "py-5" : "py-8 sm:py-12"}`}>
         {quiz ? (
           <Quiz
             key={quiz.title + quiz.mode + (quiz.initial?.index ?? "new")}
@@ -214,10 +220,10 @@ function Index() {
           />
         ) : qbanks ? (
           <>
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8">
+            <div className={isApp ? "mb-5" : "mb-10 flex flex-wrap items-end justify-between gap-4 border-b pb-8"}>
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>
-                <h1 className="text-5xl leading-none text-primary sm:text-6xl">Choose a <em>subject</em></h1>
+                {!isApp && <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">The question bank</p>}
+                <h1 className={isApp ? "text-3xl text-primary" : "text-5xl leading-none text-primary sm:text-6xl"}>{isApp ? "Q-Banks" : <>Choose a <em>subject</em></>}</h1>
               </div>
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
@@ -250,8 +256,11 @@ function Index() {
               <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
             </div>
             <div className={paused ? "mb-4" : "mb-12"}>
+              <div className={isApp ? "flex flex-col" : ""}>
               <QuestionOfTheDay />
-              <div className={`mt-4 grid gap-3 ${isApp ? "sm:grid-cols-3" : "sm:grid-cols-2"}`} aria-label="Study tools">
+              <div className={isApp ? "order-first mb-5" : "mt-4"}>
+              {isApp && <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-xl text-primary">Revision tools</h2><Link to="/" hash="qbanks" onClick={goHome} className="text-xs font-semibold text-accent">All Q-Banks →</Link></div>}
+              <div className={`grid gap-3 ${isApp ? "grid-cols-2 sm:grid-cols-3" : "sm:grid-cols-2"}`} aria-label="Study tools">
                 <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
@@ -260,7 +269,9 @@ function Index() {
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit · last 72h</span></span>
                 </Button>
-                {isApp && <PushToggle />}
+                {isApp && <div className="col-span-2 sm:col-span-1"><PushToggle /></div>}
+              </div>
+              </div>
               </div>
               {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
               <OfflineDownload />

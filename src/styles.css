@@ -63,6 +63,8 @@
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
   --color-header: var(--header);
+  --color-launch: var(--launch);
+  --color-launch-foreground: var(--launch-foreground);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger-soft: var(--danger-soft);
@@ -74,6 +76,8 @@
   --brand: oklch(0.5537 0.0897 200.89);
   --brand-foreground: oklch(1 0 0);
   --header: #43a9af;
+  --launch: oklch(0.584 0.093 196.5);
+  --launch-foreground: oklch(1 0 0);
   --background: oklch(0.9761 0.0040 91.46);
   --foreground: oklch(0.2391 0.0293 206.74);
   --card: oklch(1.000000 0.000000 89.876);
@@ -184,6 +188,7 @@ body { padding-bottom: 6rem; }
 html:has([data-sign-in-landing]),
 body:has([data-sign-in-landing]) { background-color: var(--brand); }
 body:has([data-sign-in-landing]) { padding-bottom: 0; }
+body:has([data-opening-screen]) { padding-bottom: 0; background-color: var(--launch); }
 
 @keyframes elixir-fill { 0%, 30% { clip-path: circle(0% at 50% 50%); } 75%, 100% { clip-path: circle(75% at 50% 50%); } }
 @keyframes elixir-out { 0%, 35% { opacity: 1; } 70%, 100% { opacity: 0; } }
