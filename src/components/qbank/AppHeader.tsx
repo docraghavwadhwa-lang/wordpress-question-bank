@@ -14,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
 import { BottomNav } from "@/components/qbank/BottomNav";
-import headerLogo from "@/assets/elixir-header-latest.asset.json";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
   const initials = (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -50,7 +49,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     {!hideTop && <header className="sticky top-0 z-30 border-b bg-card">
       <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-2">
         <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
-          <img src={headerLogo.url} alt="Elixir by Nirmaya Care" width={763} height={171} className="h-auto w-56 max-w-full object-contain mix-blend-multiply sm:w-64" />
+          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={763} height={171} className="h-auto w-56 max-w-full object-contain mix-blend-multiply sm:w-64" />
         </Link>
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {!isApp && (
