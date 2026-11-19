@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import darkLogo from "@/assets/elixir-logo-dark.asset.json";
 import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
+import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 
 function Landing() {
   return (
@@ -31,7 +32,7 @@ function Landing() {
       <img src={darkLogo.url} alt="Elixir by Nirmaya Care" width={1254} height={1254} className="h-auto w-72 max-w-[80vw] sm:w-96" />
       <p className="-mt-4 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
       <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
-      <Link to="/auth" className="mt-10 inline-flex h-12 items-center rounded-full bg-brand-foreground px-10 font-medium text-brand shadow-lg transition-transform hover:scale-[1.03]">Sign in to start</Link>
+      <GoogleSignInButton className="mt-10 rounded-full px-8 shadow-lg" />
     </main>
   );
 }
@@ -53,7 +54,7 @@ import type { QuizProgress } from "@/components/qbank/Quiz";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Elixir by Nirmaya Care — Medical MCQ Practice" },
+      { title: "Elixir" },
       { name: "description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },
       { property: "og:title", content: "Elixir by Nirmaya Care — Medical MCQ Practice" },
       { property: "og:description", content: "Practise thousands of medical MCQs by subject and chapter, with timers, bookmarks and explanations." },

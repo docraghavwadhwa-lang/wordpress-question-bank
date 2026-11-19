@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
-import mark from "@/assets/elixir-mark.asset.json";
+import logo from "@/assets/elixir-logo-light-trim.asset.json";
 import { BottomNav } from "@/components/qbank/BottomNav";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
@@ -47,14 +47,10 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
   return (
     <>
-    {!hideTop && <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
-      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-4">
+    {!hideTop && <header className="sticky top-0 z-30 border-b bg-card">
+      <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-2">
         <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
-          <img src={mark.url} alt="" width={270} height={243} className="h-9 w-auto shrink-0 object-contain" />
-          <span className="min-w-0 leading-none">
-            <span className="block font-display text-2xl tracking-[0.14em] text-primary">ELIXIR</span>
-            <span className="mt-1 block text-[10px] font-semibold tracking-[0.22em] text-accent">BY NIRMAYA CARE</span>
-          </span>
+          <img src={logo.url} alt="Elixir by Nirmaya Care" width={800} height={770} className="h-12 w-auto shrink-0 object-contain mix-blend-multiply" />
         </Link>
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {!isApp && (

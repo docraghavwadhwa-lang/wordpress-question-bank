@@ -10,7 +10,7 @@ export const APK_URL = "https://github.com/docraghavwadhwa-lang/wordpress-questi
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
-      { title: "Get the Elixir app — Android download" },
+      { title: "Elixir" },
       { name: "description", content: "Download the Elixir by Nirmaya Care Android app and practise medical MCQs even without internet." },
       { property: "og:title", content: "Get the Elixir app — Android download" },
       { property: "og:description", content: "Download the Elixir by Nirmaya Care Android app. iOS app coming soon." },
