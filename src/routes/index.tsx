@@ -29,7 +29,7 @@ import { OpeningScreen } from "@/components/qbank/OpeningScreen";
 function Landing() {
   return (
     <main data-sign-in-landing className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
-      <img src="/elixir-landing-logo.webp" alt="Elixir by Nirmaya Care" width={801} height={738} className="h-auto w-72 max-w-[80vw] sm:w-96" />
+      <img src="/elixir-landing-logo.webp" alt="Elixir by Nirmaya Care" width={801} height={738} className="h-auto w-80 max-w-[86vw] sm:w-[28rem]" />
       <p className="mt-8 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
       <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
       <GoogleSignInButton className="mt-10 rounded-full px-8 shadow-lg" />
