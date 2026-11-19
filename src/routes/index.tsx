@@ -21,7 +21,6 @@ import { OfflineDownload } from "@/components/qbank/OfflineDownload";
 import { Bookmarks } from "@/components/qbank/Bookmarks";
 import { fetchQuizReviews, latestReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
 import { toast } from "sonner";
-import darkLogo from "@/assets/elixir-logo-dark.asset.json";
 import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
 import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
@@ -29,8 +28,8 @@ import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 function Landing() {
   return (
     <main data-sign-in-landing className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
-      <img src={darkLogo.url} alt="Elixir by Nirmaya Care" width={1254} height={1254} className="h-auto w-72 max-w-[80vw] sm:w-96" />
-      <p className="-mt-4 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
+      <img src="/elixir-landing-logo.webp" alt="Elixir by Nirmaya Care" width={801} height={738} className="h-auto w-72 max-w-[80vw] sm:w-96" />
+      <p className="mt-8 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
       <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
       <GoogleSignInButton className="mt-10 rounded-full px-8 shadow-lg" />
     </main>
