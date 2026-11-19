@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
+import appMark from "@/assets/elixir-app-mark.asset.json";
 import { BottomNav } from "@/components/qbank/BottomNav";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
@@ -47,13 +48,27 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   return (
     <>
     {isApp && user && loc.pathname === "/" && loc.hash !== "qbanks" && <section aria-label="Your study dashboard" className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))]">
+      <div className="flex min-w-0 items-center gap-3">
+      <img src={appMark.url} alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-xl object-cover" />
       <div className="min-w-0">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-accent">Medical Q-Bank</p>
         <h1 className="mt-1 truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
       </div>
+      </div>
       <div className="flex shrink-0 items-center gap-3">
         <Link to="/stats" aria-label="Your streak and progress" title="Your streak and progress" className="grid h-10 w-10 place-items-center rounded-full border bg-card text-gold"><Flame className="h-5 w-5" /></Link>
-        <Link to="/profile" aria-label="Your profile" title="Your profile"><UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} /></Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
+            <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </section>}
     {!hideTop && <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-header">

@@ -260,7 +260,7 @@ function Index() {
               <QuestionOfTheDay />
               <div className={isApp ? "order-first mb-5" : "mt-4"}>
               {isApp && <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-xl text-primary">Revision tools</h2><Link to="/" hash="qbanks" onClick={goHome} className="text-xs font-semibold text-accent">All Q-Banks →</Link></div>}
-              <div className={`grid gap-3 ${isApp ? "grid-cols-2 sm:grid-cols-3" : "sm:grid-cols-2"}`} aria-label="Study tools">
+              <div className={`grid gap-3 ${isApp ? "grid-cols-1" : "sm:grid-cols-2"}`} aria-label="Study tools">
                 <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
@@ -269,7 +269,7 @@ function Index() {
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit · last 72h</span></span>
                 </Button>
-                {isApp && <div className="col-span-2 sm:col-span-1"><PushToggle /></div>}
+                {isApp && <div><PushToggle /></div>}
               </div>
               </div>
               </div>
