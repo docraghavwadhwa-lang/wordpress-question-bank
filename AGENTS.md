@@ -25,3 +25,4 @@
 - Android app: Capacitor shell in mobile/ loads the live site (server.url) and relies on the site's service worker for offline; GitHub Actions (.github/workflows/build-apk.yml) builds the APK so no Android SDK is needed locally.
 - Android app: question images are bundled into the APK (www/qimg) and served by mobile/MainActivity.java intercepting /qimg/* (page + service worker requests) so they show offline without downloads.
 - Android app: Google sign-in in the app uses redirect com.nirmayacare.medquiz://auth/callback (intent filter added in build-apk.yml, handled by src/lib/native-auth.ts via @capacitor/app) so login returns to the app, not Chrome.
+- Android APK is published to GitHub release tag android-latest by build-apk.yml; the /app page links to its fixed download URL so the link never changes.

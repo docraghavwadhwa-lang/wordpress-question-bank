@@ -84,9 +84,15 @@ export function Quiz({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [left, timer, done, finished]);
 
-  function finish() {
+  function finish(reachedEnd = i + 1 === questions.length && done) {
     setFinished(true);
-    onFinish?.({ score, answered, seconds: spent.total, choices, completed: i + 1 === questions.length && done });
+    onFinish?.({ score, answered, seconds: spent.total, choices, completed: reachedEnd });
+  }
+
+  /** Move on without answering; a skipped question isn't scored or recorded. */
+  function skip() {
+    if (i + 1 === questions.length) finish(true);
+    else setI(i + 1);
   }
 
   function answer(letter: string | null) {
@@ -236,10 +242,13 @@ export function Quiz({
 
       <div className="mt-8 flex flex-wrap justify-between gap-3">
         <div className="flex gap-2">
-          <Button variant="outline" onClick={finish}>End session</Button>
+          <Button variant="outline" onClick={() => finish()}>End session</Button>
           {review && i > 0 && <Button variant="outline" onClick={() => setI(i - 1)}>Previous</Button>}
         </div>
-        <Button disabled={!done} onClick={() => (last ? finish() : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
+        <div className="flex gap-2">
+          {!done && !review && <Button variant="ghost" onClick={skip}>Skip</Button>}
+          <Button disabled={!done} onClick={() => (last ? finish() : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
+        </div>
       </div>
     </div>
   );

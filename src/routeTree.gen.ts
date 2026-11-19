@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -48,6 +54,7 @@ const ApiPublicPushQotdRoute = ApiPublicPushQotdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
@@ -64,6 +72,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
@@ -71,13 +80,15 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
+  fullPaths:
+    '/' | '/app' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
+  to: '/' | '/app' | '/auth' | '/profile' | '/stats' | '/api/public/push-qotd'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/app'
     | '/auth'
     | '/_authenticated/profile'
     | '/_authenticated/stats'
@@ -87,6 +98,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   ApiPublicPushQotdRoute: typeof ApiPublicPushQotdRoute
 }
@@ -105,6 +117,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -154,6 +173,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   ApiPublicPushQotdRoute: ApiPublicPushQotdRoute,
 }

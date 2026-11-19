@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogOut, UserRound } from "lucide-react";
+import { BarChart3, LogOut, Smartphone, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
+import { isNativeApp } from "@/lib/native-auth";
 import { BottomNav } from "@/components/qbank/BottomNav";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
@@ -30,6 +31,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => fetchProfile(user!.id), enabled: !!user });
+  const isApp = isNativeApp();
   const name = profile.data?.full_name || user?.email;
 
   async function signOut() {
@@ -47,6 +49,12 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
           <span className="font-display text-2xl tracking-tight text-primary sm:text-3xl">MedQuiz</span>
           <span className="font-display text-sm italic text-muted-foreground sm:text-lg">by Nirmaya Care</span>
         </Link>
+        <div className="flex items-center gap-1 sm:gap-3">
+        {!isApp && (
+          <Link to="/app" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-primary hover:bg-secondary" activeProps={{ className: "bg-secondary" }}>
+            <Smartphone className="h-4 w-4" /> Get the app
+          </Link>
+        )}
         {user ? (
           <div className="flex items-center gap-1 sm:gap-3">
             <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-primary hover:bg-secondary sm:flex" activeProps={{ className: "bg-secondary" }}>
@@ -69,6 +77,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         ) : (
           <Link to="/auth" className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">Sign in</Link>
         )}
+        </div>
       </div>
     </header>
     {user && <BottomNav onHome={onHome} />}

@@ -21,23 +21,29 @@ export const TIMERS = [
 
 export async function fetchDecks(): Promise<Deck[]> {
   try {
+    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
     const out: Deck[] = [];
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase
+      const { data, error } = await timed(supabase
         .from("decks")
         .select("path, subject, depth, sort_key, question_count")
         .order("sort_key")
-        .range(from, from + 999);
+        .range(from, from + 999));
       if (error) throw error;
       out.push(...((data ?? []) as Deck[]));
       if (!data || data.length < 1000) break;
     }
     return out;
   } catch (e) {
-    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    const offline = await loadOfflineData();
     if (offline) return offline.decks;
     throw e;
   }
+}
+
+/** Give up on a slow/hung network call after 8s so the offline copy can take over. */
+function timed<T>(p: PromiseLike<T>, ms = 8000): Promise<T> {
+  return Promise.race([Promise.resolve(p), new Promise<T>((_, rej) => setTimeout(() => rej(new TypeError("Network timeout")), ms))]);
 }
 
 const COLS = "id, deck_path, stem, options, answer, explanation";
@@ -45,22 +51,23 @@ const COLS = "id, deck_path, stem, options, answer, explanation";
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
   try {
+    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
     const out: Question[] = [];
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase
+      const { data, error } = await timed(supabase
         .from("questions")
         .select(COLS)
         .or(`deck_path.eq.${quote(path)},deck_path.like.${quote(escapeLike(path) + " > %")}`)
         .order("sort_key")
         .order("id")
-        .range(from, from + 999);
+        .range(from, from + 999));
       if (error) throw error;
       out.push(...((data ?? []) as unknown as Question[]));
       if (!data || data.length < 1000) break;
     }
     return out;
   } catch (e) {
-    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    const offline = await loadOfflineData();
     if (offline) return filterDeckQuestions(offline.questions, path);
     throw e;
   }
@@ -79,13 +86,12 @@ export async function fetchBookmarkIds(): Promise<Set<number>> {
   try {
     if (!navigator.onLine) throw new TypeError("Offline");
     for (let from = 0; ; from += 1000) {
-      const { data, error } = await supabase.from("bookmarks").select("question_id").eq("user_id", userId).range(from, from + 999);
+      const { data, error } = await timed(supabase.from("bookmarks").select("question_id").eq("user_id", userId).range(from, from + 999));
       if (error) throw error;
       (data ?? []).forEach((r) => ids.add(Number(r.question_id)));
       if (!data || data.length < 1000) break;
     }
-  } catch (error) {
-    if (!isNetworkError(error)) throw error;
+  } catch {
     try { for (const id of JSON.parse(localStorage.getItem(key) ?? "[]")) ids.add(Number(id)); } catch { /* no saved bookmarks */ }
   }
   for (const write of readQueue()) {
@@ -149,15 +155,16 @@ function quote(s: string) {
 /** Fetch questions by id, keeping the given order. */
 export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
   try {
+    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
     const map = new Map<number, Question>();
     for (let i = 0; i < ids.length; i += 200) {
-      const { data, error } = await supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200));
+      const { data, error } = await timed(supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200)));
       if (error) throw error;
       ((data ?? []) as unknown as Question[]).forEach((q) => map.set(Number(q.id), q));
     }
     return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
   } catch (e) {
-    const offline = isNetworkError(e) ? await loadOfflineData() : null;
+    const offline = await loadOfflineData();
     if (offline) return pickByIds(offline.questions, ids);
     throw e;
   }
@@ -172,13 +179,13 @@ export async function fetchMarked(): Promise<{ bookmarks: Marked[]; mistakes: Ma
   try {
   if (!navigator.onLine) throw new TypeError("Offline");
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase
+    const { data, error } = await timed(supabase
       .from("attempts")
       .select("id, question_id, correct")
       .eq("archived", false)
       .order("created_at")
       .order("id")
-      .range(from, from + 999);
+      .range(from, from + 999));
     if (error) throw error;
     (data ?? []).forEach((r) => latest.set(Number(r.question_id), r.correct));
     if (!data || data.length < 1000) break;
