@@ -49,7 +49,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     {!hideTop && <header className="sticky top-0 z-30 border-b bg-card">
       <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-2">
         <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5 text-left">
-          <img src="/elixir-header-logo.png" alt="Elixir by Nirmaya Care" width={800} height={770} className="h-12 w-auto shrink-0 object-contain mix-blend-multiply" />
+          <img src="/elixir-header-logo-v2.png" alt="Elixir by Nirmaya Care" width={1131} height={324} className="h-11 w-auto shrink-0 object-contain mix-blend-multiply" />
         </Link>
         <div className="flex shrink-0 items-center gap-1 sm:gap-3">
         {!isApp && (
