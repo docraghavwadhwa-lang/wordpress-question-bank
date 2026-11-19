@@ -28,7 +28,7 @@ import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 
 function Landing() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
+    <main data-sign-in-landing className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-brand px-6 py-16 text-center text-brand-foreground">
       <img src={darkLogo.url} alt="Elixir by Nirmaya Care" width={1254} height={1254} className="h-auto w-72 max-w-[80vw] sm:w-96" />
       <p className="-mt-4 max-w-md font-display text-2xl italic leading-snug sm:text-3xl">The daily dose for future doctors.</p>
       <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-brand-foreground/75">16,000+ MCQs · 19 subjects</p>
