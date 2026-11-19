@@ -26,3 +26,5 @@
 - Android app: question images are bundled into the APK (www/qimg) and served by mobile/MainActivity.java intercepting /qimg/* (page + service worker requests) so they show offline without downloads.
 - Android app: Google sign-in in the app uses redirect com.nirmayacare.medquiz://auth/callback (intent filter added in build-apk.yml, handled by src/lib/native-auth.ts via @capacitor/app) so login returns to the app, not Chrome.
 - Android APK is published to GitHub release tag android-latest by build-apk.yml; the /app page links to its fixed download URL so the link never changes.
+
+- Offline bank downloads use versioned IndexedDB rows in batches of 1,000 with deck/subject indexes; activate metadata only after a complete verified download, preserving the previous bank on failure and avoiding full-bank HTML reads. Old Cache API downloads require a fresh download rather than a memory-heavy migration.

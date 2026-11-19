@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { isNetworkError, loadOfflineData, subjectById } from "@/lib/offline-data";
+import { isOffline, networkRead, offlineQuestionIds, offlineQuestionsByIds, OFFLINE_GUIDANCE } from "@/lib/offline-data";
 import quotes from "./quotes.json";
 import type { Question } from "./qbank";
 
@@ -34,35 +34,37 @@ export function subjectForDay(key: string) {
     if (r < s.weight) return s.subject;
     r -= s.weight;
   }
-  return QOTD_SUBJECTS[0]!.subject;
+  return QOTD_SUBJECTS[0]?.subject ?? "Surgery";
 }
 
 export function quoteForDay(key: string): string {
   const list = quotes as string[];
-  return list[hash(key + "quote") % list.length]!;
+  return list[hash(key + "quote") % list.length] ?? "";
 }
 
 export async function fetchQuestionOfDay(key: string): Promise<Question & { subject: string }> {
   const subject = subjectForDay(key);
   try {
-    const { count, error } = await supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject);
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
+    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject));
     if (error) throw error;
     const n = hash(key + "q") % Math.max(1, count ?? 1);
-    const { data, error: e2 } = await supabase
+    const { data, error: e2 } = await networkRead(supabase
       .from("questions")
       .select("id, deck_path, stem, options, answer, explanation")
       .eq("subject", subject)
       .order("id")
       .range(n, n)
-      .single();
+      .single());
     if (e2) throw e2;
     return { ...(data as unknown as Question), subject };
   } catch (e) {
-    const offline = isNetworkError(e) ? await loadOfflineData() : null;
-    if (!offline) throw e;
-    const pool = subjectById(offline.questions, subject);
-    if (!pool.length) throw e;
-    const n = hash(key + "q") % pool.length;
-    return { ...pool[n]!, subject };
+    const ids = await offlineQuestionIds(subject);
+    if (!ids?.length) { if (isOffline()) throw new Error(OFFLINE_GUIDANCE); throw e; }
+    const id = ids[hash(key + "q") % ids.length];
+    const rows = id === undefined ? null : await offlineQuestionsByIds([id]);
+    const question = rows?.[0];
+    if (!question) throw new Error(OFFLINE_GUIDANCE);
+    return { ...question, subject };
   }
 }

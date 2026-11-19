@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { readQueue, writeOrQueue } from "@/lib/offline";
-import { filterDeckQuestions, isNetworkError, loadOfflineData, pickByIds } from "@/lib/offline-data";
+import { isNetworkError, offlineDecks, offlineDeckQuestions, offlineQuestionsByIds, OFFLINE_GUIDANCE, isOffline, networkRead } from "@/lib/offline-data";
 
 export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number };
 export type Question = {
@@ -21,7 +21,7 @@ export const TIMERS = [
 
 export async function fetchDecks(): Promise<Deck[]> {
   try {
-    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Deck[] = [];
     for (let from = 0; ; from += 1000) {
       const { data, error } = await timed(supabase
@@ -35,23 +35,22 @@ export async function fetchDecks(): Promise<Deck[]> {
     }
     return out;
   } catch (e) {
-    const offline = await loadOfflineData();
-    if (offline) return offline.decks;
+    const offline = await offlineDecks();
+    if (offline) return offline;
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     throw e;
   }
 }
 
 /** Give up on a slow/hung network call after 8s so the offline copy can take over. */
-function timed<T>(p: PromiseLike<T>, ms = 8000): Promise<T> {
-  return Promise.race([Promise.resolve(p), new Promise<T>((_, rej) => setTimeout(() => rej(new TypeError("Network timeout")), ms))]);
-}
+const timed = networkRead;
 
 const COLS = "id, deck_path, stem, options, answer, explanation";
 
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
   try {
-    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Question[] = [];
     for (let from = 0; ; from += 1000) {
       const { data, error } = await timed(supabase
@@ -67,8 +66,9 @@ export async function fetchDeckQuestions(path: string): Promise<Question[]> {
     }
     return out;
   } catch (e) {
-    const offline = await loadOfflineData();
-    if (offline) return filterDeckQuestions(offline.questions, path);
+    const offline = await offlineDeckQuestions(path);
+    if (offline) return offline;
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     throw e;
   }
 }
@@ -77,9 +77,8 @@ export async function fetchBookmarkedQuestions(): Promise<Question[]> {
   return fetchQuestionsByIds([...(await fetchBookmarkIds())]);
 }
 
-export async function fetchBookmarkIds(): Promise<Set<number>> {
-  const { data: session } = await supabase.auth.getSession();
-  const userId = session.session?.user.id;
+export async function fetchBookmarkIds(knownUserId?: string): Promise<Set<number>> {
+  const userId = knownUserId ?? (await supabase.auth.getSession()).data.session?.user.id;
   if (!userId) return new Set();
   const key = `qb_bookmarks:${userId}`;
   const ids = new Set<number>();
@@ -155,7 +154,7 @@ function quote(s: string) {
 /** Fetch questions by id, keeping the given order. */
 export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
   try {
-    if (typeof navigator !== "undefined" && !navigator.onLine) throw new TypeError("Offline");
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const map = new Map<number, Question>();
     for (let i = 0; i < ids.length; i += 200) {
       const { data, error } = await timed(supabase.from("questions").select(COLS).in("id", ids.slice(i, i + 200)));
@@ -164,8 +163,9 @@ export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
     }
     return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
   } catch (e) {
-    const offline = await loadOfflineData();
-    if (offline) return pickByIds(offline.questions, ids);
+    const offline = await offlineQuestionsByIds(ids);
+    if (offline) return offline;
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     throw e;
   }
 }

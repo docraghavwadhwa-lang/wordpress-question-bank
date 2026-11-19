@@ -1,6 +1,6 @@
 import { writeOrQueue } from "@/lib/offline";
 import { supabase } from "@/integrations/supabase/client";
-import { answerableById, isNetworkError, loadOfflineData } from "@/lib/offline-data";
+import { isOffline, networkRead, offlineQuestionIds, offlineQuestionsByIds, OFFLINE_GUIDANCE } from "@/lib/offline-data";
 import { hash } from "./daily";
 import type { Question } from "./qbank";
 
@@ -10,33 +10,33 @@ export const BLITZ_TIMER = 60;
 /** Same 10 questions for everyone on a given day; changes at midnight. */
 export async function fetchBlitz(key: string): Promise<Question[]> {
   try {
-    const { count, error } = await supabase.from("questions").select("id", { count: "exact", head: true }).not("answer", "is", null);
+    if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
+    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).not("answer", "is", null));
     if (error) throw error;
     const n = Math.max(1, count ?? 1);
     const offsets = new Set<number>();
     for (let k = 0; offsets.size < Math.min(BLITZ_SIZE, n); k++) offsets.add(hash(`${key}blitz${k}`) % n);
     const rows = await Promise.all(
       [...offsets].map(async (o) => {
-        const { data, error: e } = await supabase
+        const { data, error: e } = await networkRead(supabase
           .from("questions")
           .select("id, deck_path, stem, options, answer, explanation")
           .not("answer", "is", null)
           .order("id")
           .range(o, o)
-          .single();
+          .single());
         if (e) throw e;
         return data as unknown as Question;
       }),
     );
     return rows;
   } catch (e) {
-    const offline = isNetworkError(e) ? await loadOfflineData() : null;
-    if (!offline) throw e;
-    const pool = answerableById(offline.questions);
-    const n = Math.max(1, pool.length);
+    const ids = await offlineQuestionIds();
+    if (!ids?.length) { if (isOffline()) throw new Error(OFFLINE_GUIDANCE); throw e; }
     const offsets = new Set<number>();
-    for (let k = 0; offsets.size < Math.min(BLITZ_SIZE, n); k++) offsets.add(hash(`${key}blitz${k}`) % n);
-    return [...offsets].map((o) => pool[o]!);
+    for (let k = 0; offsets.size < Math.min(BLITZ_SIZE, ids.length); k++) offsets.add(hash(`${key}blitz${k}`) % ids.length);
+    const selected = [...offsets].flatMap(o => ids[o] === undefined ? [] : [ids[o]]);
+    return await offlineQuestionsByIds(selected) ?? [];
   }
 }
 

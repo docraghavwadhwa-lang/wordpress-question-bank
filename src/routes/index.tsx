@@ -21,6 +21,7 @@ import { OfflineDownload } from "@/components/qbank/OfflineDownload";
 import { Bookmarks } from "@/components/qbank/Bookmarks";
 import { fetchQuizReviews, latestReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
 import { toast } from "sonner";
+import { offlineErrorMessage } from "@/lib/offline-data";
 
 function Landing() {
   return (
@@ -113,7 +114,7 @@ function Index() {
   }
 
   async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress, quizKey = title, reviewChoices?: Record<string, string | null>) {
-    const marks = user ? await fetchBookmarkIds() : new Set<number>();
+    const marks = user ? await fetchBookmarkIds(user.id) : new Set<number>();
     if (mode === "practice") {
       saveSession({ title, quizKey, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 }, choices: initial?.choices ?? {} });
     }
@@ -133,8 +134,8 @@ function Index() {
       setSavedTimer(timer);
       await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, pick.path ?? `${pick.kind}:${pick.subtitle ?? pick.title}`);
       setPick(null);
-    } catch {
-      setMessage("Couldn't open these questions. Please try again.");
+    } catch (error) {
+      setMessage(offlineErrorMessage(error, "Couldn't open these questions. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -147,6 +148,8 @@ function Index() {
       const qs = await fetchQuestionsByIds(paused.ids);
       if (restart) await launch(shuffle(qs), paused.timer, paused.title, "practice", undefined, paused.quizKey ?? paused.title);
       else await launch(qs, paused.timer, paused.title, "practice", paused, paused.quizKey ?? paused.title);
+    } catch (error) {
+      toast.error(offlineErrorMessage(error, "Couldn't resume these questions. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -156,6 +159,8 @@ function Index() {
     setLoading(true);
     try {
       await launch(await fetchBlitz(day), BLITZ_TIMER, "Daily Blitz", "blitz");
+    } catch (error) {
+      toast.error(offlineErrorMessage(error, "Couldn't open Daily Blitz. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -172,7 +177,7 @@ function Index() {
       const qs = await fetchQuestionsByIds(row.question_ids);
       if (qs.length !== row.question_ids.length) throw new Error("Questions unavailable");
       await launch(qs, 0, row.title, "review", undefined, row.quiz_key, row.choices);
-    } catch { toast.error("Couldn't open this review. Please try again."); }
+    } catch (error) { toast.error(offlineErrorMessage(error, "Couldn't open this review. Please try again.")); }
     finally { setLoading(false); }
   }
 
@@ -233,7 +238,7 @@ function Index() {
               )}
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
-            {decks.error && <p className="text-destructive">Couldn't load subjects. Please refresh.</p>}
+            {decks.error && <p className="text-destructive">{offlineErrorMessage(decks.error, "Couldn't load subjects. Please refresh.")}</p>}
             {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
           </>
         ) : (

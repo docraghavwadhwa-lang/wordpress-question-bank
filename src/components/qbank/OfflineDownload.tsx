@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CloudDownload, RefreshCw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { downloadAllQuestions, loadOfflineData } from "@/lib/offline-data";
+import { downloadAllQuestions, loadOfflineSummary } from "@/lib/offline-data";
 
 /** One-tap download of the whole question bank so the app works fully offline. */
 export function OfflineDownload() {
@@ -12,10 +12,10 @@ export function OfflineDownload() {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   useEffect(() => {
-    void loadOfflineData().then((d) => {
+    void loadOfflineSummary().then((d) => {
       if (d) {
         setSavedAt(d.savedAt);
-        setCount(d.questions.length);
+        setCount(d.count);
       }
     });
   }, []);
@@ -26,8 +26,8 @@ export function OfflineDownload() {
     try {
       const d = await downloadAllQuestions((done, total) => setProgress({ done, total }));
       setSavedAt(d.savedAt);
-      setCount(d.questions.length);
-      toast.success(`Saved ${d.questions.length.toLocaleString()} questions — the whole app now works offline`);
+      setCount(d.count);
+      toast.success(`Saved ${d.count.toLocaleString()} questions — questions are ready for offline practice`);
     } catch {
       toast.error("Download failed — check your internet and try again");
     } finally {
