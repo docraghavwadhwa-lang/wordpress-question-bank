@@ -20,6 +20,8 @@ export const TIMERS = [
 ];
 
 export async function fetchDecks(): Promise<Deck[]> {
+  const local = await offlineDecks().catch(() => null);
+  if (local?.length) return local;
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Deck[] = [];
@@ -49,6 +51,8 @@ const COLS = "id, deck_path, stem, options, answer, explanation";
 
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
+  const local = await offlineDeckQuestions(path).catch(() => null);
+  if (local?.length) return local;
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Question[] = [];
@@ -153,6 +157,11 @@ function quote(s: string) {
 
 /** Fetch questions by id, keeping the given order. */
 export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
+  const local = await offlineQuestionsByIds(ids).catch(() => null);
+  if (local && ids.length && local.length === ids.length) {
+    const map = new Map(local.map((q) => [Number(q.id), q]));
+    return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
+  }
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const map = new Map<number, Question>();
