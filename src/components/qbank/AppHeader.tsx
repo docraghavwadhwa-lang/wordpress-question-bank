@@ -42,7 +42,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    void navigate({ to: "/auth", replace: true });
+    void navigate({ to: "/", replace: true });
   }
 
   return (
@@ -51,8 +51,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       <div className="flex min-w-0 items-center gap-3">
       <img src={appMark.url} alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-xl object-cover" />
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-accent">Medical Q-Bank</p>
-        <h1 className="mt-1 truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
+        <h1 className="truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
@@ -75,7 +74,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       <div className={`mx-auto grid max-w-5xl items-center gap-2 px-4 py-2 ${isApp ? "grid-cols-[1fr_auto_1fr]" : "grid-cols-[minmax(0,1fr)_auto]"}`}>
         {isApp && <span />}
         <Link to="/" onClick={onHome} className={`flex min-w-0 items-center gap-2.5 ${isApp ? "justify-center" : "text-left"}`}>
-          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className="h-auto w-40 max-w-full object-contain sm:w-48" />
+          <img src="/icon-512.png" alt="Elixir by Nirmaya Care" width={512} height={512} className="h-11 w-11 rounded-xl object-cover" />
         </Link>
         <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-3">
         {!isApp && (
