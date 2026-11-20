@@ -71,7 +71,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
-        <Button asChild size="icon" variant="outline"><a href={HELP_PHONE_TEL} aria-label={`Call help line ${HELP_PHONE_DISPLAY}`} title={`Call help line ${HELP_PHONE_DISPLAY}`}><Phone /></a></Button>
         <Button asChild size="icon" variant="outline"><Link to="/plans" aria-label="Pro subscription plans" title="Pro subscription plans"><Crown /></Link></Button>
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
