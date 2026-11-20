@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Replace student-added colleges with the supplied 861-college, state-wise directory; verify selection and disable shared-directory contributions.
 - [x] Add first-sign-in course → college details → phone setup, growing college directory and persistence tests; isolated desktop/mobile flow checked. Real Google sign-in and saved-details readback remain unverified with external authentication.
 - [x] Prepare team product report (PDF and editable Word) and written demo walkthrough; all 19 rendered pages checked, walkthrough overflow fixed. No recording supplied; signed-in/device demonstration remains a presenter task.
 - [x] Replace app logo bar with a compact personal study dashboard and revision tools; reduce website logo size.

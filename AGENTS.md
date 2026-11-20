@@ -36,4 +36,4 @@
 - Android launch branding uses a bundled, aspect-preserving native overlay dismissed by the home page when session and deck loading finish; never add a branding timer or delay real module loading.
 - Native screens omit the website logo bar; Home uses a compact personal study toolbar while website branding remains unchanged.
 - First-sign-in setup is gated centrally using a persisted profile completion timestamp and a per-user offline completion flag; existing profiles are grandfathered so returning students are not interrupted.
-- College names are searchable shared data, never sourced by exposing private profiles; an owner-scoped, validated invoker RPC saves onboarding and contributes deduplicated colleges atomically.
+- Onboarding college choices come from the bundled supplied directory, filtered by state; the owner-scoped invoker RPC saves profiles without contributing colleges or exposing private profiles.
