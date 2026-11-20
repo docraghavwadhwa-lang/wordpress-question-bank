@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema } from "./subscriptions";
+import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId } from "./subscriptions";
 describe("subscription rules", () => {
+  it("uses the supplied manual UPI payment destination", () => { expect(manualPaymentUpiId).toBe("docraghavwadhwa-1@okicici"); });
   it("makes 10% of each subject free, rounded down to whole questions", () => { expect(freeQuestionCount(340)).toBe(34); expect(freeQuestionCount(1072)).toBe(107); });
   it("applies a generated percentage coupon", () => { expect(discountedPrice(149900,20)).toBe(119920); });
   it("charges the non-crossed-out offer price less the coupon", () => { expect(discountedPrice(399900,10)).toBe(359910); expect(discountedPrice(599900,0)).toBe(599900); });

@@ -1,6 +1,6 @@
 # Tasks
 - [x] Show original crossed-out prices and offer prices; use offer price minus valid coupon as the final payable amount.
-- [ ] Add manual UPI payment instructions — waiting on the user's UPI ID; Razorpay deferred at user request.
+- [x] Add the supplied manual UPI payment destination to plan instructions; Razorpay deferred and access still requires admin verification.
 - [x] Add subject-scoped subscription access, Pro plans, admin payment approval and coupon controls with profile validity dates. Tests and public plans checked; authenticated approval/readback remains unverified with external Google authentication.
 - [x] Replace student-added colleges with the supplied 861-college, state-wise directory; 11 tests passed and phone-sized selection checked. Directory contributions disabled; real authenticated save remains unverified with external Google authentication.
 - [x] Add first-sign-in course → college details → phone setup, growing college directory and persistence tests; isolated desktop/mobile flow checked. Real Google sign-in and saved-details readback remain unverified with external authentication.
