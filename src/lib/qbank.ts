@@ -51,7 +51,7 @@ const COLS = "id, deck_path, stem, options, answer, explanation";
 
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
-  const local = await offlineDeckQuestions(path).catch(() => null);
+  const local = isOffline() ? await offlineDeckQuestions(path).catch(() => null) : null;
   if (local?.length) return local;
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
@@ -70,7 +70,7 @@ export async function fetchDeckQuestions(path: string): Promise<Question[]> {
     }
     return out;
   } catch (e) {
-    const offline = await offlineDeckQuestions(path);
+    const offline = isNetworkError(e) ? await offlineDeckQuestions(path) : null;
     if (offline) return offline;
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     throw e;
@@ -157,7 +157,7 @@ function quote(s: string) {
 
 /** Fetch questions by id, keeping the given order. */
 export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
-  const local = await offlineQuestionsByIds(ids).catch(() => null);
+  const local = isOffline() ? await offlineQuestionsByIds(ids).catch(() => null) : null;
   if (local && ids.length && local.length === ids.length) {
     const map = new Map(local.map((q) => [Number(q.id), q]));
     return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
@@ -172,7 +172,7 @@ export async function fetchQuestionsByIds(ids: number[]): Promise<Question[]> {
     }
     return ids.map((id) => map.get(id)).filter(Boolean) as Question[];
   } catch (e) {
-    const offline = await offlineQuestionsByIds(ids);
+    const offline = isNetworkError(e) ? await offlineQuestionsByIds(ids) : null;
     if (offline) return offline;
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     throw e;

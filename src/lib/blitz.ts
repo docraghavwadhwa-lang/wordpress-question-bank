@@ -11,7 +11,7 @@ export const BLITZ_TIMER = 60;
 export async function fetchBlitz(key: string): Promise<Question[]> {
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
-    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).not("answer", "is", null));
+    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).not("answer", "is", null).eq("is_free", true));
     if (error) throw error;
     const n = Math.max(1, count ?? 1);
     const offsets = new Set<number>();
@@ -22,6 +22,7 @@ export async function fetchBlitz(key: string): Promise<Question[]> {
           .from("questions")
           .select("id, deck_path, stem, options, answer, explanation")
           .not("answer", "is", null)
+          .eq("is_free", true)
           .order("id")
           .range(o, o)
           .single());

@@ -48,10 +48,10 @@ export default defineConfig({
               options: { cacheName: "qb-images", expiration: { maxEntries: 3000, maxAgeSeconds: 60 * 60 * 24 * 180 } },
             },
             {
-              // Questions, decks and the user's own data: fresh when online, last copy when offline.
-              urlPattern: ({ url, request }) => request.method === "GET" && url.hostname.endsWith(".supabase.co") && url.pathname.startsWith("/rest/v1/"),
+              // Only public deck metadata is shared-cache safe; subscription data and questions are never cached here.
+              urlPattern: ({ url, request }) => request.method === "GET" && url.hostname.endsWith(".supabase.co") && url.pathname === "/rest/v1/decks",
               handler: "NetworkFirst",
-              options: { cacheName: "qb-data", networkTimeoutSeconds: 5, expiration: { maxEntries: 2000, maxAgeSeconds: 60 * 60 * 24 * 60 } },
+              options: { cacheName: "qb-decks-v2", networkTimeoutSeconds: 5, expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 60 } },
             },
             {
               urlPattern: ({ url }) => url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com",

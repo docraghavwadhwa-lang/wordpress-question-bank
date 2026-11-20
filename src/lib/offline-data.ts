@@ -2,13 +2,13 @@ import { openDB, type DBSchema } from "idb";
 import { supabase } from "@/integrations/supabase/client";
 import type { Deck, Question } from "@/lib/qbank";
 
-export type StoredQuestion = Question & { subject: string; sort_key?: string };
+export type StoredQuestion = Question & { subject: string; sort_key?: string; is_free?: boolean };
 export type OfflineData = { decks: Deck[]; questions: StoredQuestion[]; savedAt: string };
-export type OfflineSummary = { savedAt: string; count: number; generation: string };
-type QuestionRow = StoredQuestion & { generation: string; answerable: number };
+export type OfflineSummary = { savedAt: string; count: number; generation: string; owner?: string; paidUntil?: string };
+type QuestionRow = StoredQuestion & { generation: string; answerable: number; free: number };
 type DeckRow = Deck & { generation: string };
 interface BankDB extends DBSchema {
-  questions: { key: [string, number]; value: QuestionRow; indexes: { deck: [string, string]; subject: [string, string, number]; answerable: [string, number, number] } };
+  questions: { key: [string, number]; value: QuestionRow; indexes: { deck: [string, string]; subject: [string, string, number]; answerable: [string, number, number]; free: [string, number, number] } };
   decks: { key: [string, string]; value: DeckRow; indexes: { generation: string } };
   meta: { key: string; value: OfflineSummary };
 }
@@ -20,12 +20,13 @@ export function isOffline() { return typeof navigator !== "undefined" && !naviga
 export function isNetworkError(e: unknown): boolean { return e instanceof TypeError || isOffline(); }
 
 function database() {
-  return openDB<BankDB>("qb-bank", 1, {
+  return openDB<BankDB>("qb-bank-subscriptions", 1, {
     upgrade(db) {
       const q = db.createObjectStore("questions", { keyPath: ["generation", "id"] });
       q.createIndex("deck", ["generation", "deck_path"]);
       q.createIndex("subject", ["generation", "subject", "id"]);
       q.createIndex("answerable", ["generation", "answerable", "id"]);
+      q.createIndex("free", ["generation", "free", "id"]);
       db.createObjectStore("decks", { keyPath: ["generation", "path"] }).createIndex("generation", "generation");
       db.createObjectStore("meta");
     },
@@ -43,7 +44,7 @@ export async function saveOfflineData(data: OfflineData) {
   try {
     for (let i = 0; i < data.questions.length; i += 1000) {
       const tx = db.transaction("questions", "readwrite");
-      for (const q of data.questions.slice(i, i + 1000)) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1 });
+      for (const q of data.questions.slice(i, i + 1000)) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1, free: q.is_free ? 1 : 0 });
       await tx.done;
     }
     const tx = db.transaction(["decks", "meta"], "readwrite");
@@ -67,6 +68,15 @@ async function pruneExcept(generation?: string) {
 }
 export async function clearOfflineData() { await pruneExcept(); }
 
+async function paidOfflineAccess(active: OfflineSummary) {
+  if (!active.owner || !active.paidUntil || Date.parse(active.paidUntil) <= Date.now()) return false;
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user.id === active.owner;
+}
+async function allowedRows(rows: StoredQuestion[], active: OfflineSummary) {
+  return await paidOfflineAccess(active) ? rows : rows.filter(q => q.is_free === true);
+}
+
 /** Reads only indexed chapter rows, not the entire bank. */
 export async function offlineDeckQuestions(path: string): Promise<StoredQuestion[] | null> {
   const active = await loadOfflineSummary();
@@ -79,7 +89,7 @@ export async function offlineDeckQuestions(path: string): Promise<StoredQuestion
       index.getAll([active.generation, path]),
       index.getAll(IDBKeyRange.bound([active.generation, path + " > "], [active.generation, path + " > \uffff"])),
     ]);
-    return [...exact, ...children].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? "") || a.id - b.id);
+    return allowedRows([...exact, ...children].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? "") || a.id - b.id), active);
   } finally { db.close(); }
 }
 export async function offlineDecks(): Promise<Deck[] | null> {
@@ -94,7 +104,7 @@ export async function offlineQuestionsByIds(ids: number[]): Promise<StoredQuesti
   try {
     const tx = db.transaction("questions");
     const rows = await Promise.all(ids.map(id => tx.store.get([active.generation, id])));
-    return rows.filter((q): q is QuestionRow => q !== undefined);
+    return allowedRows(rows.filter((q): q is QuestionRow => q !== undefined), active);
   } finally { db.close(); }
 }
 /** Only keys are read for deterministic daily selection; HTML stays on disk. */
@@ -105,7 +115,8 @@ export async function offlineQuestionIds(subject?: string): Promise<number[] | n
     const keys = subject === undefined
       ? await db.getAllKeysFromIndex("questions", "answerable", IDBKeyRange.bound([active.generation, 1, 0], [active.generation, 1, Number.MAX_SAFE_INTEGER]))
       : await db.getAllKeysFromIndex("questions", "subject", IDBKeyRange.bound([active.generation, subject, 0], [active.generation, subject, Number.MAX_SAFE_INTEGER]));
-    return keys.map(key => key[1]);
+    const free = new Set((await db.getAllKeysFromIndex("questions", "free", IDBKeyRange.bound([active.generation, 1, 0], [active.generation, 1, Number.MAX_SAFE_INTEGER]))).map(key => key[1]));
+    return keys.map(key => key[1]).filter(id => free.has(id));
   } finally { db.close(); }
 }
 
@@ -135,6 +146,10 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
   const generation = crypto.randomUUID();
   const db = await database().catch(error => { downloading = false; throw error; });
   try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const subscriptions = session ? await supabase.from("subscriptions").select("ends_at").eq("user_id", session.user.id).eq("revoked", false).lte("starts_at", new Date().toISOString()).gt("ends_at", new Date().toISOString()).order("ends_at") : null;
+    if (subscriptions?.error) throw subscriptions.error;
+    const paidUntil = subscriptions?.data?.[0]?.ends_at;
     if (typeof navigator.storage?.persist === "function") await navigator.storage.persist().catch(() => false);
     const active = await loadOfflineSummary();
     await pruneExcept(active?.generation);
@@ -151,17 +166,17 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
     const total = counted.count ?? 0;
     let count = 0;
     for (let from = 0; ; from += 1000) {
-      const data = await retryRead(signal => supabase.from("questions").select("id, deck_path, subject, stem, options, answer, explanation, sort_key").order("sort_key").order("id").range(from, from + 999).abortSignal(signal));
+      const data = await retryRead(signal => supabase.from("questions").select("id, deck_path, subject, stem, options, answer, explanation, sort_key, is_free").order("sort_key").order("id").range(from, from + 999).abortSignal(signal));
       const rows = (data ?? []) as unknown as StoredQuestion[];
       const tx = db.transaction("questions", "readwrite");
-      for (const q of rows) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1 });
+      for (const q of rows) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1, free: q.is_free ? 1 : 0 });
       await tx.done;
       count += rows.length;
       onProgress?.(count, total || count);
       if (rows.length < 1000) break;
     }
     if (!count || (total && count !== total) || await db.count("questions", IDBKeyRange.bound([generation, 0], [generation, Number.MAX_SAFE_INTEGER])) !== count) throw new Error("Incomplete download — please try again");
-    const summary = { generation, count, savedAt: new Date().toISOString() };
+    const summary = { generation, count, savedAt: new Date().toISOString(), ...(session ? { owner: session.user.id } : {}), ...(paidUntil ? { paidUntil } : {}) };
     await db.put("meta", summary, "active");
     await pruneExcept(generation);
     // The old large Cache API snapshot is deliberately not parsed or migrated.

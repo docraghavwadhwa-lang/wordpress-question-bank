@@ -1,0 +1,31 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Crown, Check, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { AppHeader } from "@/components/qbank/AppHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, dateLabel } from "@/lib/subscriptions";
+
+export const Route = createFileRoute("/plans")({ head: () => ({ meta: [{ title: "Pro plans | Elixir" }, { name: "description", content: "Choose foundation, clinical or whole-bank medical MCQ access with Elixir Pro." }, { property: "og:title", content: "Elixir Pro plans" }, { property: "og:description", content: "Foundation, clinical and complete question-bank subscriptions." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: PlansPage });
+function PlansPage() {
+  const { user } = useAuth(); const qc = useQueryClient();
+  const plans = useQuery({ queryKey: ["plans"], queryFn: fetchPlans });
+  const payments = useQuery({ queryKey: ["payments", user?.id], queryFn: fetchPayments, enabled: !!user, refetchInterval: 30000 });
+  const [months, setMonths] = useState(12); const [chosen, setChosen] = useState<string | null>(null);
+  const [coupon, setCoupon] = useState(""); const [reference, setReference] = useState(""); const [busy, setBusy] = useState(false);
+  const [quote, setQuote] = useState<{ total_paise: number; discount_percent: number } | null>(null);
+  async function applyCoupon() { if (!chosen) return; setBusy(true); try { setQuote(await quotePlan(chosen, months, coupon)); } catch(e) { setQuote(null); toast.error(e instanceof Error ? e.message : "Coupon unavailable"); } finally { setBusy(false); } }
+  async function submit() { if (!chosen) return; setBusy(true); try { await submitPayment(chosen, months, coupon, reference); toast.success("Payment reference sent for verification"); setChosen(null); setReference(""); await qc.invalidateQueries({ queryKey: ["payments"] }); } catch(e) { toast.error(e instanceof Error ? e.message : "Couldn't submit payment"); } finally { setBusy(false); } }
+  return <div className="min-h-screen"><AppHeader /><main className="mx-auto max-w-5xl px-4 py-8 sm:py-12"><Button asChild variant="ghost" className="mb-5"><Link to="/"><ArrowLeft />Home</Link></Button><p className="mb-2 flex items-center gap-2 text-sm font-semibold text-accent"><Crown className="h-5 w-5" />ELIXIR PRO</p><h1 className="text-4xl text-primary sm:text-5xl">Your next chapter</h1><p className="mt-3 text-muted-foreground">10% of every subject is free. Unlock the rest with your chosen plan.</p>
+    <Tabs value={String(months)} onValueChange={v => { setMonths(Number(v)); setQuote(null); }} className="my-6"><TabsList><TabsTrigger value="12">1 year</TabsTrigger><TabsTrigger value="24">2 years</TabsTrigger></TabsList></Tabs>
+    {plans.error && <p role="alert" className="text-destructive">Couldn't load plans. Please reconnect.</p>}{plans.isPending && <p>Loading plans…</p>}
+    <div className="grid gap-4 md:grid-cols-3">{plans.data?.map(p => <article key={p.id} className="flex flex-col rounded-[8px] border bg-card p-6"><h2 className="text-2xl text-primary">{p.name}</h2><p className="mt-2 min-h-12 text-sm text-muted-foreground">{p.description}</p><p className="mt-5 text-3xl font-semibold text-primary">{money(months === 12 ? p.price_year : p.price_two_year)}</p><p className="text-xs text-muted-foreground">{months} months · manually approved access</p><p className="my-5 flex items-center gap-2 text-sm"><Check className="h-4 w-4 text-success" />Questions, answers & explanations</p><Button variant={p.id === "panacea" ? "default" : "outline"} onClick={() => { setChosen(p.id); setQuote(null); setCoupon(""); }}>Choose plan</Button></article>)}</div>
+    {chosen && <section className="mt-8 border-t pt-6"><h2 className="text-2xl text-primary">{plans.data?.find(p => p.id===chosen)?.name} · {months} months</h2>{!user ? <Button asChild className="mt-4"><Link to="/auth">Sign in with Google</Link></Button> : <><p className="mt-3 text-sm text-muted-foreground">Online checkout is not available yet. Already paid? Submit your transaction reference for admin verification.</p><div className="mt-5 flex max-w-md gap-2"><Input aria-label="Coupon code" placeholder="Coupon code" value={coupon} onChange={e => { setCoupon(e.target.value.toUpperCase()); setQuote(null); }} /><Button variant="outline" disabled={busy} onClick={applyCoupon}>Apply</Button></div>{quote && <p className="mt-2 text-sm text-success">{quote.discount_percent}% discount · {money(quote.total_paise)}</p>}<div className="mt-5 max-w-md space-y-2"><Label htmlFor="payment-reference">Payment reference</Label><Input id="payment-reference" value={reference} onChange={e => setReference(e.target.value)} maxLength={150} /><Button disabled={busy || reference.trim().length<3} onClick={submit}>{busy ? "Submitting…" : "Submit for verification"}</Button></div></>}</section>}
+    {!!payments.data?.length && <section className="mt-8 border-t pt-6"><h2 className="text-2xl text-primary">Payment updates</h2><div className="mt-3 divide-y">{payments.data.map(p => <div key={p.id} className="flex flex-wrap justify-between gap-2 py-3 text-sm"><span className="capitalize">{p.plan_id} · {money(p.total_paise)} · {dateLabel(p.created_at)}</span><span className={p.status==="approved" ? "text-success" : "text-muted-foreground"}>{p.status === "pending" ? "Awaiting payment verification" : p.status}</span></div>)}</div></section>}
+  </main></div>;
+}

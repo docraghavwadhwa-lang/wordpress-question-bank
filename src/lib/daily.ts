@@ -43,13 +43,14 @@ export async function fetchQuestionOfDay(key: string): Promise<Question & { subj
   const subject = subjectForDay(key);
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
-    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject));
+    const { count, error } = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).eq("subject", subject).eq("is_free", true));
     if (error) throw error;
     const n = hash(key + "q") % Math.max(1, count ?? 1);
     const { data, error: e2 } = await networkRead(supabase
       .from("questions")
       .select("id, deck_path, stem, options, answer, explanation")
       .eq("subject", subject)
+      .eq("is_free", true)
       .order("id")
       .range(n, n)
       .single());

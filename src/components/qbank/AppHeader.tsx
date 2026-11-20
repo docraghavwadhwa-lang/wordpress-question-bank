@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, Flame, LogOut, Smartphone, UserRound } from "lucide-react";
+import { BarChart3, Flame, LogOut, Smartphone, UserRound, Crown, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
 import { BottomNav } from "@/components/qbank/BottomNav";
+import { fetchAccess } from "@/lib/subscriptions";
+import { Button } from "@/components/ui/button";
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
   const initials = (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -31,6 +33,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => user ? fetchProfile(user.id) : Promise.resolve(null), enabled: !!user });
+  const access = useQuery({ queryKey: ["access", user?.id], queryFn: fetchAccess, enabled: !!user });
   const isApp = isNativeApp();
   const name = profile.data?.full_name || user?.email;
   const loc = useLocation();
@@ -54,6 +57,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
+        <Button asChild size="sm" variant="outline"><Link to="/plans"><Crown />Pro</Link></Button>
         <Link to="/stats" aria-label="Your streak and progress" title="Your streak and progress" className="grid h-10 w-10 place-items-center rounded-full border bg-card text-gold"><Flame className="h-5 w-5" /></Link>
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
@@ -63,6 +67,8 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
             <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
+            {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
           </DropdownMenuContent>
@@ -83,6 +89,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         )}
         {user ? (
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+            <Button asChild size="sm" variant="secondary"><Link to="/plans"><Crown />Pro</Link></Button>
             <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
               <BarChart3 className="h-4 w-4" /> Progress
             </Link>
@@ -95,6 +102,8 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}><BarChart3 className="h-4 w-4" /> Progress & streak</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
+                {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>

@@ -11,11 +11,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { fetchProfile, photoToDataUrl, updateProfile, type Profile } from "@/lib/profile";
 import { TARGET_DAYS, TIERS } from "@/lib/streak";
 import { cn } from "@/lib/utils";
+import { SubscriptionStatus } from "@/components/qbank/SubscriptionStatus";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "Elixir" },
+      { title: "Your profile | Elixir" },
       { name: "description", content: "Edit your photo, personal details and daily streak goal." },
       { property: "og:title", content: "Your profile | Elixir by Nirmaya Care" },
       { property: "og:description", content: "Edit your photo, personal details and daily streak goal." },
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
 function ProfilePage() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => fetchProfile(user!.id), enabled: !!user });
+  const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => user ? fetchProfile(user.id) : Promise.resolve(null), enabled: !!user });
   const [form, setForm] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
   const [daysText, setDaysText] = useState<string | null>(null);
@@ -78,6 +79,7 @@ function ProfilePage() {
       <main className="mx-auto max-w-3xl px-4 py-10">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">Account</p>
         <h1 className="text-5xl text-primary">Your <em>profile</em></h1>
+        <SubscriptionStatus />
 
         <section className="mt-8 rounded-2xl border bg-card p-6">
           <div className="flex flex-wrap items-center gap-5">
