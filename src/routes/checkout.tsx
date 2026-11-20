@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { trackPurchase } from "@/lib/admin";
 import { startRazorpayCheckout, confirmRazorpayCheckout } from "@/lib/razorpay.functions";
 import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, manualPaymentUpiId, DEFAULT_COUPON, checkoutCoupon } from "@/lib/subscriptions";
 
@@ -38,6 +39,7 @@ function CheckoutPage() {
   const [step, setStep] = useState<"coupon" | "payment" | "complete">("coupon");
   const [quote, setQuote] = useState<{ total_paise: number; discount_percent: number } | null>(null);
   const [busy, setBusy] = useState(false); const [reference, setReference] = useState("");
+  useEffect(() => { if (user && step !== "complete") void trackPurchase(step === "coupon" ? "coupon_page" : "payment_page", planId, months).catch(() => {}); }, [user?.id, step, planId, months]);
   const startFn = useServerFn(startRazorpayCheckout); const confirmFn = useServerFn(confirmRazorpayCheckout);
   useEffect(() => {
     if (!user) return;
@@ -71,13 +73,13 @@ function CheckoutPage() {
         catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't check payment"); }
         finally { setBusy(false); }
       };
-      const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: "INR", name: "Elixir by Nirmaya Care", prefill: { email: order.email }, handler: () => void confirm(), modal: { ondismiss: () => void confirm() } });
-      checkout.on("payment.failed", response => { toast.error(response.error?.description ?? "Payment failed"); setBusy(false); }); checkout.open();
+      const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: "INR", name: "Elixir by Nirmaya Care", prefill: { email: order.email }, handler: () => void confirm(), modal: { ondismiss: () => { void trackPurchase("payment_cancelled", plan.id, months).catch(() => {}); void confirm(); } } });
+      checkout.on("payment.failed", response => { void trackPurchase("payment_failed", plan.id, months).catch(() => {}); toast.error(response.error?.description ?? "Payment failed"); setBusy(false); }); checkout.open(); void trackPurchase("payment_opened", plan.id, months).catch(() => {});
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't start payment"); setBusy(false); }
   }
   async function manual() {
     if (!plan) return; setBusy(true);
-    try { await submitPayment(plan.id, months, checkoutCoupon(coupon), reference); toast.success("Payment reference sent for verification"); setReference(""); }
+    try { await submitPayment(plan.id, months, checkoutCoupon(coupon), reference); void trackPurchase("verification_pending", plan.id, months).catch(() => {}); toast.success("Payment reference sent for verification"); setReference(""); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't submit payment"); }
     finally { setBusy(false); }
   }

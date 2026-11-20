@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Crown, Check, ArrowLeft, Ticket } from "lucide-react";
 import { AppHeader } from "@/components/qbank/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/use-auth";
+import { trackPurchase } from "@/lib/admin";
 import { fetchPlans, money, DEFAULT_COUPON } from "@/lib/subscriptions";
 
 export const Route = createFileRoute("/plans")({ head: () => ({ meta: [{ title: "Pro plans | Elixir" }, { name: "description", content: "Choose foundation, clinical or whole-bank medical MCQ access with Elixir Pro." }, { property: "og:title", content: "Elixir Pro plans" }, { property: "og:description", content: "Foundation, clinical and complete question-bank subscriptions." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: PlansPage });
@@ -15,6 +17,8 @@ const PERKS: Record<string, string[]> = {
 };
 const COMMON = ["Detailed answers & explanations for every question", "Image-based questions by chapter", "Bookmarks and Mistake Vault for revision", "Practise whole subjects and sections", "Review your attempts after each Q-bank", "Daily Blitz, streaks and progress stats", "Use on Android app and website (2 devices)"];
 function PlansPage() {
+  const { user } = useAuth();
+  useEffect(() => { if (user) void trackPurchase("plans_viewed").catch(() => {}); }, [user?.id]);
   const plans = useQuery({ queryKey: ["plans"], queryFn: fetchPlans });
   const [months, setMonths] = useState<12 | 24>(12);
   return <div className="min-h-screen"><AppHeader /><main className="mx-auto max-w-5xl px-4 py-8 sm:py-12">

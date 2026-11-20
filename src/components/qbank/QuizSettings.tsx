@@ -20,9 +20,11 @@ export function QuizSettings({
   onCancel,
   onStart,
   attempts = [],
+  allowTest = true,
   onReview,
 }: {
   attempts?: { id: string; label: string }[];
+  allowTest?: boolean;
   onReview?: (id: string) => void;
   pick: Pick | null;
   initialTimer: number;
@@ -33,7 +35,8 @@ export function QuizSettings({
 }) {
   const [timer, setTimer] = useState(initialTimer);
   const [mode, setMode] = useState<"quiz" | "test">("quiz");
-  const active = MODES.find(m => m.id === mode) ?? MODES[0];
+  const effectiveMode = allowTest ? mode : "quiz";
+  const active = MODES.find(m => m.id === effectiveMode) ?? MODES[0];
   return (
     <Dialog open={!!pick} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent className="sm:max-w-md">
@@ -46,7 +49,7 @@ export function QuizSettings({
         {message?.includes("locked") && <Button asChild variant="outline"><Link to="/plans">Unlock with Pro</Link></Button>}
         {pick?.kind !== "bookmarks" && <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mode">
-            {MODES.map(m => <button key={m.id} type="button" role="radio" aria-checked={mode === m.id} onClick={() => setMode(m.id)} className={cn("flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-semibold transition-colors", mode === m.id ? "border-primary bg-secondary text-primary" : "text-foreground hover:bg-muted")}><m.icon className="h-5 w-5" />{m.label}</button>)}
+            {MODES.filter(m => allowTest || m.id !== "test").map(m => <button key={m.id} type="button" role="radio" aria-checked={effectiveMode === m.id} onClick={() => setMode(m.id)} className={cn("flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-semibold transition-colors", effectiveMode === m.id ? "border-primary bg-secondary text-primary" : "text-foreground hover:bg-muted")}><m.icon className="h-5 w-5" />{m.label}</button>)}
           </div>
           <ul className="space-y-1 rounded-xl bg-muted/60 px-4 py-3 text-xs text-muted-foreground">{active.how.map(h => <li key={h} className="flex gap-2"><span className="text-accent">•</span>{h}</li>)}</ul>
         </div>}
@@ -80,7 +83,7 @@ export function QuizSettings({
               <Button variant="outline" onClick={onCancel}>Cancel</Button>
             </>
           ) : (
-            <><Button variant="outline" onClick={onCancel}>Cancel</Button><Button disabled={loading} onClick={() => onStart(timer, false, mode === "test")}>{loading ? "Loading…" : mode === "test" ? "Start test" : "Start quiz"}</Button></>
+            <><Button variant="outline" onClick={onCancel}>Cancel</Button><Button disabled={loading} onClick={() => onStart(timer, false, effectiveMode === "test")}>{loading ? "Loading…" : effectiveMode === "test" ? "Start test" : "Start quiz"}</Button></>
           )}
         </div>
       </DialogContent>

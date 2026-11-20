@@ -1,9 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { BarChart3, House, NotebookPen } from "lucide-react";
+import { useFeatures } from "./FeatureGate";
 import { cn } from "@/lib/utils";
 
 /** Fixed bottom tab bar: Home, Q-Banks (subject list on home), Progress. */
 export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
+  const features = useFeatures();
   const { pathname, hash } = useLocation();
   const tabs = [
     { label: "Home", icon: House, to: "/", hash: "", active: pathname === "/" && hash !== "qbanks" },
@@ -14,7 +16,7 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
     <>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="mx-auto grid max-w-md grid-cols-3">
-          {tabs.map((t) => (
+          {tabs.filter(t => t.label === "Home" || features.enabled(t.label === "Progress" ? "progress" : "qbanks")).map((t) => (
             <Link
               key={t.label}
               to={t.to}

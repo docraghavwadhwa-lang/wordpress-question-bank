@@ -25,6 +25,7 @@ import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
 import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 import { fetchAccess, fetchPlanSubjects, lockedSubjects } from "@/lib/subscriptions";
+import { Feature, useFeatures } from "@/components/qbank/FeatureGate";
 import { OpeningScreen } from "@/components/qbank/OpeningScreen";
 
 function Landing() {
@@ -70,6 +71,7 @@ type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: st
 function Index() {
   const { user, ready } = useAuth();
   const qc = useQueryClient();
+  const features = useFeatures();
   const decks = useQuery({ queryKey: ["decks"], queryFn: fetchDecks, enabled: !!user });
   const stats = useQuery({ queryKey: ["stats", user?.id], queryFn: fetchStats, enabled: !!user });
   const marked = useQuery({ queryKey: ["marked", user?.id], queryFn: fetchMarked, enabled: !!user });
@@ -118,6 +120,7 @@ function Index() {
 
   async function start(timer: number, review?: boolean, test = false) {
     if (!pick) return;
+    if (!features.enabled("qbanks") || (pick.imagesOnly && !features.enabled("image_questions")) || (test && !features.enabled("test_mode")) || (pick.kind === "bookmarks" && !features.enabled("bookmarks")) || (pick.kind === "mistakes" && !features.enabled("mistake_vault"))) { setMessage("This feature is currently disabled."); return; }
     setLoading(true);
     try {
       const all = pick.ids ? await fetchQuestionsByIds(pick.ids) : pick.path ? await fetchDeckQuestions(pick.path) : [];
@@ -140,6 +143,7 @@ function Index() {
 
   async function resume(restart: boolean) {
     if (!paused) return;
+    if (!features.enabled("qbanks")) { toast.error("Q-Banks are currently disabled."); return; }
     setLoading(true);
     try {
       const qs = await fetchQuestionsByIds(paused.ids);
@@ -153,6 +157,7 @@ function Index() {
   }
 
   async function startBlitz() {
+    if (!features.enabled("daily_blitz")) return;
     setLoading(true);
     try {
       await launch(await fetchBlitz(day), BLITZ_TIMER, "Daily Blitz", "blitz");
@@ -164,6 +169,7 @@ function Index() {
   }
 
   async function openReview(row: QuizReview) {
+    if (!features.enabled("reviews")) return;
     if (!user || !latestReviews([row], user.id).length) {
       toast.error("This review has expired.");
       void reviews.refetch();
@@ -186,7 +192,7 @@ function Index() {
   const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
-  const recent = latestReviews(reviews.data ?? [], user.id, Math.max(now.getTime(), Date.now()) + 300000);
+  const recent = features.enabled("reviews") ? latestReviews(reviews.data ?? [], user.id, Math.max(now.getTime(), Date.now()) + 300000) : [];
   const locked = access.data?.admin ? new Set<string>() : lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
   return (
     <div className="min-h-screen">
@@ -201,6 +207,7 @@ function Index() {
             timer={quiz.timer}
             userId={user.id}
             bookmarks={quiz.marks}
+            bookmarksEnabled={features.enabled("bookmarks")}
             mode={quiz.mode}
             test={!!quiz.test}
             goal={streak.goal}
@@ -214,7 +221,7 @@ function Index() {
             }}
             onFinish={(r) => {
               if (quiz.mode === "practice") saveSession(null);
-              if (quiz.mode === "practice" && r.completed) {
+              if (quiz.mode === "practice" && r.completed && features.enabled("reviews")) {
                 const row: QuizReview = { id: crypto.randomUUID(), user_id: user.id, quiz_key: quiz.quizKey, title: quiz.title, question_ids: quiz.qs.map(q => q.id), choices: r.choices, score: r.score, answered: r.answered, completed_at: new Date().toISOString() };
                 qc.setQueryData<QuizReview[]>(["quiz-reviews", user.id], old => [row, ...(old ?? [])]);
                 void saveQuizReview(row).then(() => qc.invalidateQueries({ queryKey: ["quiz-reviews", user.id] })).catch(() => toast.error("Review saved on this device; online sync failed."));
@@ -222,7 +229,7 @@ function Index() {
               if (quiz.mode === "blitz")
                 void saveBlitz(user.id, day, r.score, r.seconds).then(() => qc.invalidateQueries({ queryKey: ["blitz-rank", day] }));
             }}
-            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : quiz.mode === "practice" ? <section className="mt-6 border-t pt-5"><h3 className="font-display text-xl text-primary">Review attempts</h3><p className="mt-1 text-xs text-muted-foreground">Available for 72 hours after submission</p><div className="mt-3 divide-y">{recent.filter(row => row.quiz_key === quiz.quizKey).map(row => <div key={row.id} className="py-3 text-left"><p className="text-sm font-medium text-primary">{row.title}</p><p className="mt-1 text-xs text-muted-foreground">{row.score}/{row.answered} correct · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left</p><Button className="mt-2" variant="outline" disabled={loading} onClick={() => void openReview(row)}>Review attempt</Button></div>)}</div></section> : undefined}
+            finishedSlot={!features.enabled("reviews") && quiz.mode === "practice" ? undefined : quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : quiz.mode === "practice" ? <section className="mt-6 border-t pt-5"><h3 className="font-display text-xl text-primary">Review attempts</h3><p className="mt-1 text-xs text-muted-foreground">Available for 72 hours after submission</p><div className="mt-3 divide-y">{recent.filter(row => row.quiz_key === quiz.quizKey).map(row => <div key={row.id} className="py-3 text-left"><p className="text-sm font-medium text-primary">{row.title}</p><p className="mt-1 text-xs text-muted-foreground">{row.score}/{row.answered} correct · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left</p><Button className="mt-2" variant="outline" disabled={loading} onClick={() => void openReview(row)}>Review attempt</Button></div>)}</div></section> : undefined}
             onExit={goHome}
           />
         ) : qbanks ? (
@@ -235,7 +242,7 @@ function Index() {
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
             {decks.error && <p className="text-destructive">{offlineErrorMessage(decks.error, "Couldn't load subjects. Please refresh.")}</p>}
-            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} locked={locked} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
+            {decks.data && <SubjectGrid imagesEnabled={features.enabled("image_questions")} bookmarksEnabled={features.enabled("bookmarks")} mistakesEnabled={features.enabled("mistake_vault")} decks={decks.data} marked={marked.data} locked={locked} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
           </>
         ) : (
           <>
@@ -247,7 +254,7 @@ function Index() {
                 </p>
               </div>
             )}
-            <Link to="/stats" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
+            <Feature name="progress"><Link to="/stats" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-5 py-4 transition-colors hover:border-accent/60">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-accent/15"><Flame className="h-5 w-5 text-accent" /></span>
                 <span>
@@ -258,11 +265,11 @@ function Index() {
               <span className="h-2 w-40 overflow-hidden rounded-full bg-secondary">
                 <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (100 * streak.streak.today) / streak.goal)}%` }} />
               </span>
-            </Link>
-            <div className="mb-4">
+            </Link></Feature>
+            <Feature name="daily_blitz"><div className="mb-4">
               <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
-            </div>
-            {paused && (
+            </div></Feature>
+            {paused && features.enabled("qbanks") && (
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
                 <span className="flex items-center gap-3">
                   <PlayCircle className="h-6 w-6 text-accent" />
@@ -280,25 +287,25 @@ function Index() {
             )}
             <div className="mb-12">
               <div className={isApp ? "flex flex-col" : ""}>
-              <QuestionOfTheDay />
-              {isApp && <div className="mt-3"><PushToggle /></div>}
+              <Feature name="qotd"><QuestionOfTheDay /></Feature>
+              {isApp && <Feature name="reminders"><div className="mt-3"><PushToggle /></div></Feature>}
               <div className={isApp ? "order-first mb-5" : "mt-4"}>
               {isApp && <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-xl text-primary">Revision tools</h2><Link to="/" hash="qbanks" onClick={goHome} className="text-xs font-semibold text-accent">All Q-Banks →</Link></div>}
               <div className={`grid gap-3 ${isApp ? "grid-cols-1" : "sm:grid-cols-2"}`} aria-label="Study tools">
-                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
+                <Feature name="bookmarks"><Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
                 </Button>
-                {studyTool === "bookmarks" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
-                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
+                {features.enabled("bookmarks") && studyTool === "bookmarks" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
+                </Feature><Feature name="mistake_vault"><Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
                   <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
                 </Button>
-                {studyTool === "mistakes" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
+                {features.enabled("mistake_vault") && studyTool === "mistakes" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
+              </Feature></div>
               </div>
               </div>
-              </div>
-              <OfflineDownload />
+              <Feature name="offline_downloads"><OfflineDownload /></Feature>
             </div>
             <QuoteOfTheDay />
           </>
@@ -307,6 +314,7 @@ function Index() {
 
       <QuizSettings
         key={pick?.title ?? "none"}
+        allowTest={features.enabled("test_mode")}
         pick={pick}
         initialTimer={savedTimer}
         loading={loading}

@@ -17,6 +17,9 @@ export const Route = createFileRoute("/api/public/push-qotd")({
         const day = ist.toISOString().slice(0, 10);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: flags, error: flagsError } = await supabaseAdmin.from("feature_settings").select("key,enabled").in("key", ["qotd", "reminders"]);
+        if (flagsError) return Response.json({ error: "Settings unavailable" }, { status: 503 });
+        if (flags?.some(f => !f.enabled)) return Response.json({ skipped: true });
         const { error: logErr } = await supabaseAdmin.from("push_log").insert({ day });
         if (logErr) return Response.json({ skipped: true });
 

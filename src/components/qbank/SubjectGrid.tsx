@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes"; imagesOnly?: boolean };
 type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
-export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
+export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = true, bookmarksEnabled = true, mistakesEnabled = true }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void; imagesEnabled?: boolean; bookmarksEnabled?: boolean; mistakesEnabled?: boolean }) {
   const [open, setOpen] = useState<string | null>(null);
   const [proOpen, setProOpen] = useState(false);
   const toPlans = () => setProOpen(true);
@@ -40,15 +40,15 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
         </Button>;
       })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
-    open === IMAGES ? <ImagePanel subjects={subjects} decks={decks} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} /> :
+    open === IMAGES && imagesEnabled ? <ImagePanel subjects={subjects} decks={decks} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} /> :
     (() => { const s = subjects.find((x) => x.path === open); return s
-      ? <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} />
+      ? <SubjectPanel subject={s} decks={decks} marked={marked ? { bookmarks: bookmarksEnabled ? marked.bookmarks : [], mistakes: mistakesEnabled ? marked.mistakes : [] } : undefined} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} />
       : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
         <Tile key={s.path} label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} onClick={() => { setOpen(s.path); window.scrollTo({ top: 0 }); }} />
       ))}
-      <hr className="col-span-full my-3 border-border" />
-      <Tile label="Image-based questions" icon={<ImageIcon className="h-5 w-5" strokeWidth={1.5} />} onClick={() => { setOpen(IMAGES); window.scrollTo({ top: 0 }); }} />
+      {imagesEnabled && <><hr className="col-span-full my-3 border-border" />
+      <Tile label="Image-based questions" icon={<ImageIcon className="h-5 w-5" strokeWidth={1.5} />} onClick={() => { setOpen(IMAGES); window.scrollTo({ top: 0 }); }} /></>}
     </div>; })()
     )}
     <Dialog open={proOpen} onOpenChange={setProOpen}>

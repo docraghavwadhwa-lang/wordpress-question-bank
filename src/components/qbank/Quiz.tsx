@@ -16,6 +16,7 @@ export function Quiz({
   timer,
   userId,
   bookmarks,
+  bookmarksEnabled = true,
   mode = "practice",
   goal,
   todayCount = 0,
@@ -32,6 +33,7 @@ export function Quiz({
   timer: number;
   userId: string | null;
   bookmarks: Set<number>;
+  bookmarksEnabled?: boolean;
   mode?: "practice" | "blitz" | "review";
   goal?: number;
   todayCount?: number;
@@ -169,7 +171,7 @@ export function Quiz({
   }
 
   function toggleMark() {
-    if (!userId) return;
+    if (!userId || !bookmarksEnabled) return;
     const on = !marks.has(q.id);
     const next = new Set(marks);
     if (on) next.add(q.id);
@@ -217,7 +219,7 @@ export function Quiz({
           </span>
         )}
         <span className="min-w-0 flex-1 truncate">{crumbs}</span>
-        {userId && (
+        {userId && bookmarksEnabled && (
           <button
             type="button"
             onClick={toggleMark}
