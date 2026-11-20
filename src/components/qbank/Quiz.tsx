@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { formatAverage, recordAttempt, setBookmark, type Question } from "@/lib/qbank";
 import { answerFeedback } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
+import { QuestionHtml } from "./QuestionHtml";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const LETTERS = "ABCDE";
 
@@ -52,6 +54,9 @@ export function Quiz({
   const [choices, setChoices] = useState<Record<string, string | null>>(initial?.choices ?? {});
   const [marks, setMarks] = useState(bookmarks);
   const [finished, setFinished] = useState(false);
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [revisiting, setRevisiting] = useState(false);
+  const skipped = questions.map((question, index) => ({ question, index })).filter(({ question }) => !Object.prototype.hasOwnProperty.call(choices, question.id));
   const [today, setToday] = useState(todayCount);
   const [xp, setXp] = useState<number[]>([]);
   const t0 = useRef(Date.now());
@@ -91,8 +96,18 @@ export function Quiz({
 
   /** Move on without answering; a skipped question isn't scored or recorded. */
   function skip() {
-    if (i + 1 === questions.length) finish(true);
+    if (i + 1 === questions.length || revisiting) setSubmitOpen(true);
     else setI(i + 1);
+  }
+  function complete() {
+    if (!review && mode === "practice" && skipped.length) setSubmitOpen(true);
+    else finish(true);
+  }
+  function next() {
+    if (revisiting) {
+      const remaining = skipped.find(row => row.index !== i);
+      if (remaining) setI(remaining.index); else complete();
+    } else if (i + 1 === questions.length) complete(); else setI(i + 1);
   }
 
   function answer(letter: string | null) {
@@ -188,16 +203,7 @@ export function Quiz({
           />
         </div>
       )}
-      {goal && !review && mode !== "blitz" && (
-        <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="shrink-0">Today {Math.min(today, goal)}/{goal}</span>
-          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-secondary">
-            <span className="block h-full rounded-full bg-success transition-all duration-300 ease-out" style={{ width: `${Math.min(100, (100 * today) / goal)}%` }} />
-          </span>
-        </div>
-      )}
-
-      <div className="qb-html mt-5 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: q.stem }} />
+      <QuestionHtml html={q.stem} className="mt-5 text-lg leading-relaxed" />
 
       <div className="mt-6 space-y-3">
         {q.options.length ? (
@@ -206,10 +212,12 @@ export function Quiz({
             const right = done && q.answer === L;
             const wrong = done && chosen === L && q.answer !== L;
             return (
-              <button
+              <div
                 key={L}
-                type="button"
-                disabled={done}
+                role="button"
+                tabIndex={done ? -1 : 0}
+                aria-disabled={done}
+                onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); answer(L); } }}
                 onClick={() => answer(L)}
                 className={cn(
                   "flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left leading-snug transition-colors",
@@ -219,8 +227,8 @@ export function Quiz({
                 )}
               >
                 <span className="font-semibold text-primary">{L}.</span>
-                <span className="qb-html min-w-0 flex-1 break-words" dangerouslySetInnerHTML={{ __html: o }} />
-              </button>
+                <QuestionHtml html={o} className="min-w-0 flex-1 break-words" />
+              </div>
             );
           })
         ) : (
@@ -236,7 +244,7 @@ export function Quiz({
             <p className="rounded-lg bg-muted px-4 py-2 text-sm">No answer key is set for this question. Read the explanation.</p>
           )}
           {q.explanation && (
-            <div className="qb-html rounded-xl bg-secondary p-4 text-sm leading-relaxed sm:p-5" dangerouslySetInnerHTML={{ __html: q.explanation }} />
+            <QuestionHtml html={q.explanation} className="rounded-xl bg-secondary p-4 text-sm leading-relaxed sm:p-5" />
           )}
         </div>
       )}
@@ -248,9 +256,10 @@ export function Quiz({
         </div>
         <div className="flex gap-2">
           {!done && !review && <Button variant="ghost" onClick={skip}>Skip</Button>}
-          <Button disabled={!done} onClick={() => (last ? finish() : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
+          <Button disabled={!done} onClick={next}>{last && !revisiting ? "Finish" : "Next"}</Button>
         </div>
       </div>
+      <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { const first = skipped[0]; if (first) { setRevisiting(true); setI(first.index); } setSubmitOpen(false); }}>Revisit skipped questions</Button><Button variant="outline" onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button></DialogContent></Dialog>
     </div>
   );
 }
@@ -264,7 +273,7 @@ function RateQbank() {
       <div className="mt-2 flex justify-center gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button key={n} type="button" aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setStars(n)} className="rounded p-1">
-            <Star className={cn("h-7 w-7 text-accent transition-transform hover:scale-110", n <= stars && "fill-current")} />
+            <Star className={cn("h-7 w-7 text-gold transition-transform hover:scale-110", n <= stars && "fill-current")} />
           </button>
         ))}
       </div>

@@ -2,6 +2,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
 export const manualPaymentUpiId = "docraghavwadhwa-1@okicici";
+export const DEFAULT_COUPON = "NIRMAYACARE";
+export function checkoutCoupon(value: string) { return value.trim().toUpperCase() || DEFAULT_COUPON; }
 export const couponSchema = z.object({ code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,32}$/), percent: z.number().int().min(1).max(100), enabled: z.boolean() });
 export const allocationSchema = z.object({ months: z.number().int().min(1).max(36), start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });
 export function freeQuestionCount(total: number) { return Math.floor(total * 0.1); }

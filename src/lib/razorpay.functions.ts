@@ -5,6 +5,13 @@ async function userFromToken(token: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !data.user) throw new Error("Please sign in again");
+  const { createClient } = await import("@supabase/supabase-js");
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"];
+  const url = process.env["SUPABASE_URL"];
+  if (!key || !url) throw new Error("Sign-in is unavailable. Please try again.");
+  const client = createClient(url, key, { auth: { persistSession: false }, global: { headers: { Authorization: `Bearer ${token}`, apikey: key } } });
+  const { data: active, error: deviceError } = await client.rpc("device_session_active");
+  if (deviceError || !active) throw new Error("This device is signed out. Please sign in again.");
   return { user: data.user, supabaseAdmin };
 }
 

@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_devices: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_name: string
+          revoked_at: string | null
+          session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_name: string
+          revoked_at?: string | null
+          session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_name?: string
+          revoked_at?: string | null
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_devices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attempts: {
         Row: {
           archived: boolean
@@ -578,6 +616,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      device_session_active: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -622,7 +661,12 @@ export type Database = {
         }[]
       }
       refresh_free_questions: { Args: never; Returns: undefined }
+      register_account_device: {
+        Args: { _device: string; _name: string; _replace?: string }
+        Returns: Json
+      }
       reject_payment: { Args: { _request: string }; Returns: undefined }
+      release_account_device: { Args: never; Returns: undefined }
       revoke_subscription: { Args: { _id: string }; Returns: undefined }
       submit_payment_request: {
         Args: {

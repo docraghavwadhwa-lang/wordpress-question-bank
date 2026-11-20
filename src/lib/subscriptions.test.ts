@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId, lockedSubjects } from "./subscriptions";
+import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId, lockedSubjects, checkoutCoupon } from "./subscriptions";
 describe("subscription rules", () => {
+  it("applies NIRMAYACARE by default while allowing a replacement coupon", () => { expect(checkoutCoupon("")).toBe("NIRMAYACARE"); expect(checkoutCoupon(" nirmayacare ")).toBe("NIRMAYACARE"); expect(checkoutCoupon(" college20 ")).toBe("COLLEGE20"); });
   it("uses the supplied manual UPI payment destination", () => { expect(manualPaymentUpiId).toBe("docraghavwadhwa-1@okicici"); });
   it("makes 10% of each subject free, rounded down to whole questions", () => { expect(freeQuestionCount(340)).toBe(34); expect(freeQuestionCount(1072)).toBe(107); });
   it("applies a generated percentage coupon", () => { expect(discountedPrice(149900,20)).toBe(119920); });

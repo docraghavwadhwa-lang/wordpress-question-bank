@@ -10,6 +10,8 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
+- JWT-session device registration is serialized per profile; restrictive RLS blocks removed online sessions. Approved offline devices recheck on reconnect.
+- Shared image viewer preserves aspect ratio; skips require explicit submission or revisit. Checkout uses a dedicated coupon/payment page and stored offer totals.
 - Website branding imports the shared full-logo asset pointer; install icons and favicon derive from its matching symbol, with versioned icon URLs to refresh cached branding.
 - Subject ordering and display aliases live in the browser-safe subjects module; preserve stored deck paths so downloads and quiz history keep working.
 - Home study tools reuse the study Button variant and subject-grouped selection; keep reminder behavior and offline-download activation unchanged during visual changes.

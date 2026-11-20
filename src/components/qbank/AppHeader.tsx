@@ -41,6 +41,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const hideTop = isApp;
 
   async function signOut() {
+    await supabase.rpc("release_account_device");
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
@@ -57,7 +58,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
-        <Button asChild size="sm" variant="outline"><Link to="/plans"><Crown />Pro</Link></Button>
+        <Button asChild size="icon" variant="outline"><Link to="/plans" aria-label="Pro subscription plans" title="Pro subscription plans"><Crown /></Link></Button>
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
             <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} />

@@ -213,12 +213,13 @@ function Index() {
               if (quiz.mode === "practice") saveSession(null);
               if (quiz.mode === "practice" && r.completed) {
                 const row: QuizReview = { id: crypto.randomUUID(), user_id: user.id, quiz_key: quiz.quizKey, title: quiz.title, question_ids: quiz.qs.map(q => q.id), choices: r.choices, score: r.score, answered: r.answered, completed_at: new Date().toISOString() };
+                qc.setQueryData<QuizReview[]>(["quiz-reviews", user.id], old => [row, ...(old ?? [])]);
                 void saveQuizReview(row).then(() => qc.invalidateQueries({ queryKey: ["quiz-reviews", user.id] })).catch(() => toast.error("Review saved on this device; online sync failed."));
               }
               if (quiz.mode === "blitz")
                 void saveBlitz(user.id, day, r.score, r.seconds).then(() => qc.invalidateQueries({ queryKey: ["blitz-rank", day] }));
             }}
-            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : undefined}
+            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : quiz.mode === "practice" ? <section className="mt-6 border-t pt-5"><h3 className="font-display text-xl text-primary">Review attempts</h3><p className="mt-1 text-xs text-muted-foreground">Available for 72 hours after submission</p><div className="mt-3 divide-y">{recent.map(row => <div key={row.id} className="py-3 text-left"><p className="text-sm font-medium text-primary">{row.title}</p><p className="mt-1 text-xs text-muted-foreground">{row.score}/{row.answered} correct · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left</p><Button className="mt-2" variant="outline" disabled={loading} onClick={() => void openReview(row)}>Review attempt</Button></div>)}</div></section> : undefined}
             onExit={goHome}
           />
         ) : qbanks ? (
@@ -270,7 +271,7 @@ function Index() {
                 </Button>
                 <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
-                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit · last 72h</span></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
                 </Button>
                 {isApp && <div><PushToggle /></div>}
               </div>
@@ -279,17 +280,6 @@ function Index() {
               {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
               <OfflineDownload />
             </div>
-            <section className="mb-8 border-t pt-6">
-              <h2 className="mb-4 flex items-center gap-2 font-display text-2xl text-primary"><History className="h-5 w-5 text-accent" />Latest attempts</h2>
-              {reviews.isLoading ? <p className="text-muted-foreground">Loading reviews…</p> : reviews.error ? <p className="text-destructive">Couldn't load recent attempts. Please try again.</p> : !recent.length ? <p className="text-sm text-muted-foreground">No completed attempts from the last 72 hours.</p> : (
-                <div className="divide-y">
-                  {recent.map(row => <div key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
-                    <div className="min-w-0"><h3 className="break-words font-display text-lg text-primary">{row.title}</h3><p className="text-sm text-muted-foreground">{row.score}/{row.answered} correct · {new Date(row.completed_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left to review</p></div>
-                    <Button variant="outline" disabled={loading} onClick={() => void openReview(row)}><BookOpenCheck className="h-4 w-4" />Review attempt</Button>
-                  </div>)}
-                </div>
-              )}
-            </section>
             {paused && (
               <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
                 <span className="flex items-center gap-3">
