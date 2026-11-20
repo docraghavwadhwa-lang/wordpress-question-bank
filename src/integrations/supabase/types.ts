@@ -869,6 +869,15 @@ export type Database = {
         Returns: boolean
       }
       has_subject_access: { Args: { _subject: string }; Returns: boolean }
+      public_feature_availability: {
+        Args: never
+        Returns: {
+          enabled: boolean
+          key: string
+          label: string
+          updated_at: string
+        }[]
+      }
       qb_blitz_rank: {
         Args: { _day: string }
         Returns: {
