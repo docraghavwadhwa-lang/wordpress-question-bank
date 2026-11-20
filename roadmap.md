@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Add subject-scoped subscription access, Pro plans, admin payment approval and coupon controls with profile validity dates.
+- [ ] Connect checkout after provider confirmation; live payment notifications depend on a connected provider and cleared content rights.
 - [x] Replace student-added colleges with the supplied 861-college, state-wise directory; 11 tests passed and phone-sized selection checked. Directory contributions disabled; real authenticated save remains unverified with external Google authentication.
 - [x] Add first-sign-in course → college details → phone setup, growing college directory and persistence tests; isolated desktop/mobile flow checked. Real Google sign-in and saved-details readback remain unverified with external authentication.
 - [x] Prepare team product report (PDF and editable Word) and written demo walkthrough; all 19 rendered pages checked, walkthrough overflow fixed. No recording supplied; signed-in/device demonstration remains a presenter task.
