@@ -313,6 +313,8 @@ function Index() {
         message={message}
         onCancel={() => setPick(null)}
         onStart={start}
+        attempts={pick ? recent.filter(row => row.quiz_key === ((pick.imagesOnly ? `images:${pick.path}` : pick.path) ?? `${pick.kind}:${pick.subtitle ?? pick.title}`)).map(row => ({ id: row.id, label: `${new Date(row.completed_at).toLocaleString([], { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} · ${row.score}/${row.answered} correct` })) : []}
+        onReview={id => { const row = recent.find(r => r.id === id); if (row) { setPick(null); void openReview(row); } }}
       />
     </div>
   );

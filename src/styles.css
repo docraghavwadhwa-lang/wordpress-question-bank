@@ -202,4 +202,5 @@ body:has([data-onboarding]) { padding-bottom: 0; }
 @keyframes elixir-breathe { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.03); } }
 .qb-image-wrap, .qb-viewer-wrap { position: relative; display: inline-block; max-width: 100%; }
 .qb-viewer-wrap { display: flex; min-height: 0; max-height: 100%; max-width: 100%; }
-.qb-image-wrap::after, .qb-viewer-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: url("/__l5e/assets-v1/3c653bf0-5cb0-458f-a1d2-e4c9290f874f/elixir_watermark.png") center / 35% auto no-repeat; opacity: 0.14; }
+.qb-image-wrap::after, .qb-viewer-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: url("/__l5e/assets-v1/3c653bf0-5cb0-458f-a1d2-e4c9290f874f/elixir_watermark.png") center / 40% auto no-repeat; opacity: 0.3; filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.9)); z-index: 1; }
+.qb-image-zoom { z-index: 2; }
