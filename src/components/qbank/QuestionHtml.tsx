@@ -24,7 +24,7 @@ export function QuestionHtml({ html, className = "" }: { html: string; className
     <Dialog open={!!expanded} onOpenChange={open => { if (!open) setExpanded(null); }}><DialogContent aria-describedby={undefined} className="image-viewer [&>button:last-child]:hidden">
       <DialogTitle className="sr-only">Question image</DialogTitle>
       <Button size="icon" variant="secondary" className="absolute right-4 top-4 z-10" aria-label="Close image" onClick={() => setExpanded(null)}><X /></Button>
-      {expanded && <img src={expanded.src} alt={expanded.alt} className="min-h-0 max-h-full max-w-full object-contain" />}
+      {expanded && <span className="qb-viewer-wrap"><img src={expanded.src} alt={expanded.alt} className="min-h-0 max-h-full max-w-full object-contain" onContextMenu={e => e.preventDefault()} draggable={false} /></span>}
     </DialogContent></Dialog>
   </>;
 }
