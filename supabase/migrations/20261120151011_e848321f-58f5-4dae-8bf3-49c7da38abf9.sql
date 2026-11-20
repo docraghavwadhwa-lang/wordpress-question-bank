@@ -1,0 +1,3 @@
+CREATE OR REPLACE FUNCTION public.has_subject_access(_subject text)
+ RETURNS boolean LANGUAGE sql STABLE SET search_path TO 'public'
+AS $function$ select public.has_role(auth.uid(), 'admin'::app_role) or exists(select 1 from public.subscriptions s join public.plan_subjects ps on ps.plan_id=s.plan_id where s.user_id=auth.uid() and ps.subject=_subject and not s.revoked and s.starts_at<=now() and s.ends_at>now()) $function$;

@@ -19,6 +19,7 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
               key={t.label}
               to={t.to}
               hash={t.hash}
+              preload={t.to === "/stats" ? "render" : "intent"}
               onClick={() => {
                 if (t.label !== "Progress") onHome?.();
                 window.scrollTo({ top: 0 });
