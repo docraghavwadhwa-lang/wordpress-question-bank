@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadAllQuestions, loadOfflineSummary } from "@/lib/offline-data";
 
-/** One-tap download of the whole question bank so the app works fully offline. */
+/** Free samples remain offline; paid questions require a live subscription check. */
 export function OfflineDownload() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [count, setCount] = useState(0);
@@ -50,7 +50,7 @@ export function OfflineDownload() {
             <span className="block text-xs text-muted-foreground">
               {savedAt
                 ? `${count.toLocaleString()} questions saved`
-                : "Practise without internet"}
+                : "Free samples offline · Pro requires internet"}
             </span>
           </span>
         </span>

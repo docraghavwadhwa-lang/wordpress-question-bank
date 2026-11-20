@@ -6,6 +6,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: str
   const builder = {
     select: (_: string, options?: { head?: boolean }) => { head = !!options?.head; return builder; },
     order: () => builder,
+    eq: () => builder,
     range: (a: number, b: number) => { from = a; to = b; return builder; },
     abortSignal: () => builder,
     then: (resolve: (value: unknown) => unknown) => {
@@ -23,10 +24,15 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: str
 } } }));
 import { clearOfflineData, downloadAllQuestions, loadOfflineSummary, offlineDeckQuestions, offlineQuestionsByIds, offlineQuestionIds, saveOfflineData, OFFLINE_GUIDANCE } from "./offline-data";
 import { fetchDeckQuestions } from "./qbank";
-function question(id: number) { return { id, deck_path: id <= 13 ? "Biochemistry > Nucleotides Structure & Metabolism" : "Biochemistry > Other", subject: "Biochemistry", stem: `q${id}`, options: ["A", "B"], answer: "A", explanation: null, sort_key: String(id).padStart(5, "0") }; }
+function question(id: number) { return { id, is_free: true, deck_path: id <= 13 ? "Biochemistry > Nucleotides Structure & Metabolism" : "Biochemistry > Other", subject: "Biochemistry", stem: `q${id}`, options: ["A", "B"], answer: "A", explanation: null, sort_key: String(id).padStart(5, "0") }; }
 beforeEach(async () => { await clearOfflineData(); backend.requests = []; backend.failAt = -1; backend.failOnce = false; vi.spyOn(navigator, "onLine", "get").mockReturnValue(true); });
 afterEach(() => vi.restoreAllMocks());
 describe("indexed offline question bank", () => {
+  it("never returns paid or legacy unclassified offline rows", async () => {
+    const { is_free: _free, ...legacy } = question(3);
+    await saveOfflineData({ decks: [], questions: [question(1), { ...question(2), is_free: false }, legacy], savedAt: "2026-11-20T06:00:00Z" });
+    expect((await offlineQuestionsByIds([1,2,3]))?.map(q=>q.id)).toEqual([1]);
+  });
   it("commits 1000-question batches and reads only the 13-question chapter", async () => {
     const progress = vi.fn();
     const summary = await downloadAllQuestions(progress);

@@ -119,7 +119,7 @@ function Index() {
     try {
       const qs = pick.ids ? await fetchQuestionsByIds(pick.ids) : pick.path ? await fetchDeckQuestions(pick.path) : [];
       if (!qs.length) {
-        setMessage("No questions found.");
+        setMessage("These questions are locked. Choose a Pro plan for access.");
         return;
       }
       localStorage.setItem("qb_timer", String(timer));

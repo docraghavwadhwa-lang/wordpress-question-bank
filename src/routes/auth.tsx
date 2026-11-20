@@ -7,7 +7,7 @@ import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Elixir" },
+      { title: "Sign in | Elixir" },
       { name: "description", content: "Sign in to save your Q-Bank scores and bookmarks." },
       { property: "og:title", content: "Sign in | Elixir by Nirmaya Care" },
       { property: "og:description", content: "Sign in to save your Q-Bank scores and bookmarks." },

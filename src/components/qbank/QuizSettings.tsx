@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { TIMERS } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
 import type { Pick } from "./SubjectGrid";
+import { Link } from "@tanstack/react-router";
 
 export function QuizSettings({
   pick,
@@ -27,9 +28,10 @@ export function QuizSettings({
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="font-display text-2xl text-primary">{pick?.title}</DialogTitle>
           <DialogDescription>
-            {message ?? `${pick?.subtitle ? pick.subtitle + " · " : ""}${pick?.total ? `All ${pick.total} questions` : "All questions"}`}
+            {message ?? `${pick?.subtitle ? pick.subtitle + " · " : ""}${pick?.total ? `${pick.total} questions · available questions depend on your plan` : "Available questions"}`}
           </DialogDescription>
         </DialogHeader>
+        {message?.includes("locked") && <Button asChild variant="outline"><Link to="/plans">Unlock with Pro</Link></Button>}
         <div className="space-y-2">
           <p className="text-center text-sm font-medium text-muted-foreground">Time per question</p>
           <div className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-1">

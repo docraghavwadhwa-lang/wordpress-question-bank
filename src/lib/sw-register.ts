@@ -16,6 +16,7 @@ function refused(): boolean {
 
 export async function registerAppServiceWorker() {
   if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+  if (typeof caches !== "undefined") await Promise.all(["qb-data", "qb-data-v1"].map(name => caches.delete(name)));
   if (refused()) {
     const regs = await navigator.serviceWorker.getRegistrations();
     await Promise.all(regs.filter((r) => r.active?.scriptURL.endsWith("/sw.js")).map((r) => r.unregister()));

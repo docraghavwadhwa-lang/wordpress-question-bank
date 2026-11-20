@@ -1,5 +1,6 @@
 # Tasks
-- [ ] Show original crossed-out prices and offer prices; clarify which amount is charged before connecting checkout.
+- [x] Show original crossed-out prices and offer prices; use offer price minus valid coupon as the final payable amount.
+- [ ] Connect Razorpay and add verified payment updates before manual access approval; waiting on connection credentials.
 - [ ] Add subject-scoped subscription access, Pro plans, admin payment approval and coupon controls with profile validity dates.
 - [ ] Connect checkout after provider confirmation; live payment notifications depend on a connected provider and cleared content rights.
 - [x] Replace student-added colleges with the supplied 861-college, state-wise directory; 11 tests passed and phone-sized selection checked. Directory contributions disabled; real authenticated save remains unverified with external Google authentication.

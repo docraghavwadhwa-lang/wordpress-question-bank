@@ -4,7 +4,7 @@ import type { Deck, Question } from "@/lib/qbank";
 
 export type StoredQuestion = Question & { subject: string; sort_key?: string; is_free?: boolean };
 export type OfflineData = { decks: Deck[]; questions: StoredQuestion[]; savedAt: string };
-export type OfflineSummary = { savedAt: string; count: number; generation: string; owner?: string; paidUntil?: string };
+export type OfflineSummary = { savedAt: string; count: number; generation: string };
 type QuestionRow = StoredQuestion & { generation: string; answerable: number; free: number };
 type DeckRow = Deck & { generation: string };
 interface BankDB extends DBSchema {
@@ -68,13 +68,8 @@ async function pruneExcept(generation?: string) {
 }
 export async function clearOfflineData() { await pruneExcept(); }
 
-async function paidOfflineAccess(active: OfflineSummary) {
-  if (!active.owner || !active.paidUntil || Date.parse(active.paidUntil) <= Date.now()) return false;
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user.id === active.owner;
-}
-async function allowedRows(rows: StoredQuestion[], active: OfflineSummary) {
-  return await paidOfflineAccess(active) ? rows : rows.filter(q => q.is_free === true);
+function allowedRows(rows: StoredQuestion[], _active: OfflineSummary) {
+  return rows.filter(q => q.is_free === true);
 }
 
 /** Reads only indexed chapter rows, not the entire bank. */
@@ -146,10 +141,6 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
   const generation = crypto.randomUUID();
   const db = await database().catch(error => { downloading = false; throw error; });
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    const subscriptions = session ? await supabase.from("subscriptions").select("ends_at").eq("user_id", session.user.id).eq("revoked", false).lte("starts_at", new Date().toISOString()).gt("ends_at", new Date().toISOString()).order("ends_at") : null;
-    if (subscriptions?.error) throw subscriptions.error;
-    const paidUntil = subscriptions?.data?.[0]?.ends_at;
     if (typeof navigator.storage?.persist === "function") await navigator.storage.persist().catch(() => false);
     const active = await loadOfflineSummary();
     await pruneExcept(active?.generation);
@@ -161,12 +152,12 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
       await tx.done;
       if (rows.length < 1000) break;
     }
-    const counted = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }));
+    const counted = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).eq("is_free", true));
     if (counted.error) throw counted.error;
     const total = counted.count ?? 0;
     let count = 0;
     for (let from = 0; ; from += 1000) {
-      const data = await retryRead(signal => supabase.from("questions").select("id, deck_path, subject, stem, options, answer, explanation, sort_key, is_free").order("sort_key").order("id").range(from, from + 999).abortSignal(signal));
+      const data = await retryRead(signal => supabase.from("questions").select("id, deck_path, subject, stem, options, answer, explanation, sort_key, is_free").eq("is_free", true).order("sort_key").order("id").range(from, from + 999).abortSignal(signal));
       const rows = (data ?? []) as unknown as StoredQuestion[];
       const tx = db.transaction("questions", "readwrite");
       for (const q of rows) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1, free: q.is_free ? 1 : 0 });
@@ -176,7 +167,7 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
       if (rows.length < 1000) break;
     }
     if (!count || (total && count !== total) || await db.count("questions", IDBKeyRange.bound([generation, 0], [generation, Number.MAX_SAFE_INTEGER])) !== count) throw new Error("Incomplete download — please try again");
-    const summary = { generation, count, savedAt: new Date().toISOString(), ...(session ? { owner: session.user.id } : {}), ...(paidUntil ? { paidUntil } : {}) };
+    const summary = { generation, count, savedAt: new Date().toISOString() };
     await db.put("meta", summary, "active");
     await pruneExcept(generation);
     // The old large Cache API snapshot is deliberately not parsed or migrated.

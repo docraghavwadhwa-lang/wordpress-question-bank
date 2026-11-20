@@ -10,7 +10,7 @@ export const APK_URL = "https://github.com/docraghavwadhwa-lang/wordpress-questi
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
-      { title: "Elixir" },
+      { title: "Get the Android app | Elixir" },
       { name: "description", content: "Download the Elixir by Nirmaya Care Android app and practise medical MCQs even without internet." },
       { property: "og:title", content: "Get the Elixir app — Android download" },
       { property: "og:description", content: "Download the Elixir by Nirmaya Care Android app. iOS app coming soon." },
@@ -28,7 +28,7 @@ function GetApp() {
       <main className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">Get the app</p>
         <h1 className="text-5xl leading-none text-primary sm:text-6xl">Elixir on your <em>phone</em></h1>
-        <p className="mt-4 max-w-xl text-muted-foreground">Practise every question bank anywhere — even with no internet once you've downloaded the questions.</p>
+        <p className="mt-4 max-w-xl text-muted-foreground">Take Elixir with you. Download free samples for offline practice; Pro questions require internet to verify your subscription.</p>
         <div className="mt-10 grid items-center gap-8 rounded-2xl border bg-card p-6 sm:grid-cols-[auto_1fr] sm:p-8">
           <div className="mx-auto rounded-xl border bg-background p-4">
             <QRCodeSVG value={APK_URL} size={180} bgColor="transparent" fgColor="currentColor" className="text-primary" />
