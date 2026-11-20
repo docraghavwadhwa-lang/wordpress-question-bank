@@ -44,7 +44,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
     await supabase.rpc("release_account_device");
     await qc.cancelQueries();
     qc.clear();
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     void navigate({ to: "/", replace: true });
   }
 

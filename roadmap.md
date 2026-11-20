@@ -1,7 +1,8 @@
 # Tasks
-- [ ] Update quiz image viewer, skipped-question submission, completion reviews, and permanent Mistake Vault.
-- [ ] Update native Pro control and default-coupon checkout without changing offer prices.
-- [ ] Enforce two active online devices with owner-only replacement selection and verify available flows.
+- [x] Update quiz image viewer, skipped-question submission, completion reviews, and permanent Mistake Vault; isolated quiz and image interactions verified.
+- [x] Update native Pro control and default-coupon checkout without changing offer prices; public navigation and six database price assertions passed.
+- [x] Enforce two active online devices with owner-only replacement selection; rolled-back database tests passed.
+- [ ] Verify real signed-in checkout, device replacement, and saved review readback — external unmanaged Google authentication provides no test session.
 - [x] Show original crossed-out prices and offer prices; use offer price minus valid coupon as the final payable amount.
 - [x] Add the supplied manual UPI payment destination to plan instructions; Razorpay deferred and access still requires admin verification.
 - [x] Add subject-scoped subscription access, Pro plans, admin payment approval and coupon controls with profile validity dates. Tests and public plans checked; authenticated approval/readback remains unverified with external Google authentication.
