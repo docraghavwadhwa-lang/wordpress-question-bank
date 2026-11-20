@@ -1,0 +1,4307 @@
+[
+  {
+    "id": "AN/001/G",
+    "state": "Andaman & Nicobar Islands",
+    "name": "Andaman & Nicobar Islands Institute of Medical Sciences, Port Blair"
+  },
+  {
+    "id": "AP/001/G",
+    "state": "Andhra Pradesh",
+    "name": "ACSR Government Medical College, Nellore"
+  },
+  {
+    "id": "INI-AP-01",
+    "state": "Andhra Pradesh",
+    "name": "AIIMS Mangalagiri"
+  },
+  {
+    "id": "AP/002/P",
+    "state": "Andhra Pradesh",
+    "name": "Alluri Sitaram Raju Academy of Medical Sciences, Eluru"
+  },
+  {
+    "id": "AP/003/G",
+    "state": "Andhra Pradesh",
+    "name": "Andhra Medical College, Visakhapatnam"
+  },
+  {
+    "id": "AP/004/P",
+    "state": "Andhra Pradesh",
+    "name": "Anna Gowri Medical College and Hospital"
+  },
+  {
+    "id": "AP/005/P",
+    "state": "Andhra Pradesh",
+    "name": "Apollo Institute of Medical Sciences and Research, Chittoor"
+  },
+  {
+    "id": "AP/006/P",
+    "state": "Andhra Pradesh",
+    "name": "Dr. P.S.I. Medical College, Chinoutpalli"
+  },
+  {
+    "id": "AP/007/P",
+    "state": "Andhra Pradesh",
+    "name": "Fathima Institute of Medical Sciences, Kadapa"
+  },
+  {
+    "id": "AP/008/P",
+    "state": "Andhra Pradesh",
+    "name": "Gayatri Vidya Parishad Institute of Health Care & Medical Technology, Visakhapatnam"
+  },
+  {
+    "id": "AP/009/P",
+    "state": "Andhra Pradesh",
+    "name": "GITAM Institute of Medical Sciences and Research, Visakhapatnam"
+  },
+  {
+    "id": "AP/010/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Ananthapuram"
+  },
+  {
+    "id": "AP/011/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Eluru"
+  },
+  {
+    "id": "AP/030/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Kadapa (previously Rajiv Gandhi Institute of Medical Sciences, Kadapa)"
+  },
+  {
+    "id": "AP/012/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Machilipatnam"
+  },
+  {
+    "id": "AP/013/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Nandyal"
+  },
+  {
+    "id": "AP/031/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Ongole (previously Rajiv Gandhi Institute of Medical Sciences, Ongole)"
+  },
+  {
+    "id": "AP/014/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Paderu"
+  },
+  {
+    "id": "NEW-AP-01",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Piduguralla"
+  },
+  {
+    "id": "AP/015/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Rajamahendravaram"
+  },
+  {
+    "id": "AP/016/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Medical College, Vizianagaram"
+  },
+  {
+    "id": "AP/017/G",
+    "state": "Andhra Pradesh",
+    "name": "Government Siddhartha Medical College, Vijayawada"
+  },
+  {
+    "id": "AP/018/P",
+    "state": "Andhra Pradesh",
+    "name": "Great Eastern Medical School and Hospital, Srikakulam"
+  },
+  {
+    "id": "AP/019/P",
+    "state": "Andhra Pradesh",
+    "name": "GSL Medical College, Rajahmundry"
+  },
+  {
+    "id": "AP/020/G",
+    "state": "Andhra Pradesh",
+    "name": "Guntur Medical College, Guntur"
+  },
+  {
+    "id": "AP/021/P",
+    "state": "Andhra Pradesh",
+    "name": "Katuri Medical College, Guntur"
+  },
+  {
+    "id": "AP/022/P",
+    "state": "Andhra Pradesh",
+    "name": "Konaseema Institute of Medical Sciences & Research Foundation, Amalapuram"
+  },
+  {
+    "id": "AP/023/G",
+    "state": "Andhra Pradesh",
+    "name": "Kurnool Medical College, Kurnool"
+  },
+  {
+    "id": "AP/024/P",
+    "state": "Andhra Pradesh",
+    "name": "Maharajah Institute of Medical Sciences, Vizianagaram"
+  },
+  {
+    "id": "AP/025/P",
+    "state": "Andhra Pradesh",
+    "name": "Narayana Medical College, Nellore"
+  },
+  {
+    "id": "AP/026/P",
+    "state": "Andhra Pradesh",
+    "name": "Nimra Institute of Medical Sciences, Krishna Dist."
+  },
+  {
+    "id": "AP/027/P",
+    "state": "Andhra Pradesh",
+    "name": "NRI Institute of Medical Sciences, Visakhapatnam"
+  },
+  {
+    "id": "AP/028/P",
+    "state": "Andhra Pradesh",
+    "name": "NRI Medical College, Guntur"
+  },
+  {
+    "id": "AP/029/P",
+    "state": "Andhra Pradesh",
+    "name": "P E S Institute of Medical Sciences and Research, Kuppam"
+  },
+  {
+    "id": "AP/032/G",
+    "state": "Andhra Pradesh",
+    "name": "Rajiv Gandhi Institute of Medical Sciences, Srikakulam"
+  },
+  {
+    "id": "AP/033/G",
+    "state": "Andhra Pradesh",
+    "name": "Rangaraya Medical College, Kakinada"
+  },
+  {
+    "id": "NEW-AP-02",
+    "state": "Andhra Pradesh",
+    "name": "RVS Institute of Medical Sciences"
+  },
+  {
+    "id": "AP/034/G",
+    "state": "Andhra Pradesh",
+    "name": "S V Medical College, Tirupati"
+  },
+  {
+    "id": "AP/035/P",
+    "state": "Andhra Pradesh",
+    "name": "Santhiram Medical College, Nandyal"
+  },
+  {
+    "id": "AP/036/P",
+    "state": "Andhra Pradesh",
+    "name": "Sri Balaji Medical College, Hospital and Research Institute, Chittoor"
+  },
+  {
+    "id": "AP/037/G",
+    "state": "Andhra Pradesh",
+    "name": "SVIMS - Sri Padmavathi Medical College for Women, Tirupati"
+  },
+  {
+    "id": "AP/038/P",
+    "state": "Andhra Pradesh",
+    "name": "Viswabharathi Medical College"
+  },
+  {
+    "id": "AR/001/G",
+    "state": "Arunachal Pradesh",
+    "name": "Tomo Riba Institute of Health & Medical Sciences, Naharlagun"
+  },
+  {
+    "id": "INI-AS-01",
+    "state": "Assam",
+    "name": "AIIMS Guwahati"
+  },
+  {
+    "id": "AS/001/G",
+    "state": "Assam",
+    "name": "Assam Medical College, Dibrugarh"
+  },
+  {
+    "id": "NEW-AS-01",
+    "state": "Assam",
+    "name": "Bongaigaon Medical College"
+  },
+  {
+    "id": "AS/002/G",
+    "state": "Assam",
+    "name": "Dhubri Medical College, Dhubri"
+  },
+  {
+    "id": "AS/003/G",
+    "state": "Assam",
+    "name": "Diphu Medical College & Hospital, Diphu"
+  },
+  {
+    "id": "AS/004/G",
+    "state": "Assam",
+    "name": "ESIC Medical College and Hospital, Beltola"
+  },
+  {
+    "id": "AS/005/G",
+    "state": "Assam",
+    "name": "Fakhruddin Ali Ahmed Medical College, Barpeta"
+  },
+  {
+    "id": "AS/006/G",
+    "state": "Assam",
+    "name": "Gauhati Medical College, Guwahati"
+  },
+  {
+    "id": "AS/007/G",
+    "state": "Assam",
+    "name": "Jorhat Medical College & Hospital, Jorhat"
+  },
+  {
+    "id": "AS/008/G",
+    "state": "Assam",
+    "name": "Kokrajhar Medical College"
+  },
+  {
+    "id": "AS/009/G",
+    "state": "Assam",
+    "name": "Lakhimpur Medical College"
+  },
+  {
+    "id": "AS/010/G",
+    "state": "Assam",
+    "name": "Nagaon Medical College"
+  },
+  {
+    "id": "AS/011/G",
+    "state": "Assam",
+    "name": "Nalbari Medical College, Nalbari"
+  },
+  {
+    "id": "AS/012/G",
+    "state": "Assam",
+    "name": "Pragjyotishpur Medical College"
+  },
+  {
+    "id": "AS/013/G",
+    "state": "Assam",
+    "name": "Silchar Medical College, Silchar"
+  },
+  {
+    "id": "AS/014/G",
+    "state": "Assam",
+    "name": "Tezpur Medical College & Hospital, Tezpur"
+  },
+  {
+    "id": "AS/015/G",
+    "state": "Assam",
+    "name": "Tinsukia Medical College"
+  },
+  {
+    "id": "INI-BR-01",
+    "state": "Bihar",
+    "name": "AIIMS Patna"
+  },
+  {
+    "id": "BR/001/G",
+    "state": "Bihar",
+    "name": "Anugrah Narayan Magadh Medical College, Gaya"
+  },
+  {
+    "id": "BR/023/G",
+    "state": "Bihar",
+    "name": "Bhagwan Mahavir Institute of Medical Sciences, Pawapuri (formerly Vardhman Institute of Medical Sciences)"
+  },
+  {
+    "id": "NEW-BR-03",
+    "state": "Bihar",
+    "name": "Buddha Hospital and Research Institute"
+  },
+  {
+    "id": "BR/002/G",
+    "state": "Bihar",
+    "name": "Darbhanga Medical College, Laheriasarai"
+  },
+  {
+    "id": "BR/003/G",
+    "state": "Bihar",
+    "name": "ESIC Medical College, Patna"
+  },
+  {
+    "id": "BR/004/G",
+    "state": "Bihar",
+    "name": "Government Medical College, Bettiah"
+  },
+  {
+    "id": "NEW-BR-02",
+    "state": "Bihar",
+    "name": "Government Medical College, Chapra, Saran"
+  },
+  {
+    "id": "BR/005/G",
+    "state": "Bihar",
+    "name": "Government Medical College, Purnea"
+  },
+  {
+    "id": "BR/006/P",
+    "state": "Bihar",
+    "name": "Himalaya Medical College and Hospital, Patna"
+  },
+  {
+    "id": "BR/007/G",
+    "state": "Bihar",
+    "name": "Indira Gandhi Institute of Medical Sciences, Sheikhpura, Patna"
+  },
+  {
+    "id": "BR/008/G",
+    "state": "Bihar",
+    "name": "Jannayak Karpoori Thakur Medical College & Hospital, Madhepura"
+  },
+  {
+    "id": "BR/009/G",
+    "state": "Bihar",
+    "name": "Jawaharlal Nehru Medical College, Bhagalpur"
+  },
+  {
+    "id": "NEW-BR-05",
+    "state": "Bihar",
+    "name": "K.K. Medical College & Hospital"
+  },
+  {
+    "id": "BR/010/P",
+    "state": "Bihar",
+    "name": "Katihar Medical College, Katihar"
+  },
+  {
+    "id": "NEW-BR-07",
+    "state": "Bihar",
+    "name": "Kurma Sanskriti Medical College and Hospital"
+  },
+  {
+    "id": "BR/011/P",
+    "state": "Bihar",
+    "name": "Lord Buddha Koshi Medical College and Hospital, Saharsa"
+  },
+  {
+    "id": "BR/012/P",
+    "state": "Bihar",
+    "name": "Madhubani Medical College, Madhubani"
+  },
+  {
+    "id": "BR/013/P",
+    "state": "Bihar",
+    "name": "Mahabodhi Medical College & Hospital"
+  },
+  {
+    "id": "NEW-BR-06",
+    "state": "Bihar",
+    "name": "Mamta Medical College & Hospital"
+  },
+  {
+    "id": "BR/014/P",
+    "state": "Bihar",
+    "name": "Mata Gujri Memorial Medical College, Kishanganj"
+  },
+  {
+    "id": "BR/015/G",
+    "state": "Bihar",
+    "name": "Nalanda Medical College, Patna"
+  },
+  {
+    "id": "BR/016/P",
+    "state": "Bihar",
+    "name": "Narayan Medical College & Hospital, Sasaram"
+  },
+  {
+    "id": "BR/017/P",
+    "state": "Bihar",
+    "name": "Netaji Subhas Medical College & Hospital, Bihta, Patna"
+  },
+  {
+    "id": "BR/018/G",
+    "state": "Bihar",
+    "name": "Patna Medical College, Patna"
+  },
+  {
+    "id": "BR/019/P",
+    "state": "Bihar",
+    "name": "Radha Devi Jageshwari Memorial Medical College and Hospital"
+  },
+  {
+    "id": "BR/020/P",
+    "state": "Bihar",
+    "name": "Shree Narayan Medical Institute and Hospital"
+  },
+  {
+    "id": "BR/021/G",
+    "state": "Bihar",
+    "name": "Shri Krishna Medical College, Muzaffarpur"
+  },
+  {
+    "id": "NEW-BR-04",
+    "state": "Bihar",
+    "name": "Shrinivas G Educational & Research Institute of Medical Sciences"
+  },
+  {
+    "id": "BR/022/P",
+    "state": "Bihar",
+    "name": "Shyamlal Chandrashekhar Medical College & S.P.N.M. Hospital"
+  },
+  {
+    "id": "NEW-BR-01",
+    "state": "Bihar",
+    "name": "Sri Ram Janki Medical College, Samastipur"
+  },
+  {
+    "id": "BR/024/P",
+    "state": "Bihar",
+    "name": "Viraat Ramayan Institute of Medical Sciences"
+  },
+  {
+    "id": "CH/001/G",
+    "state": "Chandigarh",
+    "name": "Government Medical College, Chandigarh"
+  },
+  {
+    "id": "CG/001/P",
+    "state": "Chhattisgarh",
+    "name": "Abhishek Mishra Memorial Medical College & Research Centre, Bhilai, Durg"
+  },
+  {
+    "id": "INI-CG-01",
+    "state": "Chhattisgarh",
+    "name": "AIIMS Raipur"
+  },
+  {
+    "id": "CG/002/G",
+    "state": "Chhattisgarh",
+    "name": "Chandulal Chandrakar Memorial Medical College, Durg"
+  },
+  {
+    "id": "CG/003/G",
+    "state": "Chhattisgarh",
+    "name": "Chhattisgarh Institute of Medical Sciences, Bilaspur"
+  },
+  {
+    "id": "CG/004/G",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College (Bharat Ratna Shri Atal Bihari Vajpayee Memorial Medical College), Rajnandgaon"
+  },
+  {
+    "id": "NEW-CG-01",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Dantewada"
+  },
+  {
+    "id": "NEW-CG-02",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Janjgir-Champa"
+  },
+  {
+    "id": "NEW-CG-03",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Jashpur-Kunkuri"
+  },
+  {
+    "id": "NEW-CG-04",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Kabirdham"
+  },
+  {
+    "id": "CG/006/G",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Korba"
+  },
+  {
+    "id": "CG/007/G",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Mahasamund"
+  },
+  {
+    "id": "NEW-CG-05",
+    "state": "Chhattisgarh",
+    "name": "Government Medical College, Manendragarh"
+  },
+  {
+    "id": "CG/008/G",
+    "state": "Chhattisgarh",
+    "name": "Late Shri Baliram Kashyap Memorial NDMC Government Medical College, Jagdalpur"
+  },
+  {
+    "id": "CG/009/G",
+    "state": "Chhattisgarh",
+    "name": "Late Shri Lakhi Ram Agrawal Memorial Government Medical College, Raigarh"
+  },
+  {
+    "id": "NEW-CG-06",
+    "state": "Chhattisgarh",
+    "name": "Maa Padmavati Institute of Medical Sciences"
+  },
+  {
+    "id": "CG/010/G",
+    "state": "Chhattisgarh",
+    "name": "Pt. J N M Medical College, Raipur"
+  },
+  {
+    "id": "CG/011/P",
+    "state": "Chhattisgarh",
+    "name": "Raipur Institute of Medical Sciences (RIMS), Raipur"
+  },
+  {
+    "id": "CG/005/G",
+    "state": "Chhattisgarh",
+    "name": "Rajmata Shrimati Devendra Kumari Singhdeo Government Medical College, Ambikapur (Surguja)"
+  },
+  {
+    "id": "CG/012/P",
+    "state": "Chhattisgarh",
+    "name": "Shri Balaji Institute of Medical Science"
+  },
+  {
+    "id": "CG/013/P",
+    "state": "Chhattisgarh",
+    "name": "Shri Rawatpura Sarkar Institute of Medical Sciences and Research, Atal Nagar, Raipur"
+  },
+  {
+    "id": "CG/014/P",
+    "state": "Chhattisgarh",
+    "name": "Shri Shankaracharya Institute of Medical Sciences, Bhilai"
+  },
+  {
+    "id": "CG/015/G",
+    "state": "Chhattisgarh",
+    "name": "Shrimati Indira Gandhi Memorial Government Medical College, Kanker"
+  },
+  {
+    "id": "ND/001/G",
+    "state": "Dadra & Nagar Haveli and Daman & Diu",
+    "name": "NAMO Medical Education and Research Institute, Silvassa (formerly Shri Vinoba Bhave Institute of Medical Sciences)"
+  },
+  {
+    "id": "INI-DL-01",
+    "state": "Delhi",
+    "name": "AIIMS New Delhi"
+  },
+  {
+    "id": "DL/001/P",
+    "state": "Delhi",
+    "name": "Army College of Medical Sciences"
+  },
+  {
+    "id": "DL/007/G",
+    "state": "Delhi",
+    "name": "Atal Bihari Vajpayee Institute of Medical Sciences and Dr. RML Hospital"
+  },
+  {
+    "id": "DL/002/G",
+    "state": "Delhi",
+    "name": "Dr. Baba Saheb Ambedkar Medical College, Rohini"
+  },
+  {
+    "id": "DL/003/G",
+    "state": "Delhi",
+    "name": "ESIC Medical College & Hospital, Basaidarapur"
+  },
+  {
+    "id": "DL/004/P",
+    "state": "Delhi",
+    "name": "Hamdard Institute of Medical Sciences & Research"
+  },
+  {
+    "id": "DL/008/G",
+    "state": "Delhi",
+    "name": "Lady Hardinge Medical College"
+  },
+  {
+    "id": "DL/005/G",
+    "state": "Delhi",
+    "name": "Maulana Azad Medical College"
+  },
+  {
+    "id": "DL/006/G",
+    "state": "Delhi",
+    "name": "North Delhi Municipal Corporation Medical College"
+  },
+  {
+    "id": "DL/010/G",
+    "state": "Delhi",
+    "name": "University College of Medical Sciences & GTB Hospital"
+  },
+  {
+    "id": "DL/009/G",
+    "state": "Delhi",
+    "name": "Vardhman Mahavir Medical College & Safdarjung Hospital"
+  },
+  {
+    "id": "GA/001/G",
+    "state": "Goa",
+    "name": "Goa Medical College, Panaji"
+  },
+  {
+    "id": "INI-GJ-01",
+    "state": "Gujarat",
+    "name": "AIIMS Rajkot"
+  },
+  {
+    "id": "GJ/002/P",
+    "state": "Gujarat",
+    "name": "Ananya College of Medicine & Research, Kalol"
+  },
+  {
+    "id": "GJ/003/G",
+    "state": "Gujarat",
+    "name": "B J Medical College, Ahmedabad"
+  },
+  {
+    "id": "GJ/004/P",
+    "state": "Gujarat",
+    "name": "Banas Medical College and Research Institute, Palanpur"
+  },
+  {
+    "id": "GJ/005/P",
+    "state": "Gujarat",
+    "name": "Bhagyoday Medical College"
+  },
+  {
+    "id": "GJ/006/P",
+    "state": "Gujarat",
+    "name": "C U Shah Medical College, Surendranagar"
+  },
+  {
+    "id": "GJ/007/P",
+    "state": "Gujarat",
+    "name": "Dr. Kiran C. Patel Medical College and Research Institute"
+  },
+  {
+    "id": "GJ/008/P",
+    "state": "Gujarat",
+    "name": "Dr. M.K. Shah Medical College & Research Centre, Ahmedabad"
+  },
+  {
+    "id": "GJ/009/P",
+    "state": "Gujarat",
+    "name": "Dr. N.D. Desai Faculty of Medical Science and Research, Nadiad"
+  },
+  {
+    "id": "GJ/010/G",
+    "state": "Gujarat",
+    "name": "ESIC Medical College, Naroda, Ahmedabad"
+  },
+  {
+    "id": "GJ/011/P",
+    "state": "Gujarat",
+    "name": "GCS Medical College, Ahmedabad"
+  },
+  {
+    "id": "GJ/012/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Dharpur, Patan"
+  },
+  {
+    "id": "GJ/013/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Gandhinagar"
+  },
+  {
+    "id": "GJ/014/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Gotri, Vadodara"
+  },
+  {
+    "id": "GJ/015/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Hadiyol, Himmatnagar"
+  },
+  {
+    "id": "GJ/016/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Junagadh"
+  },
+  {
+    "id": "GJ/023/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Navsari"
+  },
+  {
+    "id": "GJ/017/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Rajpipla"
+  },
+  {
+    "id": "GJ/018/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Sola, Ahmedabad"
+  },
+  {
+    "id": "GJ/019/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Vadnagar, Mehsana"
+  },
+  {
+    "id": "GJ/020/G",
+    "state": "Gujarat",
+    "name": "GMERS Medical College, Valsad"
+  },
+  {
+    "id": "GJ/021/G",
+    "state": "Gujarat",
+    "name": "Government Medical College, Bhavnagar"
+  },
+  {
+    "id": "GJ/022/G",
+    "state": "Gujarat",
+    "name": "Government Medical College, Morbi"
+  },
+  {
+    "id": "GJ/024/G",
+    "state": "Gujarat",
+    "name": "Government Medical College, Panchmahal, Godhra"
+  },
+  {
+    "id": "GJ/025/G",
+    "state": "Gujarat",
+    "name": "Government Medical College, Porbandar"
+  },
+  {
+    "id": "GJ/026/G",
+    "state": "Gujarat",
+    "name": "Government Medical College, Surat"
+  },
+  {
+    "id": "GJ/027/P",
+    "state": "Gujarat",
+    "name": "Gujarat Adani Institute of Medical Sciences, Bhuj"
+  },
+  {
+    "id": "GJ/028/P",
+    "state": "Gujarat",
+    "name": "Kiran Medical College"
+  },
+  {
+    "id": "GJ/031/G",
+    "state": "Gujarat",
+    "name": "M P Shah Medical College, Jamnagar"
+  },
+  {
+    "id": "GJ/029/P",
+    "state": "Gujarat",
+    "name": "Matushri Prabhaben Khodabhai Boghara Medical College & Research Centre"
+  },
+  {
+    "id": "GJ/030/G",
+    "state": "Gujarat",
+    "name": "Medical College, Baroda"
+  },
+  {
+    "id": "GJ/001/G",
+    "state": "Gujarat",
+    "name": "Narendra Modi Medical College, Ahmedabad (previously AMC MET Medical College)"
+  },
+  {
+    "id": "GJ/032/P",
+    "state": "Gujarat",
+    "name": "Nootan Medical College and Research Centre, Mehsana"
+  },
+  {
+    "id": "GJ/033/G",
+    "state": "Gujarat",
+    "name": "Pandit Deendayal Upadhyay Medical College, Rajkot"
+  },
+  {
+    "id": "GJ/034/P",
+    "state": "Gujarat",
+    "name": "Parul Institute of Medical Sciences & Research, Vadodara"
+  },
+  {
+    "id": "GJ/035/P",
+    "state": "Gujarat",
+    "name": "Pramukhswami Medical College, Karamsad"
+  },
+  {
+    "id": "GJ/036/P",
+    "state": "Gujarat",
+    "name": "SAL Institute of Medical Sciences, Ahmedabad"
+  },
+  {
+    "id": "GJ/037/P",
+    "state": "Gujarat",
+    "name": "SBKS Medical Institute & Research Centre, Vadodara"
+  },
+  {
+    "id": "GJ/038/P",
+    "state": "Gujarat",
+    "name": "Shantabaa Medical College, Amreli"
+  },
+  {
+    "id": "GJ/039/G",
+    "state": "Gujarat",
+    "name": "Smt. N.H.L. Municipal Medical College, Ahmedabad"
+  },
+  {
+    "id": "GJ/040/G",
+    "state": "Gujarat",
+    "name": "Surat Municipal Institute of Medical Education & Research, Surat"
+  },
+  {
+    "id": "GJ/041/P",
+    "state": "Gujarat",
+    "name": "Swaminarayan Institute of Medical Sciences & Research"
+  },
+  {
+    "id": "GJ/042/P",
+    "state": "Gujarat",
+    "name": "Zydus Medical College & Hospital, Dahod"
+  },
+  {
+    "id": "HR/001/P",
+    "state": "Haryana",
+    "name": "Adesh Medical College and Hospital, Shahabad, Kurukshetra"
+  },
+  {
+    "id": "HR/002/P",
+    "state": "Haryana",
+    "name": "Al Falah School of Medical Sciences & Research Centre, Faridabad"
+  },
+  {
+    "id": "HR/003/P",
+    "state": "Haryana",
+    "name": "Amrita School of Medicine, Faridabad"
+  },
+  {
+    "id": "HR/004/G",
+    "state": "Haryana",
+    "name": "BPS Government Medical College for Women, Sonepat"
+  },
+  {
+    "id": "HR/005/G",
+    "state": "Haryana",
+    "name": "ESIC Medical College, Faridabad"
+  },
+  {
+    "id": "HR/006/P",
+    "state": "Haryana",
+    "name": "Faculty of Medicine and Health Sciences, Gurgaon (formerly SGT Medical College)"
+  },
+  {
+    "id": "HR/007/G",
+    "state": "Haryana",
+    "name": "Kalpana Chawla Government Medical College, Karnal"
+  },
+  {
+    "id": "HR/008/P",
+    "state": "Haryana",
+    "name": "Maharaja Agrasen Medical College, Agroha"
+  },
+  {
+    "id": "HR/009/G",
+    "state": "Haryana",
+    "name": "Maharishi Chyawan Medical College, Koriawas"
+  },
+  {
+    "id": "HR/010/P",
+    "state": "Haryana",
+    "name": "Maharishi Markandeshwar College of Medical Sciences & Research, Sadopur"
+  },
+  {
+    "id": "HR/011/P",
+    "state": "Haryana",
+    "name": "Maharishi Markandeshwar Institute of Medical Sciences & Research, Mullana, Ambala"
+  },
+  {
+    "id": "HR/012/P",
+    "state": "Haryana",
+    "name": "N.C. Medical College & Hospital, Panipat"
+  },
+  {
+    "id": "HR/014/G",
+    "state": "Haryana",
+    "name": "Pt. B D Sharma Postgraduate Institute of Medical Sciences, Rohtak"
+  },
+  {
+    "id": "HR/013/G",
+    "state": "Haryana",
+    "name": "Pt. Neki Ram Sharma Government Medical College, Bhiwani"
+  },
+  {
+    "id": "NEW-HR-01",
+    "state": "Haryana",
+    "name": "Sanskaram School of Medical Sciences"
+  },
+  {
+    "id": "HR/015/G",
+    "state": "Haryana",
+    "name": "Shaheed Hasan Khan Mewati Government Medical College, Nalhar"
+  },
+  {
+    "id": "HR/016/G",
+    "state": "Haryana",
+    "name": "Shri Atal Bihari Vajpayee Government Medical College, Faridabad"
+  },
+  {
+    "id": "HR/017/P",
+    "state": "Haryana",
+    "name": "World College of Medical Sciences & Research, Jhajjar"
+  },
+  {
+    "id": "INI-HP-01",
+    "state": "Himachal Pradesh",
+    "name": "AIIMS Bilaspur"
+  },
+  {
+    "id": "HP/001/G",
+    "state": "Himachal Pradesh",
+    "name": "Dr. Radhakrishnan Government Medical College, Hamirpur"
+  },
+  {
+    "id": "HP/002/G",
+    "state": "Himachal Pradesh",
+    "name": "Dr. Rajendra Prasad Government Medical College, Tanda"
+  },
+  {
+    "id": "HP/003/G",
+    "state": "Himachal Pradesh",
+    "name": "Government Medical College, Nahan, Sirmaur"
+  },
+  {
+    "id": "HP/004/G",
+    "state": "Himachal Pradesh",
+    "name": "Indira Gandhi Medical College, Shimla"
+  },
+  {
+    "id": "HP/005/P",
+    "state": "Himachal Pradesh",
+    "name": "Maharishi Markandeshwar Medical College & Hospital, Solan"
+  },
+  {
+    "id": "HP/006/G",
+    "state": "Himachal Pradesh",
+    "name": "Pt. Jawahar Lal Nehru Government Medical College, Chamba"
+  },
+  {
+    "id": "HP/007/G",
+    "state": "Himachal Pradesh",
+    "name": "Shri Lal Bahadur Shastri Government Medical College, Mandi"
+  },
+  {
+    "id": "JK/001/P",
+    "state": "Jammu & Kashmir",
+    "name": "Acharya Shri Chander College of Medical Sciences, Jammu"
+  },
+  {
+    "id": "INI-JK-01",
+    "state": "Jammu & Kashmir",
+    "name": "AIIMS Jammu (Vijaypur)"
+  },
+  {
+    "id": "JK/004/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Anantnag"
+  },
+  {
+    "id": "JK/005/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Baramulla"
+  },
+  {
+    "id": "JK/010/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Doda"
+  },
+  {
+    "id": "JK/002/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Handwara"
+  },
+  {
+    "id": "JK/006/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Jammu"
+  },
+  {
+    "id": "JK/007/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Kathua"
+  },
+  {
+    "id": "JK/008/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Rajouri"
+  },
+  {
+    "id": "JK/009/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Srinagar"
+  },
+  {
+    "id": "JK/003/G",
+    "state": "Jammu & Kashmir",
+    "name": "Government Medical College, Udhampur"
+  },
+  {
+    "id": "JK/011/G",
+    "state": "Jammu & Kashmir",
+    "name": "Sher-i-Kashmir Institute of Medical Sciences, Srinagar"
+  },
+  {
+    "id": "INI-JH-01",
+    "state": "Jharkhand",
+    "name": "AIIMS Deoghar"
+  },
+  {
+    "id": "NEW-JH-02",
+    "state": "Jharkhand",
+    "name": "Birsa Institute of Medical Sciences and Research"
+  },
+  {
+    "id": "JH/001/G",
+    "state": "Jharkhand",
+    "name": "Dumka Medical College, Dumka"
+  },
+  {
+    "id": "JH/002/G",
+    "state": "Jharkhand",
+    "name": "Hazaribagh Medical College, Hazaribagh"
+  },
+  {
+    "id": "JH/003/P",
+    "state": "Jharkhand",
+    "name": "Laxmi Chandravansi Medical College & Hospital"
+  },
+  {
+    "id": "JH/004/G",
+    "state": "Jharkhand",
+    "name": "M G M Medical College, Jamshedpur"
+  },
+  {
+    "id": "JH/005/P",
+    "state": "Jharkhand",
+    "name": "Manipal Tata Medical College, Jamshedpur"
+  },
+  {
+    "id": "JH/006/P",
+    "state": "Jharkhand",
+    "name": "Netaji Subhas Medical College and Hospital"
+  },
+  {
+    "id": "JH/007/G",
+    "state": "Jharkhand",
+    "name": "Palamu Medical College, Palamu"
+  },
+  {
+    "id": "JH/008/G",
+    "state": "Jharkhand",
+    "name": "Rajendra Institute of Medical Sciences, Ranchi"
+  },
+  {
+    "id": "JH/009/G",
+    "state": "Jharkhand",
+    "name": "Shaheed Nirmal Mahto Medical College & Hospital, Dhanbad"
+  },
+  {
+    "id": "NEW-JH-01",
+    "state": "Jharkhand",
+    "name": "Sido Kanhu Medical College and Hospital"
+  },
+  {
+    "id": "KA/001/P",
+    "state": "Karnataka",
+    "name": "A J Institute of Medical Sciences & Research Centre, Mangalore"
+  },
+  {
+    "id": "KA/002/P",
+    "state": "Karnataka",
+    "name": "Adichunchanagiri Institute of Medical Sciences, Bellur"
+  },
+  {
+    "id": "KA/003/P",
+    "state": "Karnataka",
+    "name": "Akash Institute of Medical Sciences & Research Centre, Devanahalli, Bangalore"
+  },
+  {
+    "id": "KA/004/P",
+    "state": "Karnataka",
+    "name": "Al-Ameen Medical College, Bijapur"
+  },
+  {
+    "id": "NEW-KA-02",
+    "state": "Karnataka",
+    "name": "Alva's Institute of Medical Sciences and Research Centre"
+  },
+  {
+    "id": "NEW-KA-01",
+    "state": "Karnataka",
+    "name": "Bagalkote Medical College and Research Institute"
+  },
+  {
+    "id": "KA/005/G",
+    "state": "Karnataka",
+    "name": "Bangalore Medical College and Research Institute, Bangalore"
+  },
+  {
+    "id": "KA/006/P",
+    "state": "Karnataka",
+    "name": "Basaveshwara Medical College and Hospital, Chitradurga"
+  },
+  {
+    "id": "KA/007/G",
+    "state": "Karnataka",
+    "name": "Belagavi Institute of Medical Sciences, Belagavi"
+  },
+  {
+    "id": "KA/008/P",
+    "state": "Karnataka",
+    "name": "BGS Global Institute of Medical Sciences, Bangalore"
+  },
+  {
+    "id": "KA/009/P",
+    "state": "Karnataka",
+    "name": "BGS Medical College and Hospital, Bengaluru"
+  },
+  {
+    "id": "KA/010/G",
+    "state": "Karnataka",
+    "name": "Bidar Institute of Medical Sciences, Bidar"
+  },
+  {
+    "id": "KA/011/G",
+    "state": "Karnataka",
+    "name": "Chamarajanagar Institute of Medical Sciences, Chamarajanagar"
+  },
+  {
+    "id": "NEW-KA-03",
+    "state": "Karnataka",
+    "name": "Chettinad Institute of Medical Education and Research"
+  },
+  {
+    "id": "KA/013/G",
+    "state": "Karnataka",
+    "name": "Chikkamagaluru Institute of Medical Sciences, Chikkamagaluru"
+  },
+  {
+    "id": "KA/014/G",
+    "state": "Karnataka",
+    "name": "Chitradurga Medical College and Research Institute"
+  },
+  {
+    "id": "KA/015/P",
+    "state": "Karnataka",
+    "name": "Dr. B.R. Ambedkar Medical College, Bangalore"
+  },
+  {
+    "id": "KA/016/P",
+    "state": "Karnataka",
+    "name": "Dr. Chandramma Dayananda Sagar Institute of Medical Education & Research, Harohalli"
+  },
+  {
+    "id": "KA/017/P",
+    "state": "Karnataka",
+    "name": "East Point College of Medical Sciences & Research Centre, Bangalore"
+  },
+  {
+    "id": "KA/018/G",
+    "state": "Karnataka",
+    "name": "ESIC Medical College, Bangalore"
+  },
+  {
+    "id": "KA/019/G",
+    "state": "Karnataka",
+    "name": "ESIC Medical College, Gulbarga"
+  },
+  {
+    "id": "KA/020/P",
+    "state": "Karnataka",
+    "name": "Farookh Academy of Medical Education Hospital and Research Institute"
+  },
+  {
+    "id": "KA/021/P",
+    "state": "Karnataka",
+    "name": "Father Muller Medical College, Mangalore"
+  },
+  {
+    "id": "KA/073/T",
+    "state": "Karnataka",
+    "name": "G R Medical College Hospital & Research Centre"
+  },
+  {
+    "id": "KA/022/G",
+    "state": "Karnataka",
+    "name": "Gulbarga Institute of Medical Sciences, Gulbarga"
+  },
+  {
+    "id": "KA/023/G",
+    "state": "Karnataka",
+    "name": "Hassan Institute of Medical Sciences, Hassan"
+  },
+  {
+    "id": "KA/024/G",
+    "state": "Karnataka",
+    "name": "Haveri Institute of Medical Sciences, Haveri"
+  },
+  {
+    "id": "KA/025/P",
+    "state": "Karnataka",
+    "name": "Jagadguru Gangadhar Mahaswamigalu Moorusavirmath Medical College (JGMMMC), Hubli"
+  },
+  {
+    "id": "KA/026/P",
+    "state": "Karnataka",
+    "name": "Jawaharlal Nehru Medical College, Belgaum"
+  },
+  {
+    "id": "KA/027/P",
+    "state": "Karnataka",
+    "name": "JJM Medical College, Davangere"
+  },
+  {
+    "id": "KA/028/P",
+    "state": "Karnataka",
+    "name": "JSS Medical College, Mysore"
+  },
+  {
+    "id": "KA/029/P",
+    "state": "Karnataka",
+    "name": "K S Hegde Medical Academy, Mangalore"
+  },
+  {
+    "id": "KA/030/P",
+    "state": "Karnataka",
+    "name": "K V G Medical College, Sullia"
+  },
+  {
+    "id": "KA/031/G",
+    "state": "Karnataka",
+    "name": "K.H. Patil Institute of Medical Sciences, Gadag (previously Gadag Institute of Medical Sciences)"
+  },
+  {
+    "id": "KA/032/P",
+    "state": "Karnataka",
+    "name": "Kanachur Institute of Medical Sciences, Mangalore"
+  },
+  {
+    "id": "KA/033/G",
+    "state": "Karnataka",
+    "name": "Karnataka Medical College and Research Institute, Hubballi"
+  },
+  {
+    "id": "KA/034/G",
+    "state": "Karnataka",
+    "name": "Karwar Institute of Medical Sciences, Karwar"
+  },
+  {
+    "id": "KA/035/P",
+    "state": "Karnataka",
+    "name": "Kasturba Medical College, Mangalore"
+  },
+  {
+    "id": "KA/036/P",
+    "state": "Karnataka",
+    "name": "Kasturba Medical College, Manipal"
+  },
+  {
+    "id": "KA/037/P",
+    "state": "Karnataka",
+    "name": "Kempegowda Institute of Medical Sciences, Bangalore"
+  },
+  {
+    "id": "KA/038/P",
+    "state": "Karnataka",
+    "name": "Khaja Bandanawaz University - Faculty of Medical Sciences, Gulbarga"
+  },
+  {
+    "id": "KA/039/G",
+    "state": "Karnataka",
+    "name": "Kodagu Institute of Medical Sciences, Kodagu"
+  },
+  {
+    "id": "KA/040/G",
+    "state": "Karnataka",
+    "name": "Koppal Institute of Medical Sciences, Koppal"
+  },
+  {
+    "id": "KA/041/P",
+    "state": "Karnataka",
+    "name": "M S Ramaiah Medical College, Bangalore"
+  },
+  {
+    "id": "KA/042/P",
+    "state": "Karnataka",
+    "name": "Mahadevappa Rampure Medical College, Kalaburagi, Gulbarga"
+  },
+  {
+    "id": "KA/043/G",
+    "state": "Karnataka",
+    "name": "Mandya Institute of Medical Sciences, Mandya"
+  },
+  {
+    "id": "KA/044/P",
+    "state": "Karnataka",
+    "name": "MVJ Medical College and Research Hospital, Bangalore"
+  },
+  {
+    "id": "KA/045/G",
+    "state": "Karnataka",
+    "name": "Mysore Medical College and Research Institute, Mysore"
+  },
+  {
+    "id": "KA/012/G",
+    "state": "Karnataka",
+    "name": "Nandi Medical College and Research Institute, Chikkaballapura (formerly Chikkaballapura Institute of Medical Sciences)"
+  },
+  {
+    "id": "KA/046/P",
+    "state": "Karnataka",
+    "name": "Navodaya Medical College, Raichur"
+  },
+  {
+    "id": "KA/047/P",
+    "state": "Karnataka",
+    "name": "PES University Institute of Medical Sciences and Research, Bangalore"
+  },
+  {
+    "id": "KA/048/G",
+    "state": "Karnataka",
+    "name": "Raichur Institute of Medical Sciences, Raichur"
+  },
+  {
+    "id": "KA/049/P",
+    "state": "Karnataka",
+    "name": "Raja Rajeswari Medical College & Hospital, Bangalore"
+  },
+  {
+    "id": "KA/050/P",
+    "state": "Karnataka",
+    "name": "S S Institute of Medical Sciences & Research Centre, Davangere"
+  },
+  {
+    "id": "KA/051/P",
+    "state": "Karnataka",
+    "name": "S. Nijalingappa Medical College & HSK Hospital & Research Centre, Bagalkot"
+  },
+  {
+    "id": "KA/052/P",
+    "state": "Karnataka",
+    "name": "Sapthagiri Institute of Medical Sciences & Research Centre, Bangalore"
+  },
+  {
+    "id": "KA/053/P",
+    "state": "Karnataka",
+    "name": "SDM College of Medical Sciences & Hospital, Sattur, Dharwad"
+  },
+  {
+    "id": "KA/054/G",
+    "state": "Karnataka",
+    "name": "Shimoga Institute of Medical Sciences, Shimoga"
+  },
+  {
+    "id": "KA/055/G",
+    "state": "Karnataka",
+    "name": "Shri Atal Bihari Vajpayee Medical College and Research Institute, Bengaluru"
+  },
+  {
+    "id": "KA/056/P",
+    "state": "Karnataka",
+    "name": "Shri B M Patil Medical College, Hospital & Research Centre, Vijayapura"
+  },
+  {
+    "id": "KA/057/P",
+    "state": "Karnataka",
+    "name": "Shridevi Institute of Medical Sciences & Research Hospital, Tumkur"
+  },
+  {
+    "id": "KA/058/P",
+    "state": "Karnataka",
+    "name": "Siddaganga Medical College and Research Institute, Tumakuru"
+  },
+  {
+    "id": "KA/059/P",
+    "state": "Karnataka",
+    "name": "SR Patil Medical College and Hospital, Bagalkot"
+  },
+  {
+    "id": "KA/060/P",
+    "state": "Karnataka",
+    "name": "Sri Chamundeshwari Medical College Hospital & Research Institute"
+  },
+  {
+    "id": "KA/061/P",
+    "state": "Karnataka",
+    "name": "Sri Devaraj Urs Medical College, Kolar"
+  },
+  {
+    "id": "KA/062/P",
+    "state": "Karnataka",
+    "name": "Sri Madhusudan Sai Institute of Medical Sciences & Research, Chikkaballapur"
+  },
+  {
+    "id": "KA/063/P",
+    "state": "Karnataka",
+    "name": "Sri Siddhartha Institute of Medical Sciences & Research Centre, Bangalore"
+  },
+  {
+    "id": "KA/064/P",
+    "state": "Karnataka",
+    "name": "Sri Siddhartha Medical College, Tumkur"
+  },
+  {
+    "id": "KA/065/P",
+    "state": "Karnataka",
+    "name": "Srinivas Institute of Medical Sciences & Research Centre, Mangalore"
+  },
+  {
+    "id": "KA/066/P",
+    "state": "Karnataka",
+    "name": "St. John's Medical College, Bangalore"
+  },
+  {
+    "id": "KA/067/P",
+    "state": "Karnataka",
+    "name": "Subbaiah Institute of Medical Sciences, Shimoga"
+  },
+  {
+    "id": "KA/068/P",
+    "state": "Karnataka",
+    "name": "The Oxford Medical College, Hospital & Research Centre, Bangalore"
+  },
+  {
+    "id": "KA/069/G",
+    "state": "Karnataka",
+    "name": "Vijayanagar Institute of Medical Sciences, Bellary"
+  },
+  {
+    "id": "KA/070/P",
+    "state": "Karnataka",
+    "name": "Vydehi Institute of Medical Sciences & Research Centre, Bangalore"
+  },
+  {
+    "id": "KA/071/G",
+    "state": "Karnataka",
+    "name": "Yadgir Institute of Medical Sciences, Yadgir"
+  },
+  {
+    "id": "KA/072/P",
+    "state": "Karnataka",
+    "name": "Yenepoya Medical College, Mangalore"
+  },
+  {
+    "id": "KL/001/P",
+    "state": "Kerala",
+    "name": "Al-Azhar Medical College and Super Speciality Hospital, Thodupuzha"
+  },
+  {
+    "id": "KL/002/P",
+    "state": "Kerala",
+    "name": "Amala Institute of Medical Sciences, Thrissur"
+  },
+  {
+    "id": "KL/003/P",
+    "state": "Kerala",
+    "name": "Amrita School of Medicine, Elamkara, Kochi"
+  },
+  {
+    "id": "KL/004/P",
+    "state": "Kerala",
+    "name": "Azeezia Institute of Medical Science, Meeyannoor, Kollam"
+  },
+  {
+    "id": "KL/005/P",
+    "state": "Kerala",
+    "name": "Believers Church Medical College Hospital, Thiruvalla"
+  },
+  {
+    "id": "KL/006/P",
+    "state": "Kerala",
+    "name": "Dr. Moopen's Medical College, Wayanad"
+  },
+  {
+    "id": "KL/007/P",
+    "state": "Kerala",
+    "name": "Dr. Somervell Memorial CSI Medical College, Karakonam, Thiruvananthapuram"
+  },
+  {
+    "id": "KL/008/G",
+    "state": "Kerala",
+    "name": "Government Medical College (Institute of Integrated Medical Sciences), Yakkara, Palakkad"
+  },
+  {
+    "id": "KL/010/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Ernakulam"
+  },
+  {
+    "id": "KL/011/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Idukki"
+  },
+  {
+    "id": "KL/009/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Kasaragod"
+  },
+  {
+    "id": "KL/012/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Konni"
+  },
+  {
+    "id": "KL/013/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Kottayam"
+  },
+  {
+    "id": "KL/014/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Kozhikode"
+  },
+  {
+    "id": "KL/015/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Manjeri, Malappuram"
+  },
+  {
+    "id": "KL/016/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Parippally, Kollam"
+  },
+  {
+    "id": "KL/019/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Pariyaram, Kannur"
+  },
+  {
+    "id": "KL/017/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Thrissur"
+  },
+  {
+    "id": "KL/018/G",
+    "state": "Kerala",
+    "name": "Government Medical College, Wayanad"
+  },
+  {
+    "id": "KL/020/P",
+    "state": "Kerala",
+    "name": "Jubilee Mission Medical College & Research Institute, Thrissur"
+  },
+  {
+    "id": "KL/021/P",
+    "state": "Kerala",
+    "name": "Karuna Medical College, Palakkad"
+  },
+  {
+    "id": "KL/022/P",
+    "state": "Kerala",
+    "name": "Kerala Medical College, Mangode"
+  },
+  {
+    "id": "KL/023/P",
+    "state": "Kerala",
+    "name": "KMCT Medical College, Kozhikode"
+  },
+  {
+    "id": "KL/024/P",
+    "state": "Kerala",
+    "name": "M E S Medical College, Perinthalmanna"
+  },
+  {
+    "id": "KL/025/P",
+    "state": "Kerala",
+    "name": "Malabar Medical College, Kozhikode"
+  },
+  {
+    "id": "KL/026/P",
+    "state": "Kerala",
+    "name": "Malankara Orthodox Syrian Church Medical College, Kolenchery"
+  },
+  {
+    "id": "KL/027/G",
+    "state": "Kerala",
+    "name": "Medical College, Thiruvananthapuram"
+  },
+  {
+    "id": "KL/028/P",
+    "state": "Kerala",
+    "name": "Mount Zion Medical College, Adoor, Pathanamthitta"
+  },
+  {
+    "id": "KL/029/P",
+    "state": "Kerala",
+    "name": "P K Das Institute of Medical Sciences, Palakkad"
+  },
+  {
+    "id": "KL/030/P",
+    "state": "Kerala",
+    "name": "Palakkad Institute of Medical Sciences, Palakkad"
+  },
+  {
+    "id": "KL/031/P",
+    "state": "Kerala",
+    "name": "Pushpagiri Institute of Medical Sciences and Research Centre, Tiruvalla"
+  },
+  {
+    "id": "KL/032/P",
+    "state": "Kerala",
+    "name": "Sree Gokulam Medical College Trust & Research Foundation, Trivandrum"
+  },
+  {
+    "id": "KL/033/P",
+    "state": "Kerala",
+    "name": "Sree Narayana Institute of Medical Sciences, Chalakka, Ernakulam"
+  },
+  {
+    "id": "KL/034/P",
+    "state": "Kerala",
+    "name": "Sree Uthradom Thirunal Academy of Medical Sciences, Trivandrum"
+  },
+  {
+    "id": "KL/035/G",
+    "state": "Kerala",
+    "name": "T D Medical College, Alappuzha"
+  },
+  {
+    "id": "KL/036/P",
+    "state": "Kerala",
+    "name": "Travancore Medical College, Kollam"
+  },
+  {
+    "id": "INI-MP-01",
+    "state": "Madhya Pradesh",
+    "name": "AIIMS Bhopal"
+  },
+  {
+    "id": "MP/001/P",
+    "state": "Madhya Pradesh",
+    "name": "Amaltas Institute of Medical Sciences, Dewas"
+  },
+  {
+    "id": "MP/002/G",
+    "state": "Madhya Pradesh",
+    "name": "Bundelkhand Medical College, Sagar"
+  },
+  {
+    "id": "MP/003/P",
+    "state": "Madhya Pradesh",
+    "name": "Chirayu Medical College and Hospital, Bhopal"
+  },
+  {
+    "id": "MP/012/G",
+    "state": "Madhya Pradesh",
+    "name": "Dr. Laxminarayan Pandey Government Medical College, Ratlam"
+  },
+  {
+    "id": "MP/004/G",
+    "state": "Madhya Pradesh",
+    "name": "ESIC Medical College and Hospital, Indore"
+  },
+  {
+    "id": "MP/005/G",
+    "state": "Madhya Pradesh",
+    "name": "Gajra Raja Medical College, Gwalior"
+  },
+  {
+    "id": "MP/006/G",
+    "state": "Madhya Pradesh",
+    "name": "Gandhi Medical College, Bhopal"
+  },
+  {
+    "id": "MP/009/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Chhindwara"
+  },
+  {
+    "id": "MP/010/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Datia"
+  },
+  {
+    "id": "MP/011/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Khandwa"
+  },
+  {
+    "id": "MP/013/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Satna"
+  },
+  {
+    "id": "MP/014/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Seoni"
+  },
+  {
+    "id": "MP/015/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Shahdol"
+  },
+  {
+    "id": "MP/007/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Sheopur"
+  },
+  {
+    "id": "MP/016/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Shivpuri"
+  },
+  {
+    "id": "MP/008/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Singrauli"
+  },
+  {
+    "id": "MP/017/G",
+    "state": "Madhya Pradesh",
+    "name": "Government Medical College, Vidisha"
+  },
+  {
+    "id": "MP/018/P",
+    "state": "Madhya Pradesh",
+    "name": "Index Medical College Hospital & Research Centre, Indore"
+  },
+  {
+    "id": "MP/019/P",
+    "state": "Madhya Pradesh",
+    "name": "L.N. Medical College and Research Centre, Bhopal"
+  },
+  {
+    "id": "MP/020/P",
+    "state": "Madhya Pradesh",
+    "name": "LNCT Medical College & Sewakunj Hospital, Indore"
+  },
+  {
+    "id": "MP/021/G",
+    "state": "Madhya Pradesh",
+    "name": "M G M Medical College, Indore"
+  },
+  {
+    "id": "MP/022/P",
+    "state": "Madhya Pradesh",
+    "name": "Mahaveer Institute of Medical Sciences & Research, Bhopal"
+  },
+  {
+    "id": "MP/023/P",
+    "state": "Madhya Pradesh",
+    "name": "Mansarovar Medical College and MGU Hospital"
+  },
+  {
+    "id": "MP/024/G",
+    "state": "Madhya Pradesh",
+    "name": "Netaji Subhash Chandra Bose Medical College, Jabalpur"
+  },
+  {
+    "id": "MP/025/P",
+    "state": "Madhya Pradesh",
+    "name": "Peoples College of Medical Sciences & Research Centre, Bhanpur, Bhopal"
+  },
+  {
+    "id": "MP/026/P",
+    "state": "Madhya Pradesh",
+    "name": "Ram Krishna College Hospital & Research Centre, Bhopal"
+  },
+  {
+    "id": "MP/027/P",
+    "state": "Madhya Pradesh",
+    "name": "RKDF Medical College Hospital & Research Centre, Jatkhedi, Bhopal"
+  },
+  {
+    "id": "MP/028/P",
+    "state": "Madhya Pradesh",
+    "name": "Ruxmaniben Deepchand Gardi Medical College, Ujjain"
+  },
+  {
+    "id": "MP/029/P",
+    "state": "Madhya Pradesh",
+    "name": "School of Medical Sciences, Sri Satya Sai University of Technology and Medical Sciences"
+  },
+  {
+    "id": "MP/030/G",
+    "state": "Madhya Pradesh",
+    "name": "Shyam Shah Medical College, Rewa"
+  },
+  {
+    "id": "MP/031/P",
+    "state": "Madhya Pradesh",
+    "name": "Sri Aurobindo Medical College and Postgraduate Institute, Indore"
+  },
+  {
+    "id": "MP/032/P",
+    "state": "Madhya Pradesh",
+    "name": "Sukh Sagar Medical College & Hospital, Jabalpur"
+  },
+  {
+    "id": "MP/033/G",
+    "state": "Madhya Pradesh",
+    "name": "Sundarlal Patwa Government Medical College"
+  },
+  {
+    "id": "MP/034/G",
+    "state": "Madhya Pradesh",
+    "name": "Virendra Kumar Sakhlecha Government Medical College"
+  },
+  {
+    "id": "MH/001/P",
+    "state": "Maharashtra",
+    "name": "ACPM Medical College, Dhule"
+  },
+  {
+    "id": "INI-MH-01",
+    "state": "Maharashtra",
+    "name": "AIIMS Nagpur"
+  },
+  {
+    "id": "MH/002/G",
+    "state": "Maharashtra",
+    "name": "Armed Forces Medical College, Pune"
+  },
+  {
+    "id": "MH/003/P",
+    "state": "Maharashtra",
+    "name": "Ashwini Rural Medical College, Hospital & Research Centre, Solapur"
+  },
+  {
+    "id": "NEW-MH-05",
+    "state": "Maharashtra",
+    "name": "ASPL's CSMSS Medical College and Hospital"
+  },
+  {
+    "id": "MH/004/G",
+    "state": "Maharashtra",
+    "name": "B J Government Medical College, Pune"
+  },
+  {
+    "id": "MH/005/P",
+    "state": "Maharashtra",
+    "name": "B.K.L. Walawalkar Rural Medical College, Ratnagiri"
+  },
+  {
+    "id": "NEW-MH-02",
+    "state": "Maharashtra",
+    "name": "B.S.P. Medical College and Hospital"
+  },
+  {
+    "id": "MH/006/P",
+    "state": "Maharashtra",
+    "name": "Bharati Vidyapeeth Deemed University Medical College & Hospital, Sangli"
+  },
+  {
+    "id": "MH/007/P",
+    "state": "Maharashtra",
+    "name": "Bharati Vidyapeeth University Medical College, Pune"
+  },
+  {
+    "id": "MH/008/P",
+    "state": "Maharashtra",
+    "name": "Bharatratna Atal Bihari Vajpayee Medical College, Pune"
+  },
+  {
+    "id": "MH/020/P",
+    "state": "Maharashtra",
+    "name": "D Y Patil University, School of Medicine"
+  },
+  {
+    "id": "MH/009/P",
+    "state": "Maharashtra",
+    "name": "Datta Meghe Medical College, Nagpur"
+  },
+  {
+    "id": "MH/011/P",
+    "state": "Maharashtra",
+    "name": "Dr. D Y Patil Medical College, Hospital and Research Centre, Pimpri, Pune"
+  },
+  {
+    "id": "MH/012/P",
+    "state": "Maharashtra",
+    "name": "Dr. D Y Patil Medical College, Kolhapur"
+  },
+  {
+    "id": "MH/013/P",
+    "state": "Maharashtra",
+    "name": "Dr. N Y Tasgaonkar Institute of Medical Sciences"
+  },
+  {
+    "id": "MH/014/P",
+    "state": "Maharashtra",
+    "name": "Dr. Panjabrao Alias Bhausaheb Deshmukh Memorial Medical College, Amravati"
+  },
+  {
+    "id": "MH/015/P",
+    "state": "Maharashtra",
+    "name": "Dr. Rajendra Gode Medical College, Amravati"
+  },
+  {
+    "id": "MH/016/G",
+    "state": "Maharashtra",
+    "name": "Dr. Shankarrao Chavan Government Medical College, Nanded"
+  },
+  {
+    "id": "MH/017/P",
+    "state": "Maharashtra",
+    "name": "Dr. Ulhas Patil Medical College & Hospital, Jalgaon"
+  },
+  {
+    "id": "MH/010/G",
+    "state": "Maharashtra",
+    "name": "Dr. Vaishampayan Memorial Government Medical College, Solapur"
+  },
+  {
+    "id": "MH/018/P",
+    "state": "Maharashtra",
+    "name": "Dr. Vasantrao Pawar Medical College, Hospital & Research Centre, Nashik"
+  },
+  {
+    "id": "MH/019/P",
+    "state": "Maharashtra",
+    "name": "Dr. Vithalrao Vikhe Patil Foundation's Medical College & Hospital, Ahmednagar"
+  },
+  {
+    "id": "MH/021/G",
+    "state": "Maharashtra",
+    "name": "ESIC Medical College and Hospital, Andheri, Mumbai"
+  },
+  {
+    "id": "MH/022/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College & Hospital, Baramati"
+  },
+  {
+    "id": "MH/023/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College and District Hospital, Ratnagiri"
+  },
+  {
+    "id": "MH/025/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Akola"
+  },
+  {
+    "id": "MH/026/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Alibag"
+  },
+  {
+    "id": "MH/027/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Ambernath"
+  },
+  {
+    "id": "MH/028/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Amravati"
+  },
+  {
+    "id": "MH/029/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Aurangabad"
+  },
+  {
+    "id": "MH/030/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Bhandara"
+  },
+  {
+    "id": "MH/031/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Buldhana"
+  },
+  {
+    "id": "MH/032/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Chandrapur"
+  },
+  {
+    "id": "MH/033/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Gadchiroli"
+  },
+  {
+    "id": "MH/034/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Gondia"
+  },
+  {
+    "id": "MH/035/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Hingoli"
+  },
+  {
+    "id": "MH/036/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Jalgaon"
+  },
+  {
+    "id": "MH/037/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Jalna"
+  },
+  {
+    "id": "MH/038/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Latur"
+  },
+  {
+    "id": "MH/039/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Miraj"
+  },
+  {
+    "id": "MH/024/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Mumbai (L.T. Marg)"
+  },
+  {
+    "id": "MH/040/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Nagpur"
+  },
+  {
+    "id": "MH/041/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Nandurbar"
+  },
+  {
+    "id": "MH/047/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Nashik"
+  },
+  {
+    "id": "MH/042/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Osmanabad"
+  },
+  {
+    "id": "MH/043/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Parbhani"
+  },
+  {
+    "id": "MH/044/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Satara"
+  },
+  {
+    "id": "MH/045/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Sindhudurg"
+  },
+  {
+    "id": "MH/046/G",
+    "state": "Maharashtra",
+    "name": "Government Medical College, Washim"
+  },
+  {
+    "id": "MH/048/G",
+    "state": "Maharashtra",
+    "name": "Grant Medical College, Mumbai"
+  },
+  {
+    "id": "MH/049/G",
+    "state": "Maharashtra",
+    "name": "H.B.T. Medical College & Dr. R.N. Cooper Municipal General Hospital, Juhu, Mumbai"
+  },
+  {
+    "id": "NEW-MH-04",
+    "state": "Maharashtra",
+    "name": "Ideal Institute of Medical Science"
+  },
+  {
+    "id": "MH/050/P",
+    "state": "Maharashtra",
+    "name": "Indian Institute of Medical Science & Research, Jalna"
+  },
+  {
+    "id": "MH/051/G",
+    "state": "Maharashtra",
+    "name": "Indira Gandhi Government Medical College & Hospital, Nagpur"
+  },
+  {
+    "id": "MH/052/P",
+    "state": "Maharashtra",
+    "name": "Jawaharlal Nehru Medical College, Sawangi (Meghe), Wardha"
+  },
+  {
+    "id": "MH/053/P",
+    "state": "Maharashtra",
+    "name": "K J Somaiya Medical College & Research Centre, Mumbai"
+  },
+  {
+    "id": "MH/054/P",
+    "state": "Maharashtra",
+    "name": "Krishna Institute of Medical Sciences, Karad"
+  },
+  {
+    "id": "MH/055/G",
+    "state": "Maharashtra",
+    "name": "Lokmanya Tilak Municipal Medical College, Sion, Mumbai"
+  },
+  {
+    "id": "MH/056/P",
+    "state": "Maharashtra",
+    "name": "Maharashtra Institute of Medical Education & Research, Talegaon, Pune"
+  },
+  {
+    "id": "MH/057/P",
+    "state": "Maharashtra",
+    "name": "Maharashtra Institute of Medical Sciences & Research, Latur"
+  },
+  {
+    "id": "MH/058/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Institute of Medical Sciences, Sevagram, Wardha"
+  },
+  {
+    "id": "MH/059/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Mission Medical College, Vashi"
+  },
+  {
+    "id": "MH/060/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Missions Medical College, Aurangabad"
+  },
+  {
+    "id": "MH/061/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Missions Medical College, Kamothe, Navi Mumbai"
+  },
+  {
+    "id": "MH/062/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Missions Medical College, Nerul, Navi Mumbai"
+  },
+  {
+    "id": "MH/063/P",
+    "state": "Maharashtra",
+    "name": "Mahatma Gandhi Missions Medical College, Panvel"
+  },
+  {
+    "id": "MH/064/P",
+    "state": "Maharashtra",
+    "name": "Malati Multispeciality Hospital and Medical College"
+  },
+  {
+    "id": "NEW-MH-03",
+    "state": "Maharashtra",
+    "name": "Mauli Medical College Hospital & Research Center"
+  },
+  {
+    "id": "MH/065/P",
+    "state": "Maharashtra",
+    "name": "N.K.P. Salve Institute of Medical Sciences and Research Centre and Lata Mangeshkar Hospital, Nagpur"
+  },
+  {
+    "id": "MH/066/P",
+    "state": "Maharashtra",
+    "name": "Padmashree Dr. D.Y. Patil Medical College, Navi Mumbai"
+  },
+  {
+    "id": "MH/067/P",
+    "state": "Maharashtra",
+    "name": "Parbhani Medical College"
+  },
+  {
+    "id": "MH/068/P",
+    "state": "Maharashtra",
+    "name": "Prakash Institute of Medical Sciences & Research, Sangli"
+  },
+  {
+    "id": "NEW-MH-01",
+    "state": "Maharashtra",
+    "name": "Punyashlok Ahilyadevi Holkar Government Medical College, Ahilyanagar"
+  },
+  {
+    "id": "MH/071/P",
+    "state": "Maharashtra",
+    "name": "R K Damani Medical College, Shri Ramchandra Institute of Medical Sciences, Chhatrapati Sambhajinagar"
+  },
+  {
+    "id": "MH/069/G",
+    "state": "Maharashtra",
+    "name": "Rajarshee Chhatrapati Shahu Maharaj Government Medical College, Kolhapur"
+  },
+  {
+    "id": "MH/070/G",
+    "state": "Maharashtra",
+    "name": "Rajiv Gandhi Medical College and Chhatrapati Shivaji Maharaj Hospital, Thane"
+  },
+  {
+    "id": "MH/072/P",
+    "state": "Maharashtra",
+    "name": "Rural Medical College, Loni"
+  },
+  {
+    "id": "MH/073/G",
+    "state": "Maharashtra",
+    "name": "Seth G S Medical College, Mumbai"
+  },
+  {
+    "id": "MH/079/G",
+    "state": "Maharashtra",
+    "name": "Shri Bhausaheb Hire Government Medical College, Dhule"
+  },
+  {
+    "id": "MH/074/G",
+    "state": "Maharashtra",
+    "name": "Shri Vasantrao Naik Government Medical College, Yavatmal"
+  },
+  {
+    "id": "MH/075/P",
+    "state": "Maharashtra",
+    "name": "Sindhudurg Shikshan Prasarak Mandal (SSPM) Medical College & Lifetime Hospital, Padave, Sindhudurg"
+  },
+  {
+    "id": "MH/076/P",
+    "state": "Maharashtra",
+    "name": "SMBT Institute of Medical Sciences & Research Centre, Nandihills, Nashik"
+  },
+  {
+    "id": "MH/078/P",
+    "state": "Maharashtra",
+    "name": "Smt. Kashibai Navale Medical College and General Hospital, Pune"
+  },
+  {
+    "id": "MH/077/P",
+    "state": "Maharashtra",
+    "name": "Smt. Sakhubai Narayanrao Katkade Medical College and Research Center"
+  },
+  {
+    "id": "MH/080/G",
+    "state": "Maharashtra",
+    "name": "SRTR Medical College, Ambajogai"
+  },
+  {
+    "id": "MH/081/P",
+    "state": "Maharashtra",
+    "name": "Symbiosis Medical College for Women, Pune"
+  },
+  {
+    "id": "MH/082/P",
+    "state": "Maharashtra",
+    "name": "Terna Medical College, Navi Mumbai"
+  },
+  {
+    "id": "MH/083/G",
+    "state": "Maharashtra",
+    "name": "Topiwala National Medical College, Mumbai"
+  },
+  {
+    "id": "MH/084/P",
+    "state": "Maharashtra",
+    "name": "Vedantaa Institute of Medical Sciences, Palghar"
+  },
+  {
+    "id": "MN/001/G",
+    "state": "Manipur",
+    "name": "Government Medical College, Churachandpur"
+  },
+  {
+    "id": "MN/002/G",
+    "state": "Manipur",
+    "name": "Jawaharlal Nehru Institute of Medical Sciences, Porompat, Imphal"
+  },
+  {
+    "id": "MN/003/G",
+    "state": "Manipur",
+    "name": "Regional Institute of Medical Sciences, Imphal"
+  },
+  {
+    "id": "MN/004/P",
+    "state": "Manipur",
+    "name": "Shija Academy of Health Sciences, Imphal"
+  },
+  {
+    "id": "ML/001/G",
+    "state": "Meghalaya",
+    "name": "North Eastern Indira Gandhi Regional Institute of Health and Medical Sciences, Shillong"
+  },
+  {
+    "id": "ML/002/P",
+    "state": "Meghalaya",
+    "name": "PA Sangma International Medical College and Hospital"
+  },
+  {
+    "id": "ML/003/G",
+    "state": "Meghalaya",
+    "name": "Shillong Medical College"
+  },
+  {
+    "id": "MZ/001/G",
+    "state": "Mizoram",
+    "name": "Zoram Medical College, Mizoram"
+  },
+  {
+    "id": "NL/001/G",
+    "state": "Nagaland",
+    "name": "Nagaland Institute of Medical Sciences & Research, Kohima"
+  },
+  {
+    "id": "INI-OD-01",
+    "state": "Odisha",
+    "name": "AIIMS Bhubaneswar"
+  },
+  {
+    "id": "OD/001/G",
+    "state": "Odisha",
+    "name": "Bhima Bhoi Medical College & Hospital, Balangir"
+  },
+  {
+    "id": "OD/005/G",
+    "state": "Odisha",
+    "name": "Dharanidhar Medical College and Hospital, Keonjhar"
+  },
+  {
+    "id": "OD/001/P",
+    "state": "Odisha",
+    "name": "DRIEMS Institute of Health Sciences and Hospital, Kairapari"
+  },
+  {
+    "id": "OD/002/G",
+    "state": "Odisha",
+    "name": "Fakir Mohan Medical College & Hospital, Balasore"
+  },
+  {
+    "id": "OD/003/G",
+    "state": "Odisha",
+    "name": "Government Medical College Phulbani, Kandhamal"
+  },
+  {
+    "id": "OD/006/G",
+    "state": "Odisha",
+    "name": "Government Medical College, Sundargarh"
+  },
+  {
+    "id": "OD/007/P",
+    "state": "Odisha",
+    "name": "Hi-Tech Medical College & Hospital, Bhubaneswar"
+  },
+  {
+    "id": "OD/008/P",
+    "state": "Odisha",
+    "name": "Hi-Tech Medical College & Hospital, Rourkela"
+  },
+  {
+    "id": "OD/009/P",
+    "state": "Odisha",
+    "name": "Institute of Medical Sciences & SUM Hospital, Bhubaneswar (NMC: OD/009/P)"
+  },
+  {
+    "id": "OD/010/P",
+    "state": "Odisha",
+    "name": "Institute of Medical Sciences & SUM Hospital, Bhubaneswar (NMC: OD/010/P)"
+  },
+  {
+    "id": "OD/011/P",
+    "state": "Odisha",
+    "name": "Kalinga Institute of Medical Sciences, Bhubaneswar"
+  },
+  {
+    "id": "OD/012/G",
+    "state": "Odisha",
+    "name": "Maharaja Jajati Keshari Medical College, Jajpur"
+  },
+  {
+    "id": "OD/013/G",
+    "state": "Odisha",
+    "name": "MKCG Medical College, Berhampur"
+  },
+  {
+    "id": "OD/014/G",
+    "state": "Odisha",
+    "name": "Pabitra Mohan Pradhan Medical College, Talcher"
+  },
+  {
+    "id": "OD/015/G",
+    "state": "Odisha",
+    "name": "Pt. Raghunath Murmu Medical College and Hospital, Baripada"
+  },
+  {
+    "id": "OD/016/G",
+    "state": "Odisha",
+    "name": "Saheed Laxman Nayak Medical College & Hospital, Koraput"
+  },
+  {
+    "id": "OD/004/G",
+    "state": "Odisha",
+    "name": "Saheed Rendo Majhi Medical College and Hospital, Bhawanipatna"
+  },
+  {
+    "id": "OD/017/G",
+    "state": "Odisha",
+    "name": "SCB Medical College, Cuttack"
+  },
+  {
+    "id": "OD/018/G",
+    "state": "Odisha",
+    "name": "Sri Jagannath Medical College & Hospital, Puri"
+  },
+  {
+    "id": "OD/019/G",
+    "state": "Odisha",
+    "name": "Veer Surendra Sai Institute of Medical Sciences and Research, Burla"
+  },
+  {
+    "id": "PY/001/P",
+    "state": "Puducherry",
+    "name": "Aarupadai Veedu Medical College, Puducherry"
+  },
+  {
+    "id": "PY/002/G",
+    "state": "Puducherry",
+    "name": "Indira Gandhi Medical College & Research Institute, Puducherry"
+  },
+  {
+    "id": "INI-PY-02",
+    "state": "Puducherry",
+    "name": "JIPMER Karaikal"
+  },
+  {
+    "id": "INI-PY-01",
+    "state": "Puducherry",
+    "name": "JIPMER Puducherry"
+  },
+  {
+    "id": "PY/003/P",
+    "state": "Puducherry",
+    "name": "Mahatma Gandhi Medical College & Research Institute, Puducherry"
+  },
+  {
+    "id": "PY/004/P",
+    "state": "Puducherry",
+    "name": "Puducherry Institute of Medical Sciences & Research"
+  },
+  {
+    "id": "PY/005/P",
+    "state": "Puducherry",
+    "name": "Sri Lakshmi Narayana Institute of Medical Sciences, Puducherry"
+  },
+  {
+    "id": "PY/006/P",
+    "state": "Puducherry",
+    "name": "Sri Manakula Vinayagar Medical College & Hospital, Puducherry"
+  },
+  {
+    "id": "PY/007/P",
+    "state": "Puducherry",
+    "name": "Sri Venkateshwaraa Medical College Hospital & Research Centre, Puducherry"
+  },
+  {
+    "id": "PY/008/P",
+    "state": "Puducherry",
+    "name": "Vinayaka Missions Medical College, Karaikal"
+  },
+  {
+    "id": "PB/001/P",
+    "state": "Punjab",
+    "name": "Adesh Institute of Medical Sciences & Research, Bathinda"
+  },
+  {
+    "id": "INI-PB-01",
+    "state": "Punjab",
+    "name": "AIIMS Bathinda"
+  },
+  {
+    "id": "PB/002/P",
+    "state": "Punjab",
+    "name": "Christian Medical College, Ludhiana"
+  },
+  {
+    "id": "PB/003/P",
+    "state": "Punjab",
+    "name": "Dayanand Medical College & Hospital, Ludhiana"
+  },
+  {
+    "id": "PB/004/G",
+    "state": "Punjab",
+    "name": "Dr B R Ambedkar State Institute of Medical Sciences, SAS Nagar, Mohali"
+  },
+  {
+    "id": "PB/005/G",
+    "state": "Punjab",
+    "name": "ESIC Medical College, Ludhiana"
+  },
+  {
+    "id": "PB/006/P",
+    "state": "Punjab",
+    "name": "Gian Sagar Medical College & Hospital, Patiala"
+  },
+  {
+    "id": "PB/007/G",
+    "state": "Punjab",
+    "name": "Government Medical College, Amritsar"
+  },
+  {
+    "id": "PB/008/G",
+    "state": "Punjab",
+    "name": "Government Medical College, Patiala"
+  },
+  {
+    "id": "PB/009/G",
+    "state": "Punjab",
+    "name": "Guru Gobind Singh Medical College, Faridkot"
+  },
+  {
+    "id": "PB/010/P",
+    "state": "Punjab",
+    "name": "Punjab Institute of Medical Sciences, Jalandhar"
+  },
+  {
+    "id": "PB/011/P",
+    "state": "Punjab",
+    "name": "RIMT Medical College and Hospital"
+  },
+  {
+    "id": "PB/012/P",
+    "state": "Punjab",
+    "name": "Sri Guru Ram Das Institute of Medical Sciences and Research, Amritsar"
+  },
+  {
+    "id": "INI-RJ-01",
+    "state": "Rajasthan",
+    "name": "AIIMS Jodhpur"
+  },
+  {
+    "id": "RJ/001/P",
+    "state": "Rajasthan",
+    "name": "American International Institute of Medical Sciences, Bedwas"
+  },
+  {
+    "id": "RJ/002/P",
+    "state": "Rajasthan",
+    "name": "Ananta Institute of Medical Sciences & Research Centre, Rajsamand"
+  },
+  {
+    "id": "RJ/003/P",
+    "state": "Rajasthan",
+    "name": "Arya Medical College and Hospital"
+  },
+  {
+    "id": "RJ/004/P",
+    "state": "Rajasthan",
+    "name": "Balvir Singh Tomar Institute of Medical Sciences and Research"
+  },
+  {
+    "id": "NEW-RJ-01",
+    "state": "Rajasthan",
+    "name": "Bharat Vikas Institute of Medical Sciences"
+  },
+  {
+    "id": "RJ/006/G",
+    "state": "Rajasthan",
+    "name": "Dr S N Medical College, Jodhpur"
+  },
+  {
+    "id": "RJ/005/P",
+    "state": "Rajasthan",
+    "name": "Dr S S Tantia Medical College Hospital & Research Centre"
+  },
+  {
+    "id": "NEW-RJ-02",
+    "state": "Rajasthan",
+    "name": "Dr. B. S. Tomar Institute of Medical Sciences and Research"
+  },
+  {
+    "id": "RJ/008/G",
+    "state": "Rajasthan",
+    "name": "ESIC Medical College and Hospital, Jaipur"
+  },
+  {
+    "id": "RJ/007/G",
+    "state": "Rajasthan",
+    "name": "ESIC Medical College, Alwar"
+  },
+  {
+    "id": "RJ/009/P",
+    "state": "Rajasthan",
+    "name": "Geetanjali Institute of Medical Sciences"
+  },
+  {
+    "id": "RJ/010/P",
+    "state": "Rajasthan",
+    "name": "Geetanjali Medical College & Hospital, Udaipur"
+  },
+  {
+    "id": "RJ/011/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Alwar"
+  },
+  {
+    "id": "RJ/012/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Banswara"
+  },
+  {
+    "id": "RJ/013/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Baran"
+  },
+  {
+    "id": "RJ/014/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Barmer"
+  },
+  {
+    "id": "RJ/015/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Bharatpur"
+  },
+  {
+    "id": "RJ/016/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Bhilwara"
+  },
+  {
+    "id": "RJ/017/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Bundi"
+  },
+  {
+    "id": "RJ/018/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Chittorgarh"
+  },
+  {
+    "id": "RJ/019/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Churu"
+  },
+  {
+    "id": "RJ/020/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Dausa"
+  },
+  {
+    "id": "RJ/021/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Dholpur"
+  },
+  {
+    "id": "RJ/022/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Dungarpur"
+  },
+  {
+    "id": "RJ/023/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Hanumangarh"
+  },
+  {
+    "id": "RJ/024/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Jaisalmer"
+  },
+  {
+    "id": "RJ/025/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Jhunjhunu"
+  },
+  {
+    "id": "RJ/026/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Karauli"
+  },
+  {
+    "id": "RJ/027/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Kota"
+  },
+  {
+    "id": "RJ/028/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Nagaur"
+  },
+  {
+    "id": "RJ/029/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Pali"
+  },
+  {
+    "id": "RJ/001/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Sawai Madhopur"
+  },
+  {
+    "id": "RJ/030/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Sirohi"
+  },
+  {
+    "id": "RJ/031/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Sri Ganganagar"
+  },
+  {
+    "id": "RJ/032/G",
+    "state": "Rajasthan",
+    "name": "Government Medical College, Tonk"
+  },
+  {
+    "id": "RJ/033/P",
+    "state": "Rajasthan",
+    "name": "Jaipur National University Institute for Medical Sciences and Research Centre, Jagatpura, Jaipur"
+  },
+  {
+    "id": "RJ/034/G",
+    "state": "Rajasthan",
+    "name": "Jawaharlal Nehru Medical College, Ajmer"
+  },
+  {
+    "id": "RJ/035/G",
+    "state": "Rajasthan",
+    "name": "Jhalawar Medical College, Jhalawar"
+  },
+  {
+    "id": "RJ/036/P",
+    "state": "Rajasthan",
+    "name": "JIET Medical College and Hospital"
+  },
+  {
+    "id": "RJ/037/P",
+    "state": "Rajasthan",
+    "name": "Mahatma Gandhi Medical College and Hospital, Sitapura, Jaipur"
+  },
+  {
+    "id": "RJ/038/P",
+    "state": "Rajasthan",
+    "name": "National Institute of Medical Science & Research, Jaipur"
+  },
+  {
+    "id": "RJ/039/P",
+    "state": "Rajasthan",
+    "name": "Pacific Institute of Medical Sciences, Umarda, Udaipur"
+  },
+  {
+    "id": "RJ/040/P",
+    "state": "Rajasthan",
+    "name": "Pacific Medical College & Hospital, Bhilo Ka Bedla, Udaipur"
+  },
+  {
+    "id": "NEW-RJ-03",
+    "state": "Rajasthan",
+    "name": "Prince Medical College & Hospital"
+  },
+  {
+    "id": "RJ/041/G",
+    "state": "Rajasthan",
+    "name": "R N T Medical College, Udaipur"
+  },
+  {
+    "id": "RJ/042/G",
+    "state": "Rajasthan",
+    "name": "RUHS College of Medical Sciences, Jaipur"
+  },
+  {
+    "id": "RJ/043/G",
+    "state": "Rajasthan",
+    "name": "Sardar Patel Medical College, Bikaner"
+  },
+  {
+    "id": "RJ/044/G",
+    "state": "Rajasthan",
+    "name": "Shri Kalyan Government Medical College, Sikar"
+  },
+  {
+    "id": "RJ/045/G",
+    "state": "Rajasthan",
+    "name": "SMS Medical College, Jaipur"
+  },
+  {
+    "id": "RJ/046/P",
+    "state": "Rajasthan",
+    "name": "Sudha Medical College, Kota"
+  },
+  {
+    "id": "RJ/047/P",
+    "state": "Rajasthan",
+    "name": "Vyas Medical College & Hospital, Jodhpur"
+  },
+  {
+    "id": "NEW-SK-01",
+    "state": "Sikkim",
+    "name": "Sikkim Government Medical College"
+  },
+  {
+    "id": "SK/001/P",
+    "state": "Sikkim",
+    "name": "Sikkim Manipal Institute of Medical Sciences, Gangtok"
+  },
+  {
+    "id": "TN/001/P",
+    "state": "Tamil Nadu",
+    "name": "ACS Medical College and Hospital, Chennai"
+  },
+  {
+    "id": "INI-TN-01",
+    "state": "Tamil Nadu",
+    "name": "AIIMS Madurai"
+  },
+  {
+    "id": "TN/003/P",
+    "state": "Tamil Nadu",
+    "name": "Annapoorna Medical College & Hospital, Salem"
+  },
+  {
+    "id": "NEW-TN-01",
+    "state": "Tamil Nadu",
+    "name": "APS Medical College Hospital and Research Institute"
+  },
+  {
+    "id": "TN/004/P",
+    "state": "Tamil Nadu",
+    "name": "Arunai Medical College and Hospital"
+  },
+  {
+    "id": "TN/005/P",
+    "state": "Tamil Nadu",
+    "name": "Bhaarat Medical College & Hospital"
+  },
+  {
+    "id": "TN/006/G",
+    "state": "Tamil Nadu",
+    "name": "Chengalpattu Medical College, Chengalpattu"
+  },
+  {
+    "id": "TN/007/P",
+    "state": "Tamil Nadu",
+    "name": "Chettinad Hospital & Research Institute, Kanchipuram"
+  },
+  {
+    "id": "TN/008/P",
+    "state": "Tamil Nadu",
+    "name": "Christian Medical College, Vellore"
+  },
+  {
+    "id": "TN/009/G",
+    "state": "Tamil Nadu",
+    "name": "Coimbatore Medical College, Coimbatore"
+  },
+  {
+    "id": "TN/010/P",
+    "state": "Tamil Nadu",
+    "name": "Dhanalakshmi Srinivasan Institute of Medical Sciences and Hospital, Perambalur"
+  },
+  {
+    "id": "TN/011/P",
+    "state": "Tamil Nadu",
+    "name": "Dhanalakshmi Srinivasan Medical College and Hospital, Perambalur"
+  },
+  {
+    "id": "TN/012/G",
+    "state": "Tamil Nadu",
+    "name": "ESIC Medical College & PGIMSR, K.K. Nagar, Chennai"
+  },
+  {
+    "id": "TN/013/P",
+    "state": "Tamil Nadu",
+    "name": "Faculty of Medicine, Sri Lalithambigai Medical College and Hospital"
+  },
+  {
+    "id": "TN/014/G",
+    "state": "Tamil Nadu",
+    "name": "Government Dharmapuri Medical College, Dharmapuri"
+  },
+  {
+    "id": "TN/015/G",
+    "state": "Tamil Nadu",
+    "name": "Government Erode Medical College & Hospital, Perundurai"
+  },
+  {
+    "id": "TN/016/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College & ESIC Hospital, Coimbatore"
+  },
+  {
+    "id": "TN/054/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College & Hospital, Cuddalore (erstwhile Rajah Muthiah Medical College)"
+  },
+  {
+    "id": "TN/017/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Ariyalur"
+  },
+  {
+    "id": "TN/018/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Dindigul"
+  },
+  {
+    "id": "TN/019/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Kallakurichi"
+  },
+  {
+    "id": "TN/020/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Karur"
+  },
+  {
+    "id": "TN/021/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Krishnagiri"
+  },
+  {
+    "id": "TN/022/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Nagapattinam"
+  },
+  {
+    "id": "TN/023/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Namakkal"
+  },
+  {
+    "id": "TN/024/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Omandurar"
+  },
+  {
+    "id": "TN/025/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Pudukkottai"
+  },
+  {
+    "id": "TN/026/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Ramanathapuram"
+  },
+  {
+    "id": "TN/027/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, The Nilgiris"
+  },
+  {
+    "id": "TN/028/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Thiruvallur"
+  },
+  {
+    "id": "TN/029/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Tiruppur"
+  },
+  {
+    "id": "TN/030/G",
+    "state": "Tamil Nadu",
+    "name": "Government Medical College, Virudhunagar"
+  },
+  {
+    "id": "TN/031/G",
+    "state": "Tamil Nadu",
+    "name": "Government Sivagangai Medical College, Sivaganga"
+  },
+  {
+    "id": "TN/032/G",
+    "state": "Tamil Nadu",
+    "name": "Government Thiruvannamalai Medical College, Thiruvannamalai"
+  },
+  {
+    "id": "TN/033/G",
+    "state": "Tamil Nadu",
+    "name": "Government Vellore Medical College, Vellore"
+  },
+  {
+    "id": "TN/034/G",
+    "state": "Tamil Nadu",
+    "name": "Government Villupuram Medical College, Villupuram"
+  },
+  {
+    "id": "TN/035/G",
+    "state": "Tamil Nadu",
+    "name": "Govt. Mohan Kumaramangalam Medical College, Salem"
+  },
+  {
+    "id": "TN/036/P",
+    "state": "Tamil Nadu",
+    "name": "Indira Medical College & Hospitals, Thiruvallur"
+  },
+  {
+    "id": "TN/037/P",
+    "state": "Tamil Nadu",
+    "name": "J R Medical College and Hospital, Villupuram"
+  },
+  {
+    "id": "TN/038/G",
+    "state": "Tamil Nadu",
+    "name": "K A P Viswanathan Government Medical College, Tiruchirappalli"
+  },
+  {
+    "id": "TN/039/G",
+    "state": "Tamil Nadu",
+    "name": "Kanyakumari Government Medical College, Asaripallam"
+  },
+  {
+    "id": "TN/040/P",
+    "state": "Tamil Nadu",
+    "name": "Kanyakumari Medical Mission Research Centre"
+  },
+  {
+    "id": "TN/041/P",
+    "state": "Tamil Nadu",
+    "name": "Karpaga Vinayaga Institute of Medical Sciences, Maduranthagam"
+  },
+  {
+    "id": "TN/042/P",
+    "state": "Tamil Nadu",
+    "name": "Karpagam Faculty of Medical Sciences & Research, Coimbatore"
+  },
+  {
+    "id": "TN/043/G",
+    "state": "Tamil Nadu",
+    "name": "Kilpauk Medical College, Chennai"
+  },
+  {
+    "id": "TN/044/P",
+    "state": "Tamil Nadu",
+    "name": "KMCH Institute of Health Sciences and Research, Coimbatore"
+  },
+  {
+    "id": "TN/045/P",
+    "state": "Tamil Nadu",
+    "name": "Madha Medical College and Hospital, Thandalam, Chennai"
+  },
+  {
+    "id": "TN/046/G",
+    "state": "Tamil Nadu",
+    "name": "Madras Medical College, Chennai"
+  },
+  {
+    "id": "TN/047/G",
+    "state": "Tamil Nadu",
+    "name": "Madurai Medical College, Madurai"
+  },
+  {
+    "id": "TN/048/P",
+    "state": "Tamil Nadu",
+    "name": "Meenakshi Medical College and Research Institute, Enathur"
+  },
+  {
+    "id": "TN/049/P",
+    "state": "Tamil Nadu",
+    "name": "Melmaruvathur Adiparasakthi Institute of Medical Sciences and Research"
+  },
+  {
+    "id": "TN/050/P",
+    "state": "Tamil Nadu",
+    "name": "Nandha Medical College & Hospital, Erode"
+  },
+  {
+    "id": "TN/051/P",
+    "state": "Tamil Nadu",
+    "name": "Panimalar Medical College Hospital & Research Institute, Chennai"
+  },
+  {
+    "id": "TN/052/P",
+    "state": "Tamil Nadu",
+    "name": "PSG Institute of Medical Sciences, Coimbatore"
+  },
+  {
+    "id": "TN/053/P",
+    "state": "Tamil Nadu",
+    "name": "PSP Medical College Hospital and Research Institute, Chennai"
+  },
+  {
+    "id": "TN/002/P",
+    "state": "Tamil Nadu",
+    "name": "Rajalakshmi Medical College Hospital and Research Institute"
+  },
+  {
+    "id": "TN/055/P",
+    "state": "Tamil Nadu",
+    "name": "Saveetha Medical College and Hospital, Kanchipuram"
+  },
+  {
+    "id": "TN/056/P",
+    "state": "Tamil Nadu",
+    "name": "Shri Sathya Sai Medical College and Research Institute, Kancheepuram"
+  },
+  {
+    "id": "TN/057/P",
+    "state": "Tamil Nadu",
+    "name": "Sree Balaji Medical College and Hospital, Chennai"
+  },
+  {
+    "id": "TN/058/P",
+    "state": "Tamil Nadu",
+    "name": "Sree Mookambika Institute of Medical Sciences, Kanyakumari"
+  },
+  {
+    "id": "TN/059/P",
+    "state": "Tamil Nadu",
+    "name": "Sri Muthukumaran Medical College, Chennai"
+  },
+  {
+    "id": "TN/060/P",
+    "state": "Tamil Nadu",
+    "name": "Sri Ramachandra Medical College & Research Institute, Chennai"
+  },
+  {
+    "id": "TN/061/P",
+    "state": "Tamil Nadu",
+    "name": "Sri Venkateshwaraa Medical College Hospital and Research Institute, Chennai"
+  },
+  {
+    "id": "TN/062/P",
+    "state": "Tamil Nadu",
+    "name": "Srinivasan Medical College and Hospital"
+  },
+  {
+    "id": "TN/063/P",
+    "state": "Tamil Nadu",
+    "name": "SRM Medical College Hospital & Research Centre, Kancheepuram"
+  },
+  {
+    "id": "TN/064/P",
+    "state": "Tamil Nadu",
+    "name": "St. Peter's Medical College, Hospital & Research Institute"
+  },
+  {
+    "id": "TN/065/G",
+    "state": "Tamil Nadu",
+    "name": "Stanley Medical College, Chennai"
+  },
+  {
+    "id": "TN/066/P",
+    "state": "Tamil Nadu",
+    "name": "Swamy Vivekanandha Medical College Hospital and Research Institute"
+  },
+  {
+    "id": "TN/067/P",
+    "state": "Tamil Nadu",
+    "name": "Tagore Medical College and Hospital, Chennai"
+  },
+  {
+    "id": "TN/068/P",
+    "state": "Tamil Nadu",
+    "name": "Takshashila Medical College"
+  },
+  {
+    "id": "TN/069/G",
+    "state": "Tamil Nadu",
+    "name": "Thanjavur Medical College, Thanjavur"
+  },
+  {
+    "id": "TN/070/G",
+    "state": "Tamil Nadu",
+    "name": "Theni Government Medical College, Theni"
+  },
+  {
+    "id": "TN/071/G",
+    "state": "Tamil Nadu",
+    "name": "Thiruvarur Government Medical College, Thiruvarur"
+  },
+  {
+    "id": "TN/072/G",
+    "state": "Tamil Nadu",
+    "name": "Thoothukudi Medical College, Thoothukudi"
+  },
+  {
+    "id": "TN/073/G",
+    "state": "Tamil Nadu",
+    "name": "Tirunelveli Medical College, Tirunelveli"
+  },
+  {
+    "id": "TN/074/P",
+    "state": "Tamil Nadu",
+    "name": "Trichy SRM Medical College Hospital & Research Centre, Trichy"
+  },
+  {
+    "id": "TN/075/P",
+    "state": "Tamil Nadu",
+    "name": "Velammal Medical College Hospital and Research Institute, Madurai"
+  },
+  {
+    "id": "TN/076/P",
+    "state": "Tamil Nadu",
+    "name": "VELS Medical College & Hospital"
+  },
+  {
+    "id": "TN/077/P",
+    "state": "Tamil Nadu",
+    "name": "Vinayaka Missions Kirupananda Variyar Medical College, Salem"
+  },
+  {
+    "id": "INI-TS-01",
+    "state": "Telangana",
+    "name": "AIIMS Bibinagar, Hyderabad"
+  },
+  {
+    "id": "TS/001/P",
+    "state": "Telangana",
+    "name": "Apollo Institute of Medical Sciences and Research, Hyderabad"
+  },
+  {
+    "id": "TS/002/P",
+    "state": "Telangana",
+    "name": "Arundathi Institute of Medical Sciences, Medchal"
+  },
+  {
+    "id": "TS/004/P",
+    "state": "Telangana",
+    "name": "Ayaan Institute of Medical Sciences, Teaching Hospital & Research Centre, Kanaka Mamidi, R.R. Dist"
+  },
+  {
+    "id": "TS/005/P",
+    "state": "Telangana",
+    "name": "Bhaskar Medical College, Yenkapally"
+  },
+  {
+    "id": "TS/006/P",
+    "state": "Telangana",
+    "name": "Chalmeda Anand Rao Institute of Medical Sciences, Karimnagar"
+  },
+  {
+    "id": "TS/007/P",
+    "state": "Telangana",
+    "name": "CMR Institute of Medical Sciences"
+  },
+  {
+    "id": "TS/008/P",
+    "state": "Telangana",
+    "name": "Deccan College of Medical Sciences"
+  },
+  {
+    "id": "TS/009/P",
+    "state": "Telangana",
+    "name": "Dr. Patnam Mahender Reddy Institute of Medical Sciences, Chevella, Rangareddy"
+  },
+  {
+    "id": "TS/010/P",
+    "state": "Telangana",
+    "name": "Dr. VRK Women's Medical College, Aziznagar"
+  },
+  {
+    "id": "TS/011/G",
+    "state": "Telangana",
+    "name": "ESIC Medical College, Sanathnagar, Hyderabad"
+  },
+  {
+    "id": "TS/012/P",
+    "state": "Telangana",
+    "name": "Father Colombo Institute of Medical Sciences, Warangal"
+  },
+  {
+    "id": "TS/013/G",
+    "state": "Telangana",
+    "name": "Gandhi Medical College, Secunderabad"
+  },
+  {
+    "id": "TS/019/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Bhadradri Kothagudem"
+  },
+  {
+    "id": "TS/020/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Jagtial"
+  },
+  {
+    "id": "TS/014/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Jangaon"
+  },
+  {
+    "id": "TS/021/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Jayashankar Bhupalpally"
+  },
+  {
+    "id": "TS/022/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Jogulamba Gadwal"
+  },
+  {
+    "id": "TS/023/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Kamareddy"
+  },
+  {
+    "id": "TS/024/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Karimnagar"
+  },
+  {
+    "id": "TS/015/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Khammam"
+  },
+  {
+    "id": "TS/025/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Kodangal"
+  },
+  {
+    "id": "TS/016/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Kumuram Bheem Asifabad"
+  },
+  {
+    "id": "TS/026/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Mahabubabad"
+  },
+  {
+    "id": "TS/027/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Mahabubnagar"
+  },
+  {
+    "id": "TS/028/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Maheshwaram"
+  },
+  {
+    "id": "TS/029/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Mancherial"
+  },
+  {
+    "id": "TS/017/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Medak"
+  },
+  {
+    "id": "TS/030/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Mulugu"
+  },
+  {
+    "id": "TS/031/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Nagarkurnool"
+  },
+  {
+    "id": "TS/032/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Nalgonda"
+  },
+  {
+    "id": "TS/033/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Narayanpet"
+  },
+  {
+    "id": "TS/034/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Narsampet"
+  },
+  {
+    "id": "TS/035/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Nirmal"
+  },
+  {
+    "id": "TS/036/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Nizamabad"
+  },
+  {
+    "id": "TS/037/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Quthbullapur"
+  },
+  {
+    "id": "TS/038/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Rajanna Sircilla"
+  },
+  {
+    "id": "TS/039/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Ramagundam"
+  },
+  {
+    "id": "TS/040/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Sangareddy"
+  },
+  {
+    "id": "TS/041/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Siddipet"
+  },
+  {
+    "id": "TS/042/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Suryapet"
+  },
+  {
+    "id": "TS/018/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Vikarabad"
+  },
+  {
+    "id": "TS/043/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Wanaparthy"
+  },
+  {
+    "id": "TS/003/G",
+    "state": "Telangana",
+    "name": "Government Medical College, Yadadri"
+  },
+  {
+    "id": "TS/044/G",
+    "state": "Telangana",
+    "name": "Kakatiya Medical College, Warangal"
+  },
+  {
+    "id": "TS/045/P",
+    "state": "Telangana",
+    "name": "Kamineni Academy of Medical Sciences & Research Centre, Hyderabad"
+  },
+  {
+    "id": "TS/046/P",
+    "state": "Telangana",
+    "name": "Kamineni Institute of Medical Sciences, Narketpally"
+  },
+  {
+    "id": "TS/047/P",
+    "state": "Telangana",
+    "name": "Mahavir Institute of Medical Sciences, Vikarabad"
+  },
+  {
+    "id": "TS/048/P",
+    "state": "Telangana",
+    "name": "Maheshwara Medical College, Chitkul, Patancheru, Medak"
+  },
+  {
+    "id": "TS/049/P",
+    "state": "Telangana",
+    "name": "Malla Reddy Institute of Medical Sciences, Hyderabad"
+  },
+  {
+    "id": "TS/050/P",
+    "state": "Telangana",
+    "name": "Mallareddy Medical College for Women, Hyderabad"
+  },
+  {
+    "id": "TS/051/P",
+    "state": "Telangana",
+    "name": "Mamata Academy of Medical Sciences, Bachupally"
+  },
+  {
+    "id": "TS/052/P",
+    "state": "Telangana",
+    "name": "Mamata Medical College, Khammam"
+  },
+  {
+    "id": "TS/053/P",
+    "state": "Telangana",
+    "name": "Mediciti Institute of Medical Sciences, Ghanpur"
+  },
+  {
+    "id": "TS/054/P",
+    "state": "Telangana",
+    "name": "MNR Medical College & Hospital, Sangareddy"
+  },
+  {
+    "id": "TS/055/P",
+    "state": "Telangana",
+    "name": "Neelima Institute of Medical Sciences"
+  },
+  {
+    "id": "TS/056/P",
+    "state": "Telangana",
+    "name": "Nova Institute of Medical Sciences and Research Centre"
+  },
+  {
+    "id": "TS/057/G",
+    "state": "Telangana",
+    "name": "Osmania Medical College, Hyderabad"
+  },
+  {
+    "id": "TS/058/P",
+    "state": "Telangana",
+    "name": "Prathima Institute of Medical Sciences, Karimnagar"
+  },
+  {
+    "id": "TS/059/P",
+    "state": "Telangana",
+    "name": "Prathima Relief Institute of Medical Sciences, Warangal"
+  },
+  {
+    "id": "TS/060/P",
+    "state": "Telangana",
+    "name": "R.V.M. Institute of Medical Sciences and Research Centre, Siddipet"
+  },
+  {
+    "id": "NEW-TS-01",
+    "state": "Telangana",
+    "name": "Raja Rajeshwari Institute of Medical Sciences - Girls"
+  },
+  {
+    "id": "TS/061/G",
+    "state": "Telangana",
+    "name": "Rajiv Gandhi Institute of Medical Sciences, Adilabad"
+  },
+  {
+    "id": "TS/062/P",
+    "state": "Telangana",
+    "name": "S V S Medical College, Mahabubnagar"
+  },
+  {
+    "id": "TS/063/P",
+    "state": "Telangana",
+    "name": "Shadan Institute of Medical Sciences, Research Centre and Teaching Hospital, Peerancheru"
+  },
+  {
+    "id": "TS/064/P",
+    "state": "Telangana",
+    "name": "Surabhi Institute of Medical Sciences, Siddipet"
+  },
+  {
+    "id": "TS/065/P",
+    "state": "Telangana",
+    "name": "TRR Institute of Medical Sciences, Patancheru"
+  },
+  {
+    "id": "TR/001/G",
+    "state": "Tripura",
+    "name": "Agartala Government Medical College, Agartala"
+  },
+  {
+    "id": "TR/002/P",
+    "state": "Tripura",
+    "name": "Tripura Medical College and Dr. B R A M Teaching Hospital, Agartala"
+  },
+  {
+    "id": "TR/003/P",
+    "state": "Tripura",
+    "name": "Tripura Santiniketan Medical College, West Tripura"
+  },
+  {
+    "id": "INI-UP-02",
+    "state": "Uttar Pradesh",
+    "name": "AIIMS Gorakhpur"
+  },
+  {
+    "id": "INI-UP-01",
+    "state": "Uttar Pradesh",
+    "name": "AIIMS Raebareli"
+  },
+  {
+    "id": "UP/001/P",
+    "state": "Uttar Pradesh",
+    "name": "Ajay Sangal Institute of Medical Sciences and Ayushman Hospital, Shamli"
+  },
+  {
+    "id": "UP/005/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College and Hospital, Gonda"
+  },
+  {
+    "id": "UP/006/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College and Hospital, Kaushambi"
+  },
+  {
+    "id": "UP/007/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College and Hospital, Lakhimpur Kheri"
+  },
+  {
+    "id": "UP/013/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College Society, Etah"
+  },
+  {
+    "id": "UP/014/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College Society, Fatehpur"
+  },
+  {
+    "id": "UP/012/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College Society, Ghazipur"
+  },
+  {
+    "id": "UP/015/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College Society, Hardoi"
+  },
+  {
+    "id": "UP/016/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Akbarpur, Kanpur"
+  },
+  {
+    "id": "UP/003/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Amethi"
+  },
+  {
+    "id": "UP/008/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Kushinagar"
+  },
+  {
+    "id": "UP/009/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Lalitpur"
+  },
+  {
+    "id": "UP/010/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Pilibhit"
+  },
+  {
+    "id": "UP/011/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Pratapgarh"
+  },
+  {
+    "id": "UP/017/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Siddharthnagar"
+  },
+  {
+    "id": "UP/018/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Sonebhadra"
+  },
+  {
+    "id": "UP/002/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Medical College, Sultanpur"
+  },
+  {
+    "id": "UP/019/G",
+    "state": "Uttar Pradesh",
+    "name": "Autonomous State Society Medical College, Mirzapur"
+  },
+  {
+    "id": "UP/020/G",
+    "state": "Uttar Pradesh",
+    "name": "Baba Kina Ram Autonomous State Medical College and Hospital, Chandauli"
+  },
+  {
+    "id": "UP/021/G",
+    "state": "Uttar Pradesh",
+    "name": "BRD Medical College, Gorakhpur"
+  },
+  {
+    "id": "UP/022/P",
+    "state": "Uttar Pradesh",
+    "name": "Career Institute of Medical Sciences & Hospital, Lucknow"
+  },
+  {
+    "id": "UP/023/P",
+    "state": "Uttar Pradesh",
+    "name": "Dr. B.S. Kushwah Medical College, Kanpur"
+  },
+  {
+    "id": "UP/036/G",
+    "state": "Uttar Pradesh",
+    "name": "Dr. Bhimrao Ramji Ambedkar Government Medical College, Kannauj"
+  },
+  {
+    "id": "UP/056/P",
+    "state": "Uttar Pradesh",
+    "name": "Dr. KNS Memorial Institute of Medical Sciences (formerly Mayo Institute of Medical Sciences), Lucknow"
+  },
+  {
+    "id": "UP/024/G",
+    "state": "Uttar Pradesh",
+    "name": "Dr. Ram Manohar Lohia Institute of Medical Sciences, Lucknow"
+  },
+  {
+    "id": "UP/025/P",
+    "state": "Uttar Pradesh",
+    "name": "Era Lucknow Medical College, Lucknow"
+  },
+  {
+    "id": "UP/026/G",
+    "state": "Uttar Pradesh",
+    "name": "ESIC Medical College and Hospital, Noida"
+  },
+  {
+    "id": "UP/027/G",
+    "state": "Uttar Pradesh",
+    "name": "ESIC Medical College and Hospital, Varanasi"
+  },
+  {
+    "id": "UP/028/P",
+    "state": "Uttar Pradesh",
+    "name": "F.H. Medical College & Hospital, Etmadpur, Agra"
+  },
+  {
+    "id": "NEW-UP-01",
+    "state": "Uttar Pradesh",
+    "name": "Fulan Singh Medical College, FS University"
+  },
+  {
+    "id": "UP/029/P",
+    "state": "Uttar Pradesh",
+    "name": "G.S. Medical College & Hospital, Hapur"
+  },
+  {
+    "id": "UP/030/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Allopathic Medical College, Banda"
+  },
+  {
+    "id": "UP/031/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Institute of Medical Sciences, Kasna, Greater Noida"
+  },
+  {
+    "id": "UP/032/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College & Super Facility Hospital, Azamgarh"
+  },
+  {
+    "id": "UP/033/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College, Badaun"
+  },
+  {
+    "id": "UP/034/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College, Faizabad"
+  },
+  {
+    "id": "UP/035/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College, Firozabad"
+  },
+  {
+    "id": "UP/037/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College, Rampur, Basti"
+  },
+  {
+    "id": "UP/038/G",
+    "state": "Uttar Pradesh",
+    "name": "Government Medical College, Shahjahanpur"
+  },
+  {
+    "id": "UP/039/G",
+    "state": "Uttar Pradesh",
+    "name": "GSVM Medical College, Kanpur"
+  },
+  {
+    "id": "UP/040/P",
+    "state": "Uttar Pradesh",
+    "name": "Heritage Institute of Medical Sciences, Varanasi"
+  },
+  {
+    "id": "UP/041/P",
+    "state": "Uttar Pradesh",
+    "name": "Hind Institute of Medical Sciences, Barabanki"
+  },
+  {
+    "id": "UP/042/P",
+    "state": "Uttar Pradesh",
+    "name": "Hind Institute of Medical Sciences, Sitapur"
+  },
+  {
+    "id": "UP/043/G",
+    "state": "Uttar Pradesh",
+    "name": "Institute of Medical Sciences, BHU, Varanasi"
+  },
+  {
+    "id": "UP/044/P",
+    "state": "Uttar Pradesh",
+    "name": "Integral Institute of Medical Sciences & Research, Lucknow"
+  },
+  {
+    "id": "UP/045/G",
+    "state": "Uttar Pradesh",
+    "name": "Jawaharlal Nehru Medical College, Aligarh"
+  },
+  {
+    "id": "UP/046/P",
+    "state": "Uttar Pradesh",
+    "name": "K.D. Medical College Hospital & Research Centre, Mathura"
+  },
+  {
+    "id": "NEW-UP-04",
+    "state": "Uttar Pradesh",
+    "name": "Kalpanath Rai Institute of Medical Science"
+  },
+  {
+    "id": "UP/047/G",
+    "state": "Uttar Pradesh",
+    "name": "Kalyan Singh Government Medical College"
+  },
+  {
+    "id": "UP/048/G",
+    "state": "Uttar Pradesh",
+    "name": "King George's Medical University, Lucknow"
+  },
+  {
+    "id": "UP/049/P",
+    "state": "Uttar Pradesh",
+    "name": "KMC Medical College & Hospital, Maharajganj"
+  },
+  {
+    "id": "UP/050/P",
+    "state": "Uttar Pradesh",
+    "name": "Krishna Mohan Medical College & Hospital, Mathura"
+  },
+  {
+    "id": "UP/051/G",
+    "state": "Uttar Pradesh",
+    "name": "LLRM Medical College, Meerut"
+  },
+  {
+    "id": "UP/052/G",
+    "state": "Uttar Pradesh",
+    "name": "Mahamaya Rajkiya Allopathic Medical College, Ambedkarnagar"
+  },
+  {
+    "id": "UP/053/G",
+    "state": "Uttar Pradesh",
+    "name": "Maharani Laxmi Bai Medical College, Jhansi"
+  },
+  {
+    "id": "UP/054/G",
+    "state": "Uttar Pradesh",
+    "name": "Maharshi Devraha Baba Autonomous State Medical College, Deoria"
+  },
+  {
+    "id": "UP/055/G",
+    "state": "Uttar Pradesh",
+    "name": "Mahatma Vidur Autonomous State Medical College"
+  },
+  {
+    "id": "UP/057/G",
+    "state": "Uttar Pradesh",
+    "name": "Moti Lal Nehru Medical College, Allahabad"
+  },
+  {
+    "id": "UP/058/P",
+    "state": "Uttar Pradesh",
+    "name": "Muzaffarnagar Medical College, Muzaffarnagar"
+  },
+  {
+    "id": "UP/059/P",
+    "state": "Uttar Pradesh",
+    "name": "Naraina Medical College & Research Centre"
+  },
+  {
+    "id": "UP/060/P",
+    "state": "Uttar Pradesh",
+    "name": "National Capital Region Institute of Medical Sciences, Meerut"
+  },
+  {
+    "id": "UP/061/P",
+    "state": "Uttar Pradesh",
+    "name": "Noida International Institute of Medical Sciences"
+  },
+  {
+    "id": "UP/062/P",
+    "state": "Uttar Pradesh",
+    "name": "Prasad Institute of Medical Sciences, Lucknow"
+  },
+  {
+    "id": "NEW-UP-05",
+    "state": "Uttar Pradesh",
+    "name": "Prasad Medical College & Hospital, Unnao"
+  },
+  {
+    "id": "UP/004/G",
+    "state": "Uttar Pradesh",
+    "name": "Punyashloka Lokmata Devi Ahilyabai Holkar Autonomous State Medical College, Auraiya"
+  },
+  {
+    "id": "NEW-UP-03",
+    "state": "Uttar Pradesh",
+    "name": "Radha Govind Institute of Medical Sciences"
+  },
+  {
+    "id": "UP/063/G",
+    "state": "Uttar Pradesh",
+    "name": "Rajkiya Allopathic Medical College, Bahraich"
+  },
+  {
+    "id": "UP/064/G",
+    "state": "Uttar Pradesh",
+    "name": "Rajkiya Medical College, Jalaun, Orai"
+  },
+  {
+    "id": "UP/065/P",
+    "state": "Uttar Pradesh",
+    "name": "Rajshree Medical Research Institute, Bareilly"
+  },
+  {
+    "id": "UP/066/P",
+    "state": "Uttar Pradesh",
+    "name": "Rama Medical College Hospital & Research Centre, Kanpur"
+  },
+  {
+    "id": "UP/067/P",
+    "state": "Uttar Pradesh",
+    "name": "Rama Medical College Hospital and Research Centre, Hapur"
+  },
+  {
+    "id": "UP/068/P",
+    "state": "Uttar Pradesh",
+    "name": "Rohilkhand Medical College & Hospital, Bareilly"
+  },
+  {
+    "id": "NEW-UP-06",
+    "state": "Uttar Pradesh",
+    "name": "RSS Medical College & Hospital"
+  },
+  {
+    "id": "UP/069/G",
+    "state": "Uttar Pradesh",
+    "name": "S N Medical College, Agra"
+  },
+  {
+    "id": "UP/070/P",
+    "state": "Uttar Pradesh",
+    "name": "Santosh Medical College, Ghaziabad"
+  },
+  {
+    "id": "UP/071/P",
+    "state": "Uttar Pradesh",
+    "name": "Saraswati Institute of Medical Sciences, Hapur"
+  },
+  {
+    "id": "UP/072/P",
+    "state": "Uttar Pradesh",
+    "name": "Saraswati Medical College, Unnao"
+  },
+  {
+    "id": "NEW-UP-02",
+    "state": "Uttar Pradesh",
+    "name": "Sardar Patel Institute of Medical Education and Health Sciences"
+  },
+  {
+    "id": "UP/074/G",
+    "state": "Uttar Pradesh",
+    "name": "Shaikh-ul-Hind Maulana Mahmood Hasan Medical College, Saharanpur"
+  },
+  {
+    "id": "UP/073/P",
+    "state": "Uttar Pradesh",
+    "name": "Sharda School of Medical Sciences & Research, Greater Noida"
+  },
+  {
+    "id": "UP/075/P",
+    "state": "Uttar Pradesh",
+    "name": "Shri Gorakshnath Medical College Hospital & Arogya Dham, Gorakhpur"
+  },
+  {
+    "id": "UP/076/P",
+    "state": "Uttar Pradesh",
+    "name": "Shri Ram Murti Smarak Institute of Medical Sciences, Bareilly"
+  },
+  {
+    "id": "UP/077/P",
+    "state": "Uttar Pradesh",
+    "name": "Shri Siddhi Vinayak Medical College & Hospital, Sambhal"
+  },
+  {
+    "id": "UP/078/P",
+    "state": "Uttar Pradesh",
+    "name": "SKS Hospital Medical College & Research Centre"
+  },
+  {
+    "id": "UP/079/P",
+    "state": "Uttar Pradesh",
+    "name": "Subharti Medical College, Meerut"
+  },
+  {
+    "id": "UP/080/P",
+    "state": "Uttar Pradesh",
+    "name": "T S Misra Medical College & Hospital, Amausi, Lucknow"
+  },
+  {
+    "id": "UP/081/P",
+    "state": "Uttar Pradesh",
+    "name": "Teerthanker Mahaveer Medical College, Moradabad"
+  },
+  {
+    "id": "UP/082/G",
+    "state": "Uttar Pradesh",
+    "name": "Uma Nath Singh Autonomous State Medical College Society, Jaunpur"
+  },
+  {
+    "id": "UP/083/P",
+    "state": "Uttar Pradesh",
+    "name": "United Institute of Medical Sciences, Allahabad"
+  },
+  {
+    "id": "UP/084/G",
+    "state": "Uttar Pradesh",
+    "name": "Uttar Pradesh University of Medical Sciences (formerly UP Rural Institute of Medical Sciences & Research), Etawah"
+  },
+  {
+    "id": "UP/085/P",
+    "state": "Uttar Pradesh",
+    "name": "Varun Arjun Medical College, Banthra, Shahjahanpur"
+  },
+  {
+    "id": "UP/086/P",
+    "state": "Uttar Pradesh",
+    "name": "Venkateshwara Institute of Medical Sciences, Gajraula"
+  },
+  {
+    "id": "INI-UK-01",
+    "state": "Uttarakhand",
+    "name": "AIIMS Rishikesh"
+  },
+  {
+    "id": "UK/001/G",
+    "state": "Uttarakhand",
+    "name": "Doon Medical College, Dehradun"
+  },
+  {
+    "id": "UK/002/P",
+    "state": "Uttarakhand",
+    "name": "Gautam Buddha Chikitsa Mahavidyalaya, Dehradun"
+  },
+  {
+    "id": "UK/003/G",
+    "state": "Uttarakhand",
+    "name": "Government Medical College, Haldwani"
+  },
+  {
+    "id": "UK/004/G",
+    "state": "Uttarakhand",
+    "name": "Government Medical College, Haridwar"
+  },
+  {
+    "id": "UK/005/P",
+    "state": "Uttarakhand",
+    "name": "Graphic Era Institute of Medical Sciences, Dehradun"
+  },
+  {
+    "id": "UK/006/P",
+    "state": "Uttarakhand",
+    "name": "Himalayan Institute of Medical Sciences, Dehradun"
+  },
+  {
+    "id": "NEW-UK-01",
+    "state": "Uttarakhand",
+    "name": "Late Jagjivan Ram Government Medical College, Pithoragarh"
+  },
+  {
+    "id": "UK/007/P",
+    "state": "Uttarakhand",
+    "name": "Shri Guru Ram Rai Institute of Medical & Health Sciences, Dehradun"
+  },
+  {
+    "id": "UK/008/G",
+    "state": "Uttarakhand",
+    "name": "Soban Singh Jeena Government Institute of Medical Science & Research, Almora"
+  },
+  {
+    "id": "UK/009/G",
+    "state": "Uttarakhand",
+    "name": "Veer Chandra Singh Garhwali Government Medical Sciences & Research Institute, Srinagar, Pauri Garhwal"
+  },
+  {
+    "id": "INI-WB-01",
+    "state": "West Bengal",
+    "name": "AIIMS Kalyani"
+  },
+  {
+    "id": "WB/001/G",
+    "state": "West Bengal",
+    "name": "Bankura Sammilani Medical College, Bankura"
+  },
+  {
+    "id": "WB/002/G",
+    "state": "West Bengal",
+    "name": "Barasat Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/003/G",
+    "state": "West Bengal",
+    "name": "Burdwan Medical College, Burdwan"
+  },
+  {
+    "id": "WB/004/G",
+    "state": "West Bengal",
+    "name": "Calcutta National Medical College, Kolkata"
+  },
+  {
+    "id": "WB/005/G",
+    "state": "West Bengal",
+    "name": "College of Medicine and JNM Hospital, Kalyani, Nadia"
+  },
+  {
+    "id": "WB/006/G",
+    "state": "West Bengal",
+    "name": "College of Medicine and Sagore Dutta Hospital, Kolkata"
+  },
+  {
+    "id": "WB/007/G",
+    "state": "West Bengal",
+    "name": "Coochbehar Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/008/G",
+    "state": "West Bengal",
+    "name": "Diamond Harbour Government Medical College and Hospital"
+  },
+  {
+    "id": "WB/009/P",
+    "state": "West Bengal",
+    "name": "East West Institute of Medical Sciences and Research, Burdwan"
+  },
+  {
+    "id": "WB/010/G",
+    "state": "West Bengal",
+    "name": "ESIC Medical College, Joka, Kolkata"
+  },
+  {
+    "id": "WB/011/P",
+    "state": "West Bengal",
+    "name": "Gouri Devi Institute of Medical Sciences and Hospital, Durgapur"
+  },
+  {
+    "id": "WB/012/G",
+    "state": "West Bengal",
+    "name": "Government Medical College, Kolkata"
+  },
+  {
+    "id": "WB/013/P",
+    "state": "West Bengal",
+    "name": "ICARE Institute of Medical Sciences & Research, Haldia"
+  },
+  {
+    "id": "WB/014/G",
+    "state": "West Bengal",
+    "name": "Institute of Postgraduate Medical Education & Research, Kolkata"
+  },
+  {
+    "id": "WB/015/P",
+    "state": "West Bengal",
+    "name": "IQ-City Medical College, Burdwan"
+  },
+  {
+    "id": "WB/016/P",
+    "state": "West Bengal",
+    "name": "Jagannath Gupta Institute of Medical Sciences & Hospital, Kolkata (NMC: WB/016/P)"
+  },
+  {
+    "id": "WB/017/P",
+    "state": "West Bengal",
+    "name": "Jagannath Gupta Institute of Medical Sciences and Hospital (NMC: WB/017/P)"
+  },
+  {
+    "id": "WB/018/P",
+    "state": "West Bengal",
+    "name": "Jakir Hossain Medical College, Burdwan"
+  },
+  {
+    "id": "WB/019/G",
+    "state": "West Bengal",
+    "name": "Jalpaiguri Government Medical College"
+  },
+  {
+    "id": "WB/020/G",
+    "state": "West Bengal",
+    "name": "Jhargram Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/021/P",
+    "state": "West Bengal",
+    "name": "JIS School of Medical Science & Research, Howrah"
+  },
+  {
+    "id": "WB/022/P",
+    "state": "West Bengal",
+    "name": "JMN Medical College, Nadia"
+  },
+  {
+    "id": "WB/023/P",
+    "state": "West Bengal",
+    "name": "KPC Medical College, Jadavpur, Kolkata"
+  },
+  {
+    "id": "WB/024/P",
+    "state": "West Bengal",
+    "name": "Krishnanagar Institute of Medical Sciences, Krishnanagar, Nadia"
+  },
+  {
+    "id": "WB/025/G",
+    "state": "West Bengal",
+    "name": "Malda Medical College & Hospital, Malda"
+  },
+  {
+    "id": "WB/026/G",
+    "state": "West Bengal",
+    "name": "Midnapore Medical College, Midnapore"
+  },
+  {
+    "id": "WB/027/G",
+    "state": "West Bengal",
+    "name": "Murshidabad Medical College & Hospitals"
+  },
+  {
+    "id": "WB/028/G",
+    "state": "West Bengal",
+    "name": "Nilratan Sircar Medical College, Kolkata"
+  },
+  {
+    "id": "WB/029/G",
+    "state": "West Bengal",
+    "name": "North Bengal Medical College, Darjeeling"
+  },
+  {
+    "id": "WB/030/P",
+    "state": "West Bengal",
+    "name": "PKG Medical College & Hospital"
+  },
+  {
+    "id": "WB/031/G",
+    "state": "West Bengal",
+    "name": "Prafulla Chandra Sen Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/032/G",
+    "state": "West Bengal",
+    "name": "Purulia Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/033/G",
+    "state": "West Bengal",
+    "name": "Raiganj Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/034/G",
+    "state": "West Bengal",
+    "name": "Rampurhat Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/035/P",
+    "state": "West Bengal",
+    "name": "Raniganj Institute of Medical Science"
+  },
+  {
+    "id": "WB/036/G",
+    "state": "West Bengal",
+    "name": "RG Kar Medical College, Kolkata"
+  },
+  {
+    "id": "WB/037/P",
+    "state": "West Bengal",
+    "name": "Santiniketan Medical College, Bolpur"
+  },
+  {
+    "id": "WB/038/G",
+    "state": "West Bengal",
+    "name": "Sarat Chandra Chattopadhyay Government Medical College & Hospital"
+  },
+  {
+    "id": "WB/039/P",
+    "state": "West Bengal",
+    "name": "Shri Ramkrishna Institute of Medical Sciences & Sanaka Hospitals, Durgapur"
+  },
+  {
+    "id": "NEW-WB-01",
+    "state": "West Bengal",
+    "name": "SKS Medical College"
+  },
+  {
+    "id": "WB/040/G",
+    "state": "West Bengal",
+    "name": "Tamralipto Government Medical College & Hospital"
+  }
+]

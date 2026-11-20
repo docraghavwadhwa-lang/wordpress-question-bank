@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, GraduationCap, LoaderCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { COLLEGE_STATES, COURSES, ONBOARDING_STEPS, collegeSchema, onboardingSchema, type OnboardingDetails } from "@/lib/onboarding";
+import { COURSES, ONBOARDING_STEPS, collegeSchema, onboardingSchema, type OnboardingDetails } from "@/lib/onboarding";
+import { COLLEGE_LOCATIONS, collegesForState, isListedCollege } from "@/lib/colleges";
 import { cn } from "@/lib/utils";
 
 export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
@@ -16,35 +17,19 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
   const [admissionYear, setAdmissionYear] = useState("");
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [searchError, setSearchError] = useState(false);
+  const [collegeSearch, setCollegeSearch] = useState("");
+  const suggestions = collegesForState(state, collegeSearch);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (step !== 1 || !state) return;
-    let active = true;
-    setSearching(true);
-    const timer = setTimeout(async () => {
-      const term = college.trim().replace(/[%_\\]/g, "\\$&");
-      const result = await supabase.from("colleges").select("name").eq("state", state).ilike("name", `%${term}%`).order("name").limit(20).abortSignal(AbortSignal.timeout(8000));
-      if (!active) return;
-      setSuggestions(result.data?.map(row => row.name) ?? []);
-      setSearchError(!!result.error);
-      setSearching(false);
-    }, 250);
-    return () => { active = false; clearTimeout(timer); };
-  }, [step, state, college]);
-
-  const collegeValid = collegeSchema.safeParse({ college, state, admissionYear: Number(admissionYear) }).success;
+  const collegeValid = isListedCollege(state, college) && collegeSchema.safeParse({ college, state, admissionYear: Number(admissionYear) }).success;
   const details = onboardingSchema.safeParse({ course, college, state, admissionYear: Number(admissionYear), phone: countryCode + phone });
   const valid = step === 0 ? !!course : step === 1 ? collegeValid : details.success;
   async function submit() {
     setError("");
     if (!valid) return;
     if (step < ONBOARDING_STEPS.length - 1) { setStep(step + 1); return; }
-    if (!details.success) return;
+    if (!details.success || !isListedCollege(state, college)) return;
     setBusy(true);
     try {
       const d = details.data;
@@ -71,7 +56,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         <div className="mb-7">
           <span className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-secondary text-accent"><GraduationCap className="h-6 w-6" /></span>
           <h1 className="text-4xl leading-tight text-primary">{["Where are you in MBBS?", "Your college details", "Your phone number"][step]}</h1>
-          <p className="mt-3 text-sm text-muted-foreground">{["Choose your current year of study.", "Select your location and find your college, or add its name.", "Add your number to complete your study profile."][step]}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{["Choose your current year of study.", "Choose your state and college.", "Add your number to complete your study profile."][step]}</p>
         </div>
         {step === 0 && <div role="radiogroup" aria-label="Choose course" className="grid gap-3">
           {COURSES.map((value, i) => <Button key={value} type="button" role="radio" aria-checked={course === value} variant="outline" onClick={() => setCourse(value)} className={cn("h-16 justify-between rounded-lg px-5 text-left", course === value && "border-accent bg-secondary")}>
@@ -80,12 +65,10 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
           </Button>)}
         </div>}
         {step === 1 && <div className="space-y-5">
-          <div className="space-y-2"><Label htmlFor="college-state">State / location</Label><Select value={state} onValueChange={value => { setState(value); setCollege(""); setSuggestions([]); }}><SelectTrigger id="college-state" className="w-full"><SelectValue placeholder="Choose location" /></SelectTrigger><SelectContent>{COLLEGE_STATES.map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select></div>
-          <div className="space-y-2"><Label htmlFor="college-name">College / institute</Label><div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input id="college-name" className="pl-9" value={college} disabled={!state} maxLength={150} autoComplete="off" placeholder="Search or enter your college" onChange={e => setCollege(e.target.value)} /></div>
-            {searching && <p role="status" className="text-xs text-muted-foreground">Finding colleges…</p>}
-            {searchError && <p className="text-xs text-muted-foreground">College search unavailable. You can still enter its full name.</p>}
-            {suggestions.length > 0 && <div aria-label="Matching colleges" className="max-h-40 overflow-y-auto rounded-lg border bg-card">{suggestions.map(name => <Button key={name} type="button" variant="ghost" className="h-auto w-full justify-start whitespace-normal rounded-none px-3 py-3 text-left" onClick={() => setCollege(name)}>{name}</Button>)}</div>}
-            {state && college.trim().length >= 2 && !searching && !suggestions.some(name => name.toLowerCase() === college.trim().toLowerCase()) && <p className="text-xs text-muted-foreground">This college will be added when you finish.</p>}
+          <div className="space-y-2"><Label htmlFor="college-state">State / location</Label><Select value={state} onValueChange={value => { setState(value); setCollege(""); setCollegeSearch(""); }}><SelectTrigger id="college-state" className="w-full"><SelectValue placeholder="Choose location" /></SelectTrigger><SelectContent>{COLLEGE_LOCATIONS.map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label htmlFor="college-name">College / institute</Label><div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input id="college-name" className="pl-9" value={collegeSearch} disabled={!state} maxLength={150} autoComplete="off" placeholder="Search colleges" onChange={e => setCollegeSearch(e.target.value)} /></div>
+            {state && <div role="radiogroup" aria-label="Matching colleges" className="max-h-52 overflow-y-auto rounded-lg border bg-card">{suggestions.map(row => <Button key={row.id} type="button" role="radio" aria-checked={college === row.name} variant="ghost" className={cn("h-auto w-full justify-between whitespace-normal rounded-none px-3 py-3 text-left", college === row.name && "bg-secondary")} onClick={() => setCollege(row.name)}><span>{row.name}</span>{college === row.name && <Check className="h-4 w-4 shrink-0 text-accent" />}</Button>)}{suggestions.length === 0 && <p role="status" className="px-3 py-4 text-sm text-muted-foreground">No matching colleges.</p>}</div>}
+            {college && <p className="text-xs text-accent">Selected: {college}</p>}
           </div>
           <div className="space-y-2"><Label htmlFor="admission-year">Year of admission</Label><Select value={admissionYear} onValueChange={setAdmissionYear}><SelectTrigger id="admission-year" className="w-full"><SelectValue placeholder="Choose year" /></SelectTrigger><SelectContent>{Array.from({ length: new Date().getFullYear() - 1949 }, (_, i) => String(new Date().getFullYear() - i)).map(year => <SelectItem key={year} value={year}>{year}</SelectItem>)}</SelectContent></Select></div>
         </div>}
