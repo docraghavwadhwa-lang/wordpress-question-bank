@@ -50,15 +50,15 @@ export function QuizSettings({
             ))}
           </div>
         </div>
-        <div className="flex flex-wrap justify-center gap-3 pt-2">
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        <div className={pick?.kind === "bookmarks" ? "flex flex-col gap-2 pt-2" : "flex flex-wrap justify-center gap-3 pt-2"}>
           {pick?.kind === "bookmarks" ? (
             <>
-              <Button disabled={loading} variant="secondary" onClick={() => onStart(0, true)}>Review questions & solutions</Button>
               <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Attempt bookmarked questions"}</Button>
+              <Button disabled={loading} variant="secondary" onClick={() => onStart(0, true)}>Review questions & solutions</Button>
+              <Button variant="outline" onClick={onCancel}>Cancel</Button>
             </>
           ) : (
-            <Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Start quiz"}</Button>
+            <><Button variant="outline" onClick={onCancel}>Cancel</Button><Button disabled={loading} onClick={() => onStart(timer)}>{loading ? "Loading…" : "Start quiz"}</Button></>
           )}
         </div>
       </DialogContent>

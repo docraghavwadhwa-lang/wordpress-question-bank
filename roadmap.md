@@ -1,4 +1,5 @@
 # Tasks
+- [x] Fix desktop image viewer, per-bank review attempts, subject-scoped search, app favicon, reminder/bookmarks panel, image-based questions, richer plan cards, stacked bookmark buttons.
 - [x] Update quiz image viewer, skipped-question submission, completion reviews, and permanent Mistake Vault; isolated quiz and image interactions verified.
 - [x] Update native Pro control and default-coupon checkout without changing offer prices; public navigation and six database price assertions passed.
 - [x] Enforce two active online devices with owner-only replacement selection; rolled-back database tests passed.

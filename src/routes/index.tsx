@@ -120,14 +120,16 @@ function Index() {
     if (!pick) return;
     setLoading(true);
     try {
-      const qs = pick.ids ? await fetchQuestionsByIds(pick.ids) : pick.path ? await fetchDeckQuestions(pick.path) : [];
+      const all = pick.ids ? await fetchQuestionsByIds(pick.ids) : pick.path ? await fetchDeckQuestions(pick.path) : [];
+      const qs = pick.imagesOnly ? all.filter(q => /<img\b/i.test(q.stem)) : all;
+      if (!qs.length && all.length) { setMessage("No image-based questions in this chapter yet."); return; }
       if (!qs.length) {
         setMessage("These questions are locked. Choose a Pro plan for access.");
         return;
       }
       localStorage.setItem("qb_timer", String(timer));
       setSavedTimer(timer);
-      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, pick.path ?? `${pick.kind}:${pick.subtitle ?? pick.title}`);
+      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, (pick.imagesOnly ? `images:${pick.path}` : pick.path) ?? `${pick.kind}:${pick.subtitle ?? pick.title}`);
       setPick(null);
     } catch (error) {
       setMessage(offlineErrorMessage(error, "Couldn't open these questions. Please try again."));
@@ -219,7 +221,7 @@ function Index() {
               if (quiz.mode === "blitz")
                 void saveBlitz(user.id, day, r.score, r.seconds).then(() => qc.invalidateQueries({ queryKey: ["blitz-rank", day] }));
             }}
-            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : quiz.mode === "practice" ? <section className="mt-6 border-t pt-5"><h3 className="font-display text-xl text-primary">Review attempts</h3><p className="mt-1 text-xs text-muted-foreground">Available for 72 hours after submission</p><div className="mt-3 divide-y">{recent.map(row => <div key={row.id} className="py-3 text-left"><p className="text-sm font-medium text-primary">{row.title}</p><p className="mt-1 text-xs text-muted-foreground">{row.score}/{row.answered} correct · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left</p><Button className="mt-2" variant="outline" disabled={loading} onClick={() => void openReview(row)}>Review attempt</Button></div>)}</div></section> : undefined}
+            finishedSlot={quiz.mode === "blitz" ? <BlitzRankLine day={day} /> : quiz.mode === "practice" ? <section className="mt-6 border-t pt-5"><h3 className="font-display text-xl text-primary">Review attempts</h3><p className="mt-1 text-xs text-muted-foreground">Available for 72 hours after submission</p><div className="mt-3 divide-y">{recent.filter(row => row.quiz_key === quiz.quizKey).map(row => <div key={row.id} className="py-3 text-left"><p className="text-sm font-medium text-primary">{row.title}</p><p className="mt-1 text-xs text-muted-foreground">{row.score}/{row.answered} correct · {Math.max(1, Math.ceil((Date.parse(row.completed_at) + REVIEW_WINDOW_MS - now.getTime()) / 3600000))}h left</p><Button className="mt-2" variant="outline" disabled={loading} onClick={() => void openReview(row)}>Review attempt</Button></div>)}</div></section> : undefined}
             onExit={goHome}
           />
         ) : qbanks ? (
@@ -275,9 +277,9 @@ function Index() {
                 </Button>
                 {isApp && <div><PushToggle /></div>}
               </div>
-              </div>
-              </div>
               {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
+              </div>
+              </div>
               <OfflineDownload />
             </div>
             {paused && (

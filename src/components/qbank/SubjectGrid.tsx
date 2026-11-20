@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Crown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Bookmark, CircleAlert, Search, Lock, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, CircleAlert, Search, Lock, Star, Image as ImageIcon } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
 import { compareSubjects, subjectLabel, deckParts, searchDecks } from "@/lib/subjects";
 import { Button } from "@/components/ui/button";
 
-export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes" };
+export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes"; imagesOnly?: boolean };
 type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
 export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
@@ -19,13 +19,15 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
-  const hits = useMemo(() => searchDecks(decks, term), [decks, term]);
+  const scoped = open && open !== IMAGES ? decks.filter(d => d.subject === open) : decks;
+  const hits = useMemo(() => searchDecks(scoped, term), [scoped, term]);
+  const searchLabel = open && open !== IMAGES ? `Search ${subjectLabel(open)} topics` : "Search subjects, topics, subtopics";
 
   return (
     <>
     <label className="mb-5 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search subjects, topics, subtopics" aria-label="Search subjects, topics, subtopics" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchLabel} aria-label={searchLabel} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
     </label>
     {term ? (
       hits.length ? <><p className="mb-3 text-xs text-muted-foreground">{hits.length} matches</p><div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
@@ -38,12 +40,15 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
         </Button>;
       })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
+    open === IMAGES ? <ImagePanel subjects={subjects} decks={decks} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} /> :
     (() => { const s = subjects.find((x) => x.path === open); return s
       ? <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} />
       : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
         <Tile key={s.path} label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} onClick={() => { setOpen(s.path); window.scrollTo({ top: 0 }); }} />
       ))}
+      <hr className="col-span-full my-3 border-border" />
+      <Tile label="Image-based questions" icon={<ImageIcon className="h-5 w-5" strokeWidth={1.5} />} onClick={() => { setOpen(IMAGES); window.scrollTo({ top: 0 }); }} />
     </div>; })()
     )}
     <Dialog open={proOpen} onOpenChange={setProOpen}>
@@ -178,3 +183,28 @@ function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; ti
   );
 }
 
+
+const IMAGES = "__image-questions";
+
+/** Subject → chapter picker; the chapter's questions are filtered to those with an image in the stem. */
+function ImagePanel({ subjects, decks, locked, onPick, onLocked, onBack }: { subjects: Deck[]; decks: Deck[]; locked?: Set<string> | undefined; onPick: (p: Pick) => void; onLocked: () => void; onBack: () => void }) {
+  const [subject, setSubject] = useState<Deck | null>(null);
+  if (!subject) return <div>
+    <Button variant="ghost" type="button" onClick={onBack} className="-ml-2 mb-2 gap-1 px-2 text-muted-foreground"><ChevronLeft className="h-4 w-4" />All subjects</Button>
+    <h2 className="font-display text-3xl text-primary">Image-based questions</h2>
+    <p className="mb-5 text-sm text-muted-foreground">Choose a subject, then a chapter. Only questions with an image are included.</p>
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{subjects.map(s => { const I = subjectIcon(s.path); return <Tile key={s.path} label={subjectLabel(s.path)} icon={<I className="h-5 w-5" strokeWidth={1.5} />} onClick={() => { setSubject(s); window.scrollTo({ top: 0 }); }} />; })}</div>
+  </div>;
+  const chapters = decks.filter(d => d.depth === 2 && d.subject === subject.path);
+  const isLocked = !!locked?.has(subject.subject);
+  return <div>
+    <Button variant="ghost" type="button" onClick={() => setSubject(null)} className="-ml-2 mb-2 gap-1 px-2 text-muted-foreground"><ChevronLeft className="h-4 w-4" />Image-based subjects</Button>
+    <h2 className="font-display text-3xl text-primary">{subjectLabel(subject.path)}</h2>
+    <p className="mb-5 text-sm text-muted-foreground">Image-based questions by chapter</p>
+    <div className="divide-y rounded-lg border bg-card">{chapters.map(ch => { const name = ch.path.split(" > ").pop() ?? ch.path;
+      return <Button variant="ghost" key={ch.path} type="button" onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: `${subjectLabel(subject.path)} · Image-based`, path: ch.path, imagesOnly: true })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
+        <span className="min-w-0 break-words font-medium text-primary">{name}</span>
+        <span className="flex shrink-0 items-center gap-2">{isLocked && <LockBadge />}<ChevronRight className="h-4 w-4 text-muted-foreground" /></span>
+      </Button>; })}</div>
+  </div>;
+}
