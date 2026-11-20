@@ -52,6 +52,39 @@ export type Database = {
           },
         ]
       }
+      admin_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          changed_fields: Json
+          created_at: string
+          entity: string
+          id: string
+          record_key: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          changed_fields?: Json
+          created_at?: string
+          entity: string
+          id?: string
+          record_key: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          changed_fields?: Json
+          created_at?: string
+          entity?: string
+          id?: string
+          record_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attempts: {
         Row: {
           archived: boolean
@@ -202,6 +235,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          key: string
+          label: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          key: string
+          label: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          key?: string
+          label?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       payment_requests: {
         Row: {
           approved_by: string | null
@@ -347,6 +407,47 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      purchase_journey: {
+        Row: {
+          created_at: string
+          id: string
+          months: number | null
+          plan_id: string | null
+          platform: string
+          stage: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          months?: number | null
+          plan_id?: string | null
+          platform: string
+          stage: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          months?: number | null
+          plan_id?: string | null
+          platform?: string
+          stage?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_journey_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_log: {
         Row: {
@@ -500,6 +601,8 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          allocation_note: string
+          amount_paid_paise: number | null
           approved_by: string | null
           created_at: string
           ends_at: string
@@ -512,6 +615,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allocation_note?: string
+          amount_paid_paise?: number | null
           approved_by?: string | null
           created_at?: string
           ends_at: string
@@ -524,6 +629,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allocation_note?: string
+          amount_paid_paise?: number | null
           approved_by?: string | null
           created_at?: string
           ends_at?: string
@@ -587,6 +694,110 @@ export type Database = {
         Args: { _paid: number; _request: string }
         Returns: string
       }
+      admin_all_plans: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          enabled: boolean
+          id: string
+          name: string
+          original_price_two_year: number | null
+          original_price_year: number | null
+          price_two_year: number
+          price_year: number
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "subscription_plans"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_allocate_access: {
+        Args: {
+          _amount: number
+          _months: number
+          _note?: string
+          _plan: string
+          _request?: string
+          _start: string
+          _user: string
+        }
+        Returns: string
+      }
+      admin_bank_content: {
+        Args: { _offset?: number; _search?: string; _subject: string }
+        Returns: {
+          answer: string | null
+          deck_path: string
+          explanation: string | null
+          id: number
+          is_free: boolean
+          options: Json
+          sort_key: string
+          stem: string
+          subject: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "questions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_console_users: {
+        Args: { _journeys?: boolean; _offset?: number; _search?: string }
+        Returns: {
+          college: string
+          email: string
+          full_name: string
+          latest_stage: string
+          months: number
+          payment_status: string
+          phone: string
+          plan_id: string
+          platform: string
+          stage_at: string
+          study_year: string
+          user_id: string
+        }[]
+      }
+      admin_save_plan: {
+        Args: {
+          _description: string
+          _enabled: boolean
+          _id: string
+          _name: string
+          _original_two_year: number
+          _original_year: number
+          _subjects: string[]
+          _two_year: number
+          _year: number
+        }
+        Returns: undefined
+      }
+      admin_save_question: {
+        Args: {
+          _answer: string
+          _explanation: string
+          _id: number
+          _options: Json
+          _stem: string
+        }
+        Returns: undefined
+      }
+      admin_save_student: {
+        Args: {
+          _college: string
+          _name: string
+          _phone: string
+          _user: string
+          _year: string
+        }
+        Returns: undefined
+      }
       admin_students: {
         Args: { _offset?: number; _search?: string }
         Returns: {
@@ -597,6 +808,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_update_access: {
+        Args: {
+          _amount: number
+          _id: string
+          _months: number
+          _note: string
+          _revoked: boolean
+          _start: string
+        }
+        Returns: undefined
+      }
+      admin_user_detail: { Args: { _user: string }; Returns: Json }
       approve_subscription: {
         Args: {
           _months: number
@@ -618,6 +841,7 @@ export type Database = {
         Returns: undefined
       }
       device_session_active: { Args: never; Returns: boolean }
+      feature_enabled: { Args: { _key: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -677,6 +901,15 @@ export type Database = {
           _reference: string
         }
         Returns: string
+      }
+      track_purchase_stage: {
+        Args: {
+          _months?: number
+          _plan?: string
+          _platform?: string
+          _stage: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
