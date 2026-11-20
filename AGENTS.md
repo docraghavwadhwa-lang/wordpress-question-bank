@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Project rules
-- Admin RPCs verify roles and audit edits; shared flags gate features, and checkout page events never prove payment.
+- Admin RPCs verify roles and audit edits; public flags expose known availability, not actor metadata. Flags gate features; checkout events never prove payment.
 - JWT-session device registration is serialized per profile; restrictive RLS blocks removed online sessions. Approved offline devices recheck on reconnect.
 - Shared image viewer preserves aspect ratio; skips require explicit submission or revisit. Checkout uses a dedicated coupon/payment page and stored offer totals.
 - Website branding imports the shared full-logo asset pointer; install icons and favicon derive from its matching symbol, with versioned icon URLs to refresh cached branding.
