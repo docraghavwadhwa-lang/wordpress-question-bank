@@ -189,6 +189,9 @@ html:has([data-sign-in-landing]),
 body:has([data-sign-in-landing]) { background-color: var(--brand); }
 body:has([data-sign-in-landing]) { padding-bottom: 0; }
 body:has([data-opening-screen]) { padding-bottom: 0; background-color: var(--launch); }
+body:has([data-onboarding]) { padding-bottom: 0; }
+/* Scoped because the legacy app has no global radius value. */
+[data-onboarding] { --radius: 6px; }
 
 @keyframes elixir-fill { 0%, 30% { clip-path: circle(0% at 50% 50%); } 75%, 100% { clip-path: circle(75% at 50% 50%); } }
 @keyframes elixir-out { 0%, 35% { opacity: 1; } 70%, 100% { opacity: 0; } }

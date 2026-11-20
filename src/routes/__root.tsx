@@ -13,6 +13,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { OfflineBanner } from "@/components/qbank/OfflineBanner";
 import { registerAppServiceWorker } from "@/lib/sw-register";
 import { initNativeAuth } from "@/lib/native-auth";
+import { OnboardingGate } from "@/components/qbank/OnboardingGate";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -134,7 +135,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <OfflineBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <OnboardingGate><Outlet /></OnboardingGate>
       <Toaster />
     </QueryClientProvider>
   );
