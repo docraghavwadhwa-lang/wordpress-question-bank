@@ -56,6 +56,7 @@ export function Quiz({
   const [finished, setFinished] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const [revisiting, setRevisiting] = useState(false);
+  const [revisitList, setRevisitList] = useState<number[]>([]);
   const skipped = questions.map((question, index) => ({ question, index })).filter(({ question }) => !Object.prototype.hasOwnProperty.call(choices, question.id));
   const [today, setToday] = useState(todayCount);
   const [xp, setXp] = useState<number[]>([]);
@@ -96,7 +97,10 @@ export function Quiz({
 
   /** Move on without answering; a skipped question isn't scored or recorded. */
   function skip() {
-    if (i + 1 === questions.length || revisiting) setSubmitOpen(true);
+    if (revisiting) {
+      const after = revisitList.find(index => index > i && skipped.some(row => row.index === index));
+      if (after !== undefined) setI(after); else setSubmitOpen(true);
+    } else if (i + 1 === questions.length) setSubmitOpen(true);
     else setI(i + 1);
   }
   function complete() {
@@ -105,8 +109,8 @@ export function Quiz({
   }
   function next() {
     if (revisiting) {
-      const remaining = skipped.find(row => row.index !== i);
-      if (remaining) setI(remaining.index); else complete();
+      const after = revisitList.find(index => index > i && skipped.some(row => row.index === index && index !== i));
+      if (after !== undefined) setI(after); else complete();
     } else if (i + 1 === questions.length) complete(); else setI(i + 1);
   }
 
@@ -175,7 +179,7 @@ export function Quiz({
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="font-semibold text-primary">
-          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}Question {i + 1} of {questions.length}
+          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}{revisiting ? <>Skipped question {Math.max(1, revisitList.indexOf(i) + 1)} of {revisitList.length}</> : <>Question {i + 1} of {questions.length}</>}
         </span>
         {timer > 0 && !review && (
           <span className={cn("inline-flex items-center gap-1 font-semibold", left <= 10 && "text-destructive")}>
@@ -259,7 +263,7 @@ export function Quiz({
           <Button disabled={!done} onClick={next}>{last && !revisiting ? "Finish" : "Next"}</Button>
         </div>
       </div>
-      <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { const first = skipped[0]; if (first) { setRevisiting(true); setI(first.index); } setSubmitOpen(false); }}>Revisit skipped questions</Button><Button variant="outline" onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button></DialogContent></Dialog>
+      <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { const first = skipped[0]; if (first) { setRevisiting(true); setRevisitList(skipped.map(row => row.index)); setI(first.index); } setSubmitOpen(false); }}>Revisit skipped questions</Button><Button variant="outline" onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button></DialogContent></Dialog>
     </div>
   );
 }
