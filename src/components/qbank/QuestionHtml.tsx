@@ -9,6 +9,7 @@ export function QuestionHtml({ html, className = "" }: { html: string; className
   const [images, setImages] = useState<{ host: HTMLElement; src: string; alt: string }[]>([]);
   const [expanded, setExpanded] = useState<{ src: string; alt: string } | null>(null);
   useEffect(() => {
+    if (root.current) root.current.innerHTML = html;
     const wrappers: HTMLElement[] = [];
     const targets = Array.from(root.current?.querySelectorAll("img") ?? []).map(img => {
       const host = document.createElement("span"); host.className = "qb-image-wrap";
@@ -18,7 +19,7 @@ export function QuestionHtml({ html, className = "" }: { html: string; className
     setImages(targets);
     return () => { for (const host of wrappers) { const img = host.querySelector("img"); if (img) host.replaceWith(img); } };
   }, [html]);
-  return <><div ref={root} className={`qb-html ${className}`} dangerouslySetInnerHTML={{ __html: html }} />
+  return <><div ref={root} className={`qb-html ${className}`} />
     {images.map((image, index) => createPortal(<Button type="button" size="icon" variant="secondary" title="Enlarge image" aria-label="Enlarge image" className="qb-image-zoom" onClick={event => { event.stopPropagation(); setExpanded(image); }}><ZoomIn className="h-4 w-4" /></Button>, image.host, String(index)))}
     <Dialog open={!!expanded} onOpenChange={open => { if (!open) setExpanded(null); }}><DialogContent aria-describedby={undefined} className="image-viewer [&>button:last-child]:hidden">
       <DialogTitle className="sr-only">Question image</DialogTitle>

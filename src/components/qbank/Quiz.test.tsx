@@ -41,7 +41,7 @@ describe("completed attempt capture", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(onFinish).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Submit", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Submit$/ }));
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 0, answered: 0, choices: {}, completed: true }));
   });
 });

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Quote, Sparkles } from "lucide-react";
 import { fetchQuestionOfDay, quoteForDay, todayKey } from "@/lib/daily";
 import { cn } from "@/lib/utils";
+import { QuestionHtml } from "./QuestionHtml";
 
 const LETTERS = "ABCDE";
 
@@ -34,17 +35,19 @@ export function QuestionOfTheDay() {
         </p>
         <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary">{subject}</span>
       </div>
-      <div className="qb-html mt-4 text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: d.stem }} />
+      <QuestionHtml html={d.stem} className="mt-4 text-lg leading-relaxed" />
       <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
         {d.options.map((o, k) => {
           const L = LETTERS[k] ?? String(k);
           const right = done && d.answer === L;
           const wrong = done && chosen === L && d.answer !== L;
           return (
-            <button
+            <div
               key={L}
-              type="button"
-              disabled={done}
+              role="button"
+              tabIndex={done ? -1 : 0}
+              aria-disabled={done}
+              onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); pick(L); } }}
               onClick={() => pick(L)}
               className={cn(
                 "flex items-start gap-3 rounded-xl border px-4 py-3 text-left text-sm leading-snug transition-colors",
@@ -54,15 +57,15 @@ export function QuestionOfTheDay() {
               )}
             >
               <span className="font-semibold text-primary">{L}.</span>
-              <span className="qb-html min-w-0 flex-1 break-words" dangerouslySetInnerHTML={{ __html: o }} />
-            </button>
+              <QuestionHtml html={o} className="min-w-0 flex-1 break-words" />
+            </div>
           );
         })}
       </div>
       {done && d.explanation && (
         <details className="mt-4 rounded-xl bg-secondary p-4 text-sm">
           <summary className="cursor-pointer font-medium text-primary">See explanation</summary>
-          <div className="qb-html mt-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: d.explanation }} />
+          <QuestionHtml html={d.explanation} className="mt-3 leading-relaxed" />
         </details>
       )}
       <p className="mt-4 text-xs text-muted-foreground">A new question every day. This one doesn't count towards your streak.</p>
