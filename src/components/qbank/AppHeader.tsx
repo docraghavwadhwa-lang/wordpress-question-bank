@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, Flame, LogOut, Smartphone, UserRound, Crown, ShieldCheck } from "lucide-react";
+import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +58,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       <div className="flex shrink-0 items-center gap-3">
         <Button asChild size="sm" variant="outline"><Link to="/plans"><Crown />Pro</Link></Button>
-        <Link to="/stats" aria-label="Your streak and progress" title="Your streak and progress" className="grid h-10 w-10 place-items-center rounded-full border bg-card text-gold"><Flame className="h-5 w-5" /></Link>
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
             <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} />

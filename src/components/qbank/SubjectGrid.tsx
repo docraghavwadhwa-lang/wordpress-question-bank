@@ -85,7 +85,7 @@ function Tile({ label, icon, active, locked, onClick }: { label: string; icon?: 
 /** Q-bank ratings are fixed at 5 stars for every Q-bank. */
 export const QBANK_RATING = 5;
 export function Rating() {
-  return <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-accent text-accent" />{QBANK_RATING.toFixed(1)}</span>;
+  return <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-gold text-gold" />{QBANK_RATING.toFixed(1)}</span>;
 }
 
 function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked, onBack }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void; onLocked: () => void; onBack: () => void }) {
@@ -97,10 +97,20 @@ function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked, onBack
       <Button variant="ghost" type="button" onClick={onBack} className="-ml-2 mb-2 gap-1 px-2 text-muted-foreground"><ChevronLeft className="h-4 w-4" />All subjects</Button>
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div><h2 className="font-display text-3xl text-primary">{subjectLabel(subject.path)}</h2>
-        <p className="text-sm text-muted-foreground">{modules} Q-bank modules · {subject.question_count} questions</p></div>
+        <p className="text-sm text-muted-foreground">{modules} Q-bank modules</p></div>
         <Button variant="study" type="button" onClick={() => isLocked ? onLocked() : onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
           className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground hover:bg-primary hover:text-primary-foreground">Practise whole subject</Button>
       </div>
+      {isLocked && (() => { const free = decks.filter((d) => d.depth === 3 && d.subject === subject.path && d.is_free); return free.length > 0 && (
+        <section className="mb-7 rounded-xl border border-success/40 bg-success/10 p-4">
+          <h3 className="mb-1 font-display text-xl text-primary">Free Q-banks</h3>
+          <p className="mb-3 text-xs text-muted-foreground">Start practising these right away, no subscription needed.</p>
+          <div className="space-y-2">{free.map((ch) => { const parts = ch.path.split(" > "); const title = parts.at(-1) ?? ch.path; const sec = parts.at(-2) ?? "";
+            return <button key={ch.path} type="button" onClick={() => onPick({ title, subtitle: `${subjectLabel(subject.path)} › ${sec}`, path: ch.path, total: ch.question_count })} className="flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left hover:bg-secondary/60">
+              <span className="min-w-0 flex-1"><span className="block break-words font-medium text-foreground">{title}</span><span className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground"><Rating /><span>•</span>{ch.question_count} Ques</span></span>
+              <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" /></button>; })}</div>
+        </section>); })()}
       <div className="space-y-7">
         {sections.map((sec) => {
           const name = sec.path.split(" > ").pop() ?? sec.path;
