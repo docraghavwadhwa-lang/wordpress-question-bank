@@ -582,6 +582,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accessible_subjects: { Args: never; Returns: string[] }
       activate_razorpay_payment: {
         Args: { _paid: number; _request: string }
         Returns: string
