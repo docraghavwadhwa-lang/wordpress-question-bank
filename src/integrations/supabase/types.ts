@@ -569,6 +569,7 @@ export type Database = {
           name: string
           original_price_two_year: number | null
           original_price_year: number | null
+          perks: string[]
           price_two_year: number
           price_year: number
           updated_at: string
@@ -581,6 +582,7 @@ export type Database = {
           name: string
           original_price_two_year?: number | null
           original_price_year?: number | null
+          perks?: string[]
           price_two_year: number
           price_year: number
           updated_at?: string
@@ -593,6 +595,7 @@ export type Database = {
           name?: string
           original_price_two_year?: number | null
           original_price_year?: number | null
+          perks?: string[]
           price_two_year?: number
           price_year?: number
           updated_at?: string
@@ -704,6 +707,7 @@ export type Database = {
           name: string
           original_price_two_year: number | null
           original_price_year: number | null
+          perks: string[]
           price_two_year: number
           price_year: number
           updated_at: string
@@ -772,6 +776,21 @@ export type Database = {
           _name: string
           _original_two_year: number
           _original_year: number
+          _subjects: string[]
+          _two_year: number
+          _year: number
+        }
+        Returns: undefined
+      }
+      admin_save_plan_full: {
+        Args: {
+          _description: string
+          _enabled: boolean
+          _id: string
+          _name: string
+          _original_two_year: number
+          _original_year: number
+          _perks: string[]
           _subjects: string[]
           _two_year: number
           _year: number

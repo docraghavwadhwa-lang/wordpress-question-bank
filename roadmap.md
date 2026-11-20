@@ -1,6 +1,7 @@
 # Tasks
-- [ ] Expand administration with purchase journeys, student detail/edit views, editable plans/content, feature controls, custom paid/free access, and audit history.
-- [ ] Verify new administration permissions and flows — real signed-in checks may require an external Supabase session.
+- [x] Expand administration with purchase journeys, student detail/edit views, editable plans/content/benefits, twelve feature controls, custom paid/free access, and audit history.
+- [x] Verify admin rules through rollback-only database checks and 27 tests; isolated student edit/free six-month allocation and desktop/mobile tabs checked.
+- [ ] Verify real signed-in administration save/readback and checkout journey — external unmanaged Supabase provides no test session.
 - [x] Fix desktop image viewer, per-bank review attempts, subject-scoped search, app favicon, reminder/bookmarks panel, image-based questions, richer plan cards, stacked bookmark buttons.
 - [x] Update quiz image viewer, skipped-question submission, completion reviews, and permanent Mistake Vault; isolated quiz and image interactions verified.
 - [x] Update native Pro control and default-coupon checkout without changing offer prices; public navigation and six database price assertions passed.

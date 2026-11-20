@@ -7,19 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
 import { trackPurchase } from "@/lib/admin";
-import { fetchPlans, money, DEFAULT_COUPON } from "@/lib/subscriptions";
+import { subjectLabel } from "@/lib/subjects";
+import { fetchPlans, fetchPlanSubjects, money, DEFAULT_COUPON } from "@/lib/subscriptions";
 
 export const Route = createFileRoute("/plans")({ head: () => ({ meta: [{ title: "Pro plans | Elixir" }, { name: "description", content: "Choose foundation, clinical or whole-bank medical MCQ access with Elixir Pro." }, { property: "og:title", content: "Elixir Pro plans" }, { property: "og:description", content: "Foundation, clinical and complete question-bank subscriptions." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: PlansPage });
-const PERKS: Record<string, string[]> = {
-  base: ["Anatomy, Physiology, Biochemistry, Pathology, Pharmacology, Microbiology, PSM & Forensic Medicine", "Every chapter Q-bank in preclinical and paraclinical subjects"],
-  catalyst: ["Medicine, Surgery, OBG, Paediatrics, Orthopaedics, Radiology, Psychiatry, ENT, Ophthalmology & more", "Every chapter Q-bank in clinical subjects"],
-  panacea: ["All 19 subjects — the complete 16,000+ MCQ bank", "Every Q-bank, every chapter, every subject"],
-};
-const COMMON = ["Detailed answers & explanations for every question", "Image-based questions by chapter", "Bookmarks and Mistake Vault for revision", "Practise whole subjects and sections", "Review your attempts after each Q-bank", "Daily Blitz, streaks and progress stats", "Use on Android app and website (2 devices)"];
 function PlansPage() {
   const { user } = useAuth();
   useEffect(() => { if (user) void trackPurchase("plans_viewed").catch(() => {}); }, [user?.id]);
   const plans = useQuery({ queryKey: ["plans"], queryFn: fetchPlans });
+  const coverage = useQuery({ queryKey: ["plan-subjects"], queryFn: fetchPlanSubjects });
   const [months, setMonths] = useState<12 | 24>(12);
   return <div className="min-h-screen"><AppHeader /><main className="mx-auto max-w-5xl px-4 py-8 sm:py-12">
     <Button asChild variant="ghost" className="mb-5"><Link to="/"><ArrowLeft />Home</Link></Button>
@@ -33,7 +29,7 @@ function PlansPage() {
       <h2 className="text-2xl text-primary">{plan.name}</h2><p className="mt-2 min-h-12 text-sm text-muted-foreground">{plan.description}</p>
       <p className="mt-5 text-sm text-muted-foreground"><s>{money((months === 12 ? plan.original_price_year : plan.original_price_two_year) ?? (months === 12 ? plan.price_year : plan.price_two_year))}</s></p>
       <p className="text-3xl font-semibold text-primary">{money(months === 12 ? plan.price_year : plan.price_two_year)}</p><p className="text-xs text-muted-foreground">{months} months</p>
-      <ul className="my-5 flex-1 space-y-2.5 text-sm">{(PERKS[plan.id] ?? []).concat(COMMON).map(perk => <li key={perk} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />{perk}</li>)}</ul>
+      <ul className="my-5 flex-1 space-y-2.5 text-sm">{[coverage.data?.filter(p => p.plan_id === plan.id).map(p => subjectLabel(p.subject)).join(", ") || "Included subjects", ...plan.perks].map(perk => <li key={perk} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />{perk}</li>)}</ul>
       <Button asChild variant={plan.id === "panacea" ? "default" : "outline"}><Link to="/checkout" search={{ plan: plan.id, months }}>Choose plan</Link></Button>
     </article>)}</div>
   </main></div>;
