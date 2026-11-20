@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck } from "lucide-react";
+import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck, Phone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,19 @@ export function UserAvatar({ src, name, size = 36 }: { src?: string | null | und
     <span style={{ width: size, height: size }} className="grid place-items-center rounded-full bg-primary font-display text-primary-foreground ring-2 ring-accent/60">
       {initials}
     </span>
+  );
+}
+
+export const HELP_PHONE_DISPLAY = "+91 63607-59145";
+export const HELP_PHONE_TEL = "tel:+916360759145";
+
+function GetHelpItem() {
+  return (
+    <DropdownMenuItem asChild>
+      <a href={HELP_PHONE_TEL} aria-label={`Call help line ${HELP_PHONE_DISPLAY}`}>
+        <Phone className="h-4 w-4" /> Get help here
+      </a>
+    </DropdownMenuItem>
   );
 }
 
@@ -58,6 +71,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
+        <Button asChild size="icon" variant="outline"><a href={HELP_PHONE_TEL} aria-label={`Call help line ${HELP_PHONE_DISPLAY}`} title={`Call help line ${HELP_PHONE_DISPLAY}`}><Phone /></a></Button>
         <Button asChild size="icon" variant="outline"><Link to="/plans" aria-label="Pro subscription plans" title="Pro subscription plans"><Crown /></Link></Button>
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
@@ -69,6 +83,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
             <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
             {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
+            <GetHelpItem />
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
           </DropdownMenuContent>
@@ -104,6 +119,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
                 <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
                 {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
+                <GetHelpItem />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>
