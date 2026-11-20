@@ -36,7 +36,7 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
         <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
-          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} locked={locked?.has(s.subject)} onClick={() => setOpen(open === s.path ? null : s.path)} />
+          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} locked={!!locked?.has(s.subject)} onClick={() => setOpen(open === s.path ? null : s.path)} />
           {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} />}
         </div>
       ))}
@@ -112,7 +112,7 @@ function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Dec
                         <ChapterBtn
                           flat
                           label={cn2}
-                          locked={isLocked}
+                          locked={!!isLocked}
                           onClick={() => onPick({ title: cn2, subtitle: `${subject.path} › ${name}`, path: ch.path, total: ch.question_count })}
                         />
                         <MarkChips path={ch.path} title={cn2} subtitle={`${subject.path} › ${name}`} marked={marked} onPick={onPick} />
