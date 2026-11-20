@@ -11,7 +11,7 @@ export function Bookmarks({ marked, loading, error, onPick, kind = "bookmarks" }
   const groups = groupBookmarks(marked ?? []).sort((a, b) => compareSubjects(a.subject, b.subject));
   const mistakes = kind === "mistakes";
   const label = mistakes ? "Mistake vault" : "Bookmarks";
-  return <section className="mt-6 border-t pt-6">
+  return <section className="pt-1">
     <h2 className="mb-4 font-display text-2xl text-primary">{mistakes ? "Mistake vault" : "Bookmarked questions"}</h2>
     {loading ? <p className="text-muted-foreground">Loading saved questions…</p> : error ? <p className="text-destructive">Couldn't load saved questions. Please try again.</p> : !groups.length ? <p className="text-muted-foreground">{mistakes ? "No mistakes to revisit yet." : "No bookmarked questions yet."}</p> : (
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

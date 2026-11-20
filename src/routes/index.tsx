@@ -261,29 +261,8 @@ function Index() {
             <div className="mb-4">
               <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
             </div>
-            <div className={paused ? "mb-4" : "mb-12"}>
-              <div className={isApp ? "flex flex-col" : ""}>
-              <QuestionOfTheDay />
-              <div className={isApp ? "order-first mb-5" : "mt-4"}>
-              {isApp && <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-xl text-primary">Revision tools</h2><Link to="/" hash="qbanks" onClick={goHome} className="text-xs font-semibold text-accent">All Q-Banks →</Link></div>}
-              <div className={`grid gap-3 ${isApp ? "grid-cols-1" : "sm:grid-cols-2"}`} aria-label="Study tools">
-                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
-                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
-                </Button>
-                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
-                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
-                </Button>
-                {isApp && <div><PushToggle /></div>}
-              </div>
-              {studyTool && <Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} />}
-              </div>
-              </div>
-              <OfflineDownload />
-            </div>
             {paused && (
-              <div className="mb-12 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-card px-5 py-4">
                 <span className="flex items-center gap-3">
                   <PlayCircle className="h-6 w-6 text-accent" />
                   <span>
@@ -298,6 +277,28 @@ function Index() {
                 </span>
               </div>
             )}
+            <div className="mb-12">
+              <div className={isApp ? "flex flex-col" : ""}>
+              <QuestionOfTheDay />
+              {isApp && <div className="mt-3"><PushToggle /></div>}
+              <div className={isApp ? "order-first mb-5" : "mt-4"}>
+              {isApp && <div className="mb-3 flex items-center justify-between"><h2 className="font-display text-xl text-primary">Revision tools</h2><Link to="/" hash="qbanks" onClick={goHome} className="text-xs font-semibold text-accent">All Q-Banks →</Link></div>}
+              <div className={`grid gap-3 ${isApp ? "grid-cols-1" : "sm:grid-cols-2"}`} aria-label="Study tools">
+                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "bookmarks"} onClick={() => setStudyTool(v => v === "bookmarks" ? null : "bookmarks")} aria-expanded={studyTool === "bookmarks"}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent"><Bookmark /></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Bookmarks</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.bookmarks.length ?? 0} saved questions</span></span>
+                </Button>
+                {studyTool === "bookmarks" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
+                <Button variant="study" className="h-auto min-h-24 justify-start gap-3 whitespace-normal px-4 py-4 text-left" data-active={studyTool === "mistakes"} onClick={() => setStudyTool(v => v === "mistakes" ? null : "mistakes")} aria-expanded={studyTool === "mistakes"}>
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-destructive"><CircleAlert /></span>
+                  <span className="min-w-0"><span className="block font-display text-lg text-primary">Mistake vault</span><span className="block text-xs font-normal text-muted-foreground">{marked.data?.mistakes.length ?? 0} to revisit</span></span>
+                </Button>
+                {studyTool === "mistakes" && <div className="col-span-full -mt-1"><Bookmarks kind={studyTool} marked={marked.data?.[studyTool]} loading={marked.isLoading} error={!!marked.error} onPick={p => { setMessage(undefined); setPick(p); }} /></div>}
+              </div>
+              </div>
+              </div>
+              <OfflineDownload />
+            </div>
             <QuoteOfTheDay />
           </>
         )}

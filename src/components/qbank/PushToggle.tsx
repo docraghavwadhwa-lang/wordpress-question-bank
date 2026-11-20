@@ -25,7 +25,7 @@ export function PushToggle() {
     try {
       if (on) {
         await ln.cancel({ notifications: [{ id: 8 }] });
-        localStorage.removeItem(KEY); setOn(false); toast.success("Daily reminder turned off.");
+        localStorage.removeItem(KEY); setOn(false); toast.success("Daily reminders turned off.");
         return;
       }
       const p = await ln.requestPermissions();
@@ -38,9 +38,9 @@ export function PushToggle() {
   }
 
   return (
-    <Button variant="study" className="h-auto min-h-24 w-full justify-start gap-3 whitespace-normal px-4 py-4 text-left" onClick={toggle} disabled={busy}>
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-secondary text-accent">{on ? <BellRing /> : <Bell />}</span>
-      <span className="min-w-0"><span className="block font-display text-lg text-primary">Daily reminder</span><span className="block text-xs font-normal text-muted-foreground">{on ? "8 AM · On · tap to turn off" : busy ? "Turning on…" : "8 AM · Tap to allow notifications"}</span></span>
+    <Button variant="outline" size="sm" className="gap-2" onClick={toggle} disabled={busy} aria-pressed={on}>
+      {on ? <BellRing className="h-4 w-4 text-accent" /> : <Bell className="h-4 w-4" />}
+      Daily reminders · {busy ? "Turning on…" : on ? "8 AM On" : "Off"}
     </Button>
   );
 }
