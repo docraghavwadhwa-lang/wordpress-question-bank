@@ -202,5 +202,7 @@ body:has([data-onboarding]) { padding-bottom: 0; }
 @keyframes elixir-breathe { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.03); } }
 .qb-image-wrap, .qb-viewer-wrap { position: relative; display: inline-block; max-width: 100%; }
 .qb-viewer-wrap { display: flex; min-height: 0; max-height: 100%; max-width: 100%; }
-.qb-image-wrap::after, .qb-viewer-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: url("/elixir-watermark.png") center / min(45%, 220px) auto no-repeat; opacity: 0.45; filter: drop-shadow(0 0 2px rgb(255 255 255 / 0.9)); z-index: 1; }
+.qb-image-wrap, .qb-viewer-wrap { padding-bottom: 30px; background: #fff; border-radius: 6px; overflow: hidden; }
+.qb-viewer-wrap { flex-direction: column; align-items: center; }
+.qb-image-wrap::after, .qb-viewer-wrap::after { content: "ELIXIR"; position: absolute; left: 0; right: 0; bottom: 0; height: 30px; display: flex; align-items: center; justify-content: center; gap: 6px; padding-left: 26px; background: #fff url("/elixir-watermark.png") calc(50% - 30px) center / 20px 20px no-repeat; color: #0D5C63; font: 700 13px/1 "Hanken Grotesk", sans-serif; letter-spacing: 0.22em; pointer-events: none; z-index: 1; }
 .qb-image-zoom { z-index: 2; }
