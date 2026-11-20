@@ -1,0 +1,8 @@
+CREATE OR REPLACE FUNCTION public.register_account_device(_device uuid,_name text,_replace uuid DEFAULT NULL) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path=public AS $$ DECLARE uid uuid:=auth.uid(); sid uuid:=(auth.jwt()->>'session_id')::uuid; devices jsonb; BEGIN
+IF uid IS NULL OR sid IS NULL THEN RAISE EXCEPTION 'Sign in again to register this device'; END IF;
+PERFORM 1 FROM public.profiles WHERE id=uid FOR UPDATE;
+IF EXISTS(SELECT 1 FROM public.account_devices WHERE user_id=uid AND session_id=sid AND revoked_at IS NOT NULL) THEN RETURN jsonb_build_object('status','revoked'); END IF;
+IF EXISTS(SELECT 1 FROM public.account_devices WHERE user_id=uid AND session_id=sid AND revoked_at IS NULL) THEN UPDATE public.account_devices SET updated_at=now() WHERE user_id=uid AND session_id=sid; RETURN jsonb_build_object('status','active'); END IF;
+IF _replace IS NOT NULL THEN UPDATE public.account_devices SET revoked_at=now(),updated_at=now() WHERE user_id=uid AND session_id=_replace AND revoked_at IS NULL; IF NOT FOUND THEN RAISE EXCEPTION 'That device is no longer active'; END IF; END IF;
+IF (SELECT count(*) FROM public.account_devices WHERE user_id=uid AND revoked_at IS NULL)>=2 THEN SELECT jsonb_agg(jsonb_build_object('session_id',session_id,'device_name',device_name,'updated_at',updated_at) ORDER BY updated_at DESC) INTO devices FROM public.account_devices WHERE user_id=uid AND revoked_at IS NULL; RETURN jsonb_build_object('status','choose','devices',devices); END IF;
+INSERT INTO public.account_devices(user_id,session_id,device_id,device_name) VALUES(uid,sid,_device,left(coalesce(nullif(btrim(_name),''),'Device'),80)); RETURN jsonb_build_object('status','active'); END; $$;
