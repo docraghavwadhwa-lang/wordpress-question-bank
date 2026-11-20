@@ -145,7 +145,7 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
     const active = await loadOfflineSummary();
     await pruneExcept(active?.generation);
     for (let from = 0; ; from += 1000) {
-      const data = await retryRead(signal => supabase.from("decks").select("path, subject, depth, sort_key, question_count").order("sort_key").range(from, from + 999).abortSignal(signal));
+      const data = await retryRead(signal => supabase.from("decks").select("path, subject, depth, sort_key, question_count, is_free").order("sort_key").range(from, from + 999).abortSignal(signal));
       const rows = (data ?? []) as Deck[];
       const tx = db.transaction("decks", "readwrite");
       for (const d of rows) void tx.store.put({ ...d, generation });

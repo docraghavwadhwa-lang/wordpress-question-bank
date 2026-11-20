@@ -116,6 +116,7 @@ export type Database = {
       decks: {
         Row: {
           depth: number
+          is_free: boolean
           path: string
           question_count: number
           sort_key: string
@@ -123,6 +124,7 @@ export type Database = {
         }
         Insert: {
           depth: number
+          is_free?: boolean
           path: string
           question_count?: number
           sort_key?: string
@@ -130,6 +132,7 @@ export type Database = {
         }
         Update: {
           depth?: number
+          is_free?: boolean
           path?: string
           question_count?: number
           sort_key?: string

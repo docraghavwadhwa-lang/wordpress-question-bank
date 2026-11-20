@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { readQueue, writeOrQueue } from "@/lib/offline";
 import { isNetworkError, offlineDecks, offlineDeckQuestions, offlineQuestionsByIds, OFFLINE_GUIDANCE, isOffline, networkRead } from "@/lib/offline-data";
 
-export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number };
+export type Deck = { path: string; subject: string; depth: number; sort_key: string; question_count: number; is_free?: boolean };
 export type Question = {
   id: number;
   deck_path: string;
@@ -28,7 +28,7 @@ export async function fetchDecks(): Promise<Deck[]> {
     for (let from = 0; ; from += 1000) {
       const { data, error } = await timed(supabase
         .from("decks")
-        .select("path, subject, depth, sort_key, question_count")
+        .select("path, subject, depth, sort_key, question_count, is_free")
         .order("sort_key")
         .range(from, from + 999));
       if (error) throw error;

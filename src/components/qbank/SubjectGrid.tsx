@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search, Lock } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
@@ -11,6 +12,8 @@ type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
 export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
   const [open, setOpen] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const toPlans = () => navigate({ to: "/plans" });
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
@@ -26,8 +29,8 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
       hits.length ? <><p className="mb-3 text-xs text-muted-foreground">{hits.length} matches</p><div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
         const parts = deckParts(d.path); const title = d.depth === 1 ? subjectLabel(d.path) : parts.at(-1) ?? d.path;
         const subtitle = [subjectLabel(parts[0] ?? d.subject), ...parts.slice(1, -1)].join(" › ");
-        const isLocked = locked?.has(d.subject);
-        return <Button variant="ghost" key={d.path} type="button" onClick={() => onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
+        const isLocked = !!locked?.has(d.subject) && !(d.depth === 3 && d.is_free);
+        return <Button variant="ghost" key={d.path} type="button" onClick={() => isLocked ? toPlans() : onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
           <span className="min-w-0"><span className="block break-words font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block break-words text-xs font-normal text-muted-foreground">{subtitle}</span>}</span>
           <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{isLocked && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
         </Button>;
@@ -37,7 +40,7 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
       {subjects.map((s) => (
         <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
           <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} locked={!!locked?.has(s.subject)} onClick={() => setOpen(open === s.path ? null : s.path)} />
-          {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} />}
+          {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} />}
         </div>
       ))}
     </div>
@@ -70,7 +73,7 @@ function Tile({ label, icon, active, locked, onClick }: { label: string; icon?: 
   );
 }
 
-function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
+function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void; onLocked: () => void }) {
   const [openSec, setOpenSec] = useState<string | null>(null);
   const sections = decks.filter((d) => d.depth === 2 && d.subject === subject.path);
   const isLocked = locked?.has(subject.subject);
@@ -80,10 +83,10 @@ function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Dec
         <h3 className="text-xl text-primary">{subjectLabel(subject.path)}</h3>
         <Button variant="study"
           type="button"
-          onClick={() => onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
+          onClick={() => isLocked ? onLocked() : onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
           className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground hover:bg-primary hover:text-primary-foreground"
         >
-          Practise whole subject
+          {isLocked && <Lock className="mr-1.5 h-3.5 w-3.5" />}Practise whole subject
         </Button>
       </div>
       <div className="divide-y rounded-lg border">
@@ -104,7 +107,7 @@ function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Dec
               </Button>
               {isOpen && (
                 <div className="grid gap-2 bg-muted/50 p-3 sm:grid-cols-2">
-                  <ChapterBtn strong label={`Practise all of ${name}`} onClick={() => onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })} />
+                  <ChapterBtn strong locked={!!isLocked} label={`Practise all of ${name}`} onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })} />
                   {chapters.map((ch) => {
                     const cn2 = ch.path.split(" > ").pop() ?? ch.path;
                     return (
@@ -112,8 +115,9 @@ function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Dec
                         <ChapterBtn
                           flat
                           label={cn2}
-                          locked={!!isLocked}
-                          onClick={() => onPick({ title: cn2, subtitle: `${subject.path} › ${name}`, path: ch.path, total: ch.question_count })}
+                          locked={!!isLocked && !ch.is_free}
+                          free={!!isLocked && !!ch.is_free}
+                          onClick={() => isLocked && !ch.is_free ? onLocked() : onPick({ title: cn2, subtitle: `${subject.path} › ${name}`, path: ch.path, total: ch.question_count })}
                         />
                         <MarkChips path={ch.path} title={cn2} subtitle={`${subject.path} › ${name}`} marked={marked} onPick={onPick} />
                       </div>
@@ -151,7 +155,7 @@ function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; ti
   );
 }
 
-function ChapterBtn({ label, strong, flat, locked, onClick }: { label: string; strong?: boolean; flat?: boolean; locked?: boolean; onClick: () => void }) {
+function ChapterBtn({ label, strong, flat, locked, free, onClick }: { label: string; strong?: boolean; flat?: boolean; locked?: boolean; free?: boolean; onClick: () => void }) {
   return (
     <Button variant="study"
       type="button"
@@ -163,7 +167,7 @@ function ChapterBtn({ label, strong, flat, locked, onClick }: { label: string; s
       )}
     >
       <span className="min-w-0 flex-1">{label}</span>
-      {locked && <Lock className="ml-2 h-3.5 w-3.5 shrink-0 text-accent" />}
+      {locked && <Lock className="ml-2 h-3.5 w-3.5 shrink-0 text-accent" />}{free && <span className="ml-2 shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>}
     </Button>
   );
 }

@@ -13,7 +13,7 @@
 - Website branding imports the shared full-logo asset pointer; install icons and favicon derive from its matching symbol, with versioned icon URLs to refresh cached branding.
 - Subject ordering and display aliases live in the browser-safe subjects module; preserve stored deck paths so downloads and quiz history keep working.
 - Home study tools reuse the study Button variant and subject-grouped selection; keep reminder behavior and offline-download activation unchanged during visual changes.
-- Deck metadata remains public; question RLS allows free samples or active subject-scoped subscriptions, with database-verified admin RPCs for approval — client gates alone cannot protect paid content.
+- Free access = a hash-shuffled 10% of each subject's chapter decks (decks.is_free, set by refresh_free_questions); whole-subject/section practice stays locked. Deck metadata remains public; question RLS allows free samples or active subject-scoped subscriptions, with database-verified admin RPCs for approval — client gates alone cannot protect paid content.
 - Subscription-era offline downloads use a new IndexedDB namespace and store only free samples; never shared-cache question or account responses — old full-bank caches must not bypass paid access.
 - Original and offer prices are stored separately; payment requests use database-computed totals and are unverified until admin approval — browser prices and submitted references are not payment proof.
 - Questions come from the Prepladder .apkg (note_id = questions.id, deck root "Prepladder" dropped, General Medicine→Medicine, OBG→"Obstetrics & Gyenacology"); images are webp in public/qimg because public storage buckets are blocked; attempts/bookmarks have no FK to questions so history survives re-imports.
