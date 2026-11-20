@@ -185,10 +185,7 @@ function Index() {
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
   const recent = latestReviews(reviews.data ?? [], user.id, now.getTime());
-  const locked = useMemo(() => {
-    if (access.data?.admin) return new Set<string>();
-    return lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
-  }, [access.data, planSubjects.data, decks.data]);
+  const locked = access.data?.admin ? new Set<string>() : lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
   return (
     <div className="min-h-screen">
       <AppHeader onHome={goHome} />
