@@ -1,4 +1,5 @@
 # Tasks
+- [x] Prepare team product report (PDF and editable Word) and written demo walkthrough; all 19 rendered pages checked, walkthrough overflow fixed. No recording supplied; signed-in/device demonstration remains a presenter task.
 - [x] Replace app logo bar with a compact personal study dashboard and revision tools; reduce website logo size.
 - [x] Search stored subjects, topics and subtopics with working question selection; live subtopic returned 13 matching questions and 21 tests passed.
 - [x] Centre supplied opening branding with live loading indication and no artificial delay; website, phone-sized opening artwork and live search verified. Installed Android launch and signed-in dashboard need a rebuilt APK/device; external Google authentication prevents signed-in checks here.
