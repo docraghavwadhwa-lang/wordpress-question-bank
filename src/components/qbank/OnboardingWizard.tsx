@@ -56,7 +56,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         <div className="mb-7">
           <span className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-secondary text-accent"><GraduationCap className="h-6 w-6" /></span>
           <h1 className="text-4xl leading-tight text-primary">{["Where are you in MBBS?", "Your college details", "Your phone number"][step]}</h1>
-          <p className="mt-3 text-sm text-muted-foreground">{["Choose your current year of study.", "Choose your state and college.", "Add your number to complete your study profile."][step]}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{["Choose your current year of study. This can't be changed later.", "Choose your state and college. These details can't be changed later.", "Add your number to complete your study profile."][step]}</p>
         </div>
         {step === 0 && <div role="radiogroup" aria-label="Choose course" className="grid gap-3">
           {COURSES.map((value, i) => <Button key={value} type="button" role="radio" aria-checked={course === value} variant="outline" onClick={() => setCourse(value)} className={cn("h-16 justify-between rounded-lg px-5 text-left", course === value && "border-accent bg-secondary")}>

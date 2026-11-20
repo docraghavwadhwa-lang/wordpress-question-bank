@@ -45,6 +45,14 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    // After an app update, an old cached screen can ask for files that no longer exist.
+    // Reload once to fetch the fresh version instead of showing this error.
+    const msg = String((error as Error)?.message ?? error);
+    if (/dynamically imported module|Importing a module script|Failed to fetch|Loading chunk|module script/i.test(msg)) {
+      const key = "elixir-reloaded-at";
+      const last = Number(sessionStorage.getItem(key) || 0);
+      if (Date.now() - last > 30000) { sessionStorage.setItem(key, String(Date.now())); window.location.reload(); }
+    }
   }, [error]);
 
   return (
@@ -59,8 +67,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
+              void router;
               reset();
+              window.location.reload();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >

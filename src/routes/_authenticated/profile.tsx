@@ -57,8 +57,6 @@ function ProfilePage() {
       const patch = {
         full_name: form.full_name?.trim().slice(0, 100) || null,
         phone: form.phone?.trim().slice(0, 20) || null,
-        college: form.college?.trim().slice(0, 150) || null,
-        study_year: form.study_year?.trim().slice(0, 50) || null,
         avatar_url: form.avatar_url ?? null,
         streak_goal: form.streak_goal ?? 20,
         streak_target_days: form.streak_target_days ?? 30,
@@ -106,9 +104,9 @@ function ProfilePage() {
               <Input value={user?.email ?? ""} disabled />
             </div>
             <Field label="Phone" value={form.phone} onChange={(v) => set("phone", v)} type="tel" />
-            <Field label="Year of study" value={form.study_year} onChange={(v) => set("study_year", v)} placeholder="e.g. 3rd Prof / Intern / PG aspirant" />
+            <div className="space-y-1.5"><Label>Year of study</Label><Input value={form.study_year ?? ""} disabled /></div>
             <div className="sm:col-span-2">
-              <Field label="College" value={form.college} onChange={(v) => set("college", v)} />
+              <div className="space-y-1.5"><Label>College</Label><Input value={form.college ?? ""} disabled /><p className="text-xs text-muted-foreground">Year of study and college are locked after setup and can't be changed.</p></div>
             </div>
           </div>
         </section>
