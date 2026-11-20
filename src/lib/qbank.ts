@@ -21,7 +21,7 @@ export const TIMERS = [
 
 export async function fetchDecks(): Promise<Deck[]> {
   const local = await offlineDecks().catch(() => null);
-  if (local?.length) return local;
+  if (local?.length && (isOffline() || local.some(d => d.is_free !== undefined))) return local;
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Deck[] = [];
@@ -52,7 +52,7 @@ const COLS = "id, deck_path, stem, options, answer, explanation";
 /** Every question in a subject / section / chapter (deck path prefix). */
 export async function fetchDeckQuestions(path: string): Promise<Question[]> {
   const local = isOffline() ? await offlineDeckQuestions(path).catch(() => null) : null;
-  if (local?.length) return local;
+  if (local?.length && (isOffline() || local.some(d => d.is_free !== undefined))) return local;
   try {
     if (isOffline()) throw new Error(OFFLINE_GUIDANCE);
     const out: Question[] = [];
