@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Crown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, CircleAlert, Search, Lock, Star } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
@@ -34,18 +34,17 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
         const isLocked = !!locked?.has(d.subject) && !(d.depth === 3 && d.is_free);
         return <Button variant="ghost" key={d.path} type="button" onClick={() => isLocked ? toPlans() : onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
           <span className="min-w-0"><span className="block break-words font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block break-words text-xs font-normal text-muted-foreground">{subtitle}</span>}</span>
-          <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{isLocked && d.depth === 3 && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
+          <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{d.depth === 3 && <Rating />}{isLocked && d.depth === 3 && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
         </Button>;
       })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    (() => { const s = subjects.find((x) => x.path === open); return s
+      ? <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} onBack={() => setOpen(null)} />
+      : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
-        <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
-          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} onClick={() => setOpen(open === s.path ? null : s.path)} />
-          {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} />}
-        </div>
+        <Tile key={s.path} label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} onClick={() => { setOpen(s.path); window.scrollTo({ top: 0 }); }} />
       ))}
-    </div>
+    </div>; })()
     )}
     <Dialog open={proOpen} onOpenChange={setProOpen}>
       <DialogContent className="max-w-sm text-center">
@@ -83,58 +82,63 @@ function Tile({ label, icon, active, locked, onClick }: { label: string; icon?: 
   );
 }
 
-function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void; onLocked: () => void }) {
-  const [openSec, setOpenSec] = useState<string | null>(null);
+/** Q-bank ratings are fixed at 5 stars for every Q-bank. */
+export const QBANK_RATING = 5;
+export function Rating() {
+  return <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-accent text-accent" />{QBANK_RATING.toFixed(1)}</span>;
+}
+
+function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked, onBack }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void; onLocked: () => void; onBack: () => void }) {
   const sections = decks.filter((d) => d.depth === 2 && d.subject === subject.path);
   const isLocked = locked?.has(subject.subject);
+  const modules = decks.filter((d) => d.depth === 3 && d.subject === subject.path).length;
   return (
-    <div className="mt-3 border-l-2 border-primary/20 py-3 pl-4 sm:pl-5">
-      <div className="mb-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-        <h3 className="text-xl text-primary">{subjectLabel(subject.path)}</h3>
-        <Button variant="study"
-          type="button"
-          onClick={() => isLocked ? onLocked() : onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
-          className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground hover:bg-primary hover:text-primary-foreground"
-        >
-          Practise whole subject
-        </Button>
+    <div>
+      <Button variant="ghost" type="button" onClick={onBack} className="-ml-2 mb-2 gap-1 px-2 text-muted-foreground"><ChevronLeft className="h-4 w-4" />All subjects</Button>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div><h2 className="font-display text-3xl text-primary">{subjectLabel(subject.path)}</h2>
+        <p className="text-sm text-muted-foreground">{modules} Q-bank modules · {subject.question_count} questions</p></div>
+        <Button variant="study" type="button" onClick={() => isLocked ? onLocked() : onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
+          className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground hover:bg-primary hover:text-primary-foreground">Practise whole subject</Button>
       </div>
-      <div className="divide-y rounded-lg border">
+      <div className="space-y-7">
         {sections.map((sec) => {
           const name = sec.path.split(" > ").pop() ?? sec.path;
           const chapters = decks.filter((d) => d.depth === 3 && d.path.startsWith(sec.path + " > "));
-          const isOpen = openSec === sec.path;
           return (
-            <div key={sec.path}>
-              <Button variant="study"
-                type="button"
-                onClick={() => setOpenSec(isOpen ? null : sec.path)}
-                className="flex h-auto w-full items-center gap-3 whitespace-normal rounded-none bg-transparent px-4 py-3 text-left text-foreground shadow-none hover:bg-muted"
-              >
-                <span className="min-w-0 flex-1 break-words font-medium leading-snug">{name}</span>
-                <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
-              </Button>
-              {isOpen && (
-                <div className="grid gap-2 bg-muted/50 p-3 sm:grid-cols-2">
-                  <ChapterBtn strong label={`Practise all of ${name}`} onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })} />
-                  {chapters.map((ch) => {
-                    const cn2 = ch.path.split(" > ").pop() ?? ch.path;
-                    return (
-                      <div key={ch.path} className="rounded-lg border bg-card">
-                        <ChapterBtn
-                          flat
-                          label={cn2}
-                          locked={!!isLocked && !ch.is_free}
-                          free={!!isLocked && !!ch.is_free}
-                          onClick={() => isLocked && !ch.is_free ? onLocked() : onPick({ title: cn2, subtitle: `${subject.path} › ${name}`, path: ch.path, total: ch.question_count })}
-                        />
-                        <MarkChips path={ch.path} title={cn2} subtitle={`${subject.path} › ${name}`} marked={marked} onPick={onPick} />
+            <section key={sec.path}>
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{name}</h3>
+                <button type="button" className="shrink-0 text-xs font-semibold text-accent hover:underline" onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })}>Practise all</button>
+              </div>
+              <ol className="space-y-3">
+                {chapters.map((ch, n) => {
+                  const title = ch.path.split(" > ").pop() ?? ch.path;
+                  const lock = !!isLocked && !ch.is_free;
+                  return (
+                    <li key={ch.path} className="relative flex gap-3">
+                      <span className="flex w-7 shrink-0 flex-col items-center">
+                        <span className="mt-4 flex h-7 w-7 items-center justify-center rounded-full border bg-card text-xs font-semibold text-primary">{n + 1}</span>
+                        {n + 1 < chapters.length && <span className="w-0.5 flex-1 bg-border" />}
+                      </span>
+                      <div className="min-w-0 flex-1 rounded-xl border bg-card shadow-sm">
+                        <button type="button" onClick={() => lock ? onLocked() : onPick({ title, subtitle: `${subjectLabel(subject.path)} › ${name}`, path: ch.path, total: ch.question_count })}
+                          className="flex w-full items-center gap-3 px-4 py-3.5 text-left hover:bg-secondary/60 rounded-xl">
+                          <span className="min-w-0 flex-1">
+                            <span className="block break-words font-medium leading-snug text-foreground">{title}</span>
+                            <span className="mt-1 flex items-center gap-2 text-xs text-muted-foreground"><Rating /><span>•</span>{ch.question_count} Ques</span>
+                          </span>
+                          {lock && <LockBadge />}
+                          {!!isLocked && !!ch.is_free && <span className="shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>}
+                          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        </button>
+                        <MarkChips path={ch.path} title={title} subtitle={`${subjectLabel(subject.path)} › ${name}`} marked={marked} onPick={onPick} />
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
           );
         })}
       </div>
@@ -164,19 +168,3 @@ function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; ti
   );
 }
 
-function ChapterBtn({ label, strong, flat, locked, free, onClick }: { label: string; strong?: boolean; flat?: boolean; locked?: boolean; free?: boolean; onClick: () => void }) {
-  return (
-    <Button variant="study"
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "h-auto w-full justify-start whitespace-normal rounded-lg border bg-card px-3 py-2.5 text-left text-sm leading-snug break-words hover:border-accent hover:text-primary",
-        flat && "border-transparent",
-        strong && "border-accent/50 font-semibold text-primary",
-      )}
-    >
-      <span className="min-w-0 flex-1">{label}</span>
-      {locked && <span className="ml-2 shrink-0"><LockBadge /></span>}{free && <span className="ml-2 shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>}
-    </Button>
-  );
-}

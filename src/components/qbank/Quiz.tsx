@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bookmark, Timer } from "lucide-react";
+import { Bookmark, Star, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatAverage, recordAttempt, setBookmark, type Question } from "@/lib/qbank";
 import { answerFeedback } from "@/lib/feedback";
@@ -141,6 +141,7 @@ export function Quiz({
             <p className="mt-1 text-muted-foreground">Average time per question: {formatAverage(spent.total, spent.count)}</p>
           </>
         )}
+        {mode === "practice" && <RateQbank />}
         {finishedSlot}
         <Button className="mt-8" onClick={onExit}>Back to subjects</Button>
       </div>
@@ -249,6 +250,23 @@ export function Quiz({
           {!done && !review && <Button variant="ghost" onClick={skip}>Skip</Button>}
           <Button disabled={!done} onClick={() => (last ? finish() : setI(i + 1))}>{last ? "Finish" : "Next"}</Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Students can rate a Q-bank after finishing it; the displayed Q-bank rating stays fixed at 5 stars. */
+function RateQbank() {
+  const [stars, setStars] = useState(0);
+  return (
+    <div className="mt-6 rounded-xl bg-secondary p-4">
+      <p className="text-sm font-medium text-primary">{stars ? "Thanks for rating this Q-bank!" : "How was this Q-bank?"}</p>
+      <div className="mt-2 flex justify-center gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setStars(n)} className="rounded p-1">
+            <Star className={cn("h-7 w-7 text-accent transition-transform hover:scale-110", n <= stars && "fill-current")} />
+          </button>
+        ))}
       </div>
     </div>
   );
