@@ -186,7 +186,7 @@ function Index() {
   const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
-  const recent = latestReviews(reviews.data ?? [], user.id, now.getTime());
+  const recent = latestReviews(reviews.data ?? [], user.id, Math.max(now.getTime(), Date.now()) + 300000);
   const locked = access.data?.admin ? new Set<string>() : lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
   return (
     <div className="min-h-screen">
