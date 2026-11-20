@@ -36,7 +36,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
       const result = await supabase.rpc("complete_onboarding", { _study_year: d.course, _college: d.college, _state: d.state, _admission_year: d.admissionYear, _phone: d.phone });
       if (result.error) throw result.error;
       onComplete();
-    } catch { setError("Couldn't save your details. Check your connection and try again."); }
+    } catch (e) { const m = (e as { message?: string })?.message; setError(m && !/fetch|network/i.test(m) ? m : "Couldn't save your details. Check your connection and try again."); }
     finally { setBusy(false); }
   }
 
