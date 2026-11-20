@@ -171,6 +171,7 @@ export type Database = {
           months: number
           payment_reference: string
           plan_id: string
+          razorpay_order_id: string | null
           status: string
           total_paise: number
           updated_at: string
@@ -185,6 +186,7 @@ export type Database = {
           months: number
           payment_reference: string
           plan_id: string
+          razorpay_order_id?: string | null
           status?: string
           total_paise: number
           updated_at?: string
@@ -199,6 +201,7 @@ export type Database = {
           months?: number
           payment_reference?: string
           plan_id?: string
+          razorpay_order_id?: string | null
           status?: string
           total_paise?: number
           updated_at?: string
@@ -456,7 +459,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          approved_by: string
+          approved_by: string | null
           created_at: string
           ends_at: string
           id: string
@@ -468,7 +471,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          approved_by: string
+          approved_by?: string | null
           created_at?: string
           ends_at: string
           id?: string
@@ -480,7 +483,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          approved_by?: string
+          approved_by?: string | null
           created_at?: string
           ends_at?: string
           id?: string
@@ -538,6 +541,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activate_razorpay_payment: {
+        Args: { _paid: number; _request: string }
+        Returns: string
+      }
       admin_students: {
         Args: { _offset?: number; _search?: string }
         Returns: {
