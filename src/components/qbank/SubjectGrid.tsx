@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { Crown } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search, Lock } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
@@ -12,8 +14,8 @@ type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
 export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
   const [open, setOpen] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const toPlans = () => navigate({ to: "/plans" });
+  const [proOpen, setProOpen] = useState(false);
+  const toPlans = () => setProOpen(true);
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
   const term = q.trim().toLowerCase();
@@ -32,19 +34,28 @@ export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; 
         const isLocked = !!locked?.has(d.subject) && !(d.depth === 3 && d.is_free);
         return <Button variant="ghost" key={d.path} type="button" onClick={() => isLocked ? toPlans() : onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
           <span className="min-w-0"><span className="block break-words font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block break-words text-xs font-normal text-muted-foreground">{subtitle}</span>}</span>
-          <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{isLocked && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
+          <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{isLocked && d.depth === 3 && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
         </Button>;
       })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
         <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
-          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} locked={!!locked?.has(s.subject)} onClick={() => setOpen(open === s.path ? null : s.path)} />
+          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} onClick={() => setOpen(open === s.path ? null : s.path)} />
           {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} onLocked={toPlans} />}
         </div>
       ))}
     </div>
     )}
+    <Dialog open={proOpen} onOpenChange={setProOpen}>
+      <DialogContent className="max-w-sm text-center">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/15 text-accent"><Crown className="h-7 w-7" /></span>
+        <DialogHeader className="sm:text-center"><DialogTitle className="text-center font-display text-2xl text-primary">Unlock with Pro</DialogTitle>
+        <DialogDescription className="text-center">This Q-bank is part of Elixir Pro. Subscribe to unlock every Q-bank, full subjects and explanations.</DialogDescription></DialogHeader>
+        <Button asChild className="mt-2 w-full"><Link to="/plans" onClick={() => setProOpen(false)}>Go Pro</Link></Button>
+        <Button variant="ghost" className="w-full" onClick={() => setProOpen(false)}>Maybe later</Button>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }
@@ -67,7 +78,6 @@ function Tile({ label, icon, active, locked, onClick }: { label: string; icon?: 
         {icon}
       </span>
       <span className="min-w-0 flex-1 break-words font-display text-lg leading-snug tracking-tight">{label}</span>
-      {locked && <LockBadge />}
       <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", active && "rotate-90")} />
     </Button>
   );
@@ -86,7 +96,7 @@ function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked }: { su
           onClick={() => isLocked ? onLocked() : onPick({ title: subjectLabel(subject.path), path: subject.path, total: subject.question_count })}
           className="rounded-full bg-accent px-4 py-1.5 text-sm font-semibold text-accent-foreground hover:bg-primary hover:text-primary-foreground"
         >
-          {isLocked && <Lock className="mr-1.5 h-3.5 w-3.5" />}Practise whole subject
+          Practise whole subject
         </Button>
       </div>
       <div className="divide-y rounded-lg border">
@@ -102,12 +112,11 @@ function SubjectPanel({ subject, decks, marked, locked, onPick, onLocked }: { su
                 className="flex h-auto w-full items-center gap-3 whitespace-normal rounded-none bg-transparent px-4 py-3 text-left text-foreground shadow-none hover:bg-muted"
               >
                 <span className="min-w-0 flex-1 break-words font-medium leading-snug">{name}</span>
-                {isLocked && <LockBadge />}
                 <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
               </Button>
               {isOpen && (
                 <div className="grid gap-2 bg-muted/50 p-3 sm:grid-cols-2">
-                  <ChapterBtn strong locked={!!isLocked} label={`Practise all of ${name}`} onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })} />
+                  <ChapterBtn strong label={`Practise all of ${name}`} onClick={() => isLocked ? onLocked() : onPick({ title: name, subtitle: subjectLabel(subject.path), path: sec.path, total: sec.question_count })} />
                   {chapters.map((ch) => {
                     const cn2 = ch.path.split(" > ").pop() ?? ch.path;
                     return (
@@ -167,7 +176,7 @@ function ChapterBtn({ label, strong, flat, locked, free, onClick }: { label: str
       )}
     >
       <span className="min-w-0 flex-1">{label}</span>
-      {locked && <Lock className="ml-2 h-3.5 w-3.5 shrink-0 text-accent" />}{free && <span className="ml-2 shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>}
+      {locked && <span className="ml-2 shrink-0"><LockBadge /></span>}{free && <span className="ml-2 shrink-0 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">Free</span>}
     </Button>
   );
 }
