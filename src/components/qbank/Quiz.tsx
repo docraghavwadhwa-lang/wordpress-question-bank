@@ -26,6 +26,7 @@ export function Quiz({
   onAnswered,
   finishedSlot,
   reviewChoices,
+  test = false,
 }: {
   questions: Question[];
   timer: number;
@@ -41,13 +42,17 @@ export function Quiz({
   onAnswered?: () => void;
   finishedSlot?: React.ReactNode;
   reviewChoices?: Record<string, string | null> | undefined;
+  /** Test mode: answers stay hidden until the whole test is submitted. */
+  test?: boolean;
 }) {
   const review = mode === "review";
   const [i, setI] = useState(initial?.index ?? 0);
   const [chosen, setChosen] = useState<string | null>(null);
   const [done, setDone] = useState(review);
   const [timedOut, setTimedOut] = useState(false);
-  const [left, setLeft] = useState(timer);
+  const testTotal = timer * questions.length;
+  const [left, setLeft] = useState(test ? testTotal : timer);
+  const testStart = useRef(Date.now());
   const [score, setScore] = useState(initial?.score ?? 0);
   const [answered, setAnswered] = useState(initial?.answered ?? 0);
   const [spent, setSpent] = useState(initial?.spent ?? { total: 0, count: 0 });
@@ -67,9 +72,9 @@ export function Quiz({
     t0.current = Date.now();
     const saved = review ? reviewChoices : choices;
     setChosen(saved?.[q?.id] ?? null);
-    setDone(review || Object.prototype.hasOwnProperty.call(saved ?? {}, q?.id));
+    setDone(review || (!test && Object.prototype.hasOwnProperty.call(saved ?? {}, q?.id)));
     setTimedOut(false);
-    setLeft(timer);
+    if (!test) setLeft(timer);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [i, timer, review]);
 
@@ -79,7 +84,8 @@ export function Quiz({
   }, [i, score, answered, spent, choices]);
 
   useEffect(() => {
-    if (!timer || done || finished || review) return;
+    if (!timer || (done && !test) || finished || review) return;
+    if (left <= 0 && test) { submitTest(); return; }
     if (left <= 0) {
       setTimedOut(true);
       answer(null);
@@ -114,7 +120,31 @@ export function Quiz({
     } else if (i + 1 === questions.length) complete(); else setI(i + 1);
   }
 
+  /** Score every answer at once, record the attempts, then show results. */
+  function submitTest() {
+    let sc = 0, ans = 0;
+    const per = Math.max(1, ((Date.now() - testStart.current) / 1000) / Math.max(1, Object.keys(choices).length));
+    for (const question of questions) {
+      const letter = choices[question.id];
+      if (!letter || !question.answer) continue;
+      ans++;
+      const ok = letter === question.answer;
+      if (ok) sc++;
+      if (userId) void recordAttempt(userId, question.id, letter, ok, per).then(() => onAnswered?.());
+    }
+    const seconds = (Date.now() - testStart.current) / 1000;
+    setScore(sc); setAnswered(ans); setSpent({ total: seconds, count: ans || 1 });
+    setSubmitOpen(false); setFinished(true);
+    onFinish?.({ score: sc, answered: ans, seconds, choices, completed: true });
+  }
+
   function answer(letter: string | null) {
+    if (test) {
+      if (!letter) return;
+      setChosen(letter);
+      setChoices(c => ({ ...c, [q.id]: letter }));
+      return;
+    }
     if (done) return;
     setDone(true);
     setChosen(letter);
@@ -179,11 +209,11 @@ export function Quiz({
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="font-semibold text-primary">
-          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}{revisiting ? <>Skipped question {Math.max(1, revisitList.indexOf(i) + 1)} of {revisitList.length}</> : <>Question {i + 1} of {questions.length}</>}
+          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}{test && "Test · "}{revisiting ? <>Skipped question {Math.max(1, revisitList.indexOf(i) + 1)} of {revisitList.length}</> : <>Question {i + 1} of {questions.length}</>}
         </span>
         {timer > 0 && !review && (
           <span className={cn("inline-flex items-center gap-1 font-semibold", left <= 10 && "text-destructive")}>
-            <Timer className="h-4 w-4" /> {left}s
+            <Timer className="h-4 w-4" /> {test ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : `${left}s`}
           </span>
         )}
         <span className="min-w-0 flex-1 truncate">{crumbs}</span>
@@ -203,7 +233,7 @@ export function Quiz({
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
             className={cn("h-full rounded-full bg-accent transition-all duration-1000 ease-linear", left <= 10 && "bg-destructive")}
-            style={{ width: `${(100 * left) / timer}%` }}
+            style={{ width: `${(100 * left) / (test ? testTotal : timer)}%` }}
           />
         </div>
       )}
@@ -228,6 +258,7 @@ export function Quiz({
                   !done && "hover:border-accent hover:bg-secondary",
                   right && "border-success bg-success-soft",
                   wrong && "border-destructive bg-danger-soft",
+                  test && chosen === L && "border-primary bg-secondary ring-1 ring-primary",
                 )}
               >
                 <span className="font-semibold text-primary">{L}.</span>
@@ -253,6 +284,19 @@ export function Quiz({
         </div>
       )}
 
+      {test ? <>
+        <div className="mt-8 flex flex-wrap justify-between gap-3">
+          <Button variant="outline" disabled={i === 0} onClick={() => setI(i - 1)}>Previous</Button>
+          <div className="flex gap-2">
+            {!last && <Button variant="outline" onClick={() => setI(i + 1)}>Next</Button>}
+            <Button onClick={() => setSubmitOpen(true)}>Submit test</Button>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-wrap gap-1.5" aria-label="Question palette">
+          {questions.map((question, n) => <button key={question.id} type="button" onClick={() => setI(n)} aria-label={`Question ${n + 1}`} aria-current={n === i} className={cn("h-8 w-8 rounded-md border text-xs font-semibold", choices[question.id] ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground", n === i && "ring-2 ring-accent")}>{n + 1}</button>)}
+        </div>
+        <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Submit test?</DialogTitle><DialogDescription>{questions.length - Object.keys(choices).length} of {questions.length} questions unanswered. Answers and explanations appear after you submit.</DialogDescription><Button onClick={submitTest}>Submit test</Button><Button variant="outline" onClick={() => setSubmitOpen(false)}>Keep going</Button></DialogContent></Dialog>
+      </> : <>
       <div className="mt-8 flex flex-wrap justify-between gap-3">
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => finish()}>End session</Button>
@@ -264,6 +308,7 @@ export function Quiz({
         </div>
       </div>
       <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { const first = skipped[0]; if (first) { setRevisiting(true); setRevisitList(skipped.map(row => row.index)); setI(first.index); } setSubmitOpen(false); }}>Revisit skipped questions</Button><Button variant="outline" onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button></DialogContent></Dialog>
+      </>}
     </div>
   );
 }

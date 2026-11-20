@@ -45,3 +45,18 @@ describe("completed attempt capture", () => {
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 0, answered: 0, choices: {}, completed: true }));
   });
 });
+describe("test mode", () => {
+  it("hides solutions, allows changing answers and scores only on submit", () => {
+    const onFinish = vi.fn();
+    render(<Quiz test questions={questions} timer={0} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
+    expect(screen.queryByText("Solution")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "A. First" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
+    expect(onFinish).not.toHaveBeenCalled();
+    fireEvent.click(screen.getAllByRole("button", { name: "Submit test" })[0]!);
+    fireEvent.click(screen.getAllByRole("button", { name: "Submit test" }).at(-1)!);
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 2, choices: { 1: "A", 2: "B" }, completed: true }));
+  });
+});

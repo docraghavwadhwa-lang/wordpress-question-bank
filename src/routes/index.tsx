@@ -65,7 +65,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; quizKey: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined; reviewChoices?: Record<string, string | null> | undefined };
+type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; quizKey: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined; reviewChoices?: Record<string, string | null> | undefined; test?: boolean };
 
 function Index() {
   const { user, ready } = useAuth();
@@ -108,15 +108,15 @@ function Index() {
     void reviews.refetch();
   }
 
-  async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress, quizKey = title, reviewChoices?: Record<string, string | null>) {
+  async function launch(qs: Question[], timer: number, title: string, mode: ActiveQuiz["mode"], initial?: QuizProgress, quizKey = title, reviewChoices?: Record<string, string | null>, test = false) {
     const marks = user ? await fetchBookmarkIds(user.id) : new Set<number>();
-    if (mode === "practice") {
+    if (mode === "practice" && !test) {
       saveSession({ title, quizKey, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 }, choices: initial?.choices ?? {} });
     }
-    setQuiz({ qs, timer, marks, title, mode, initial, quizKey, reviewChoices });
+    setQuiz({ qs, timer, marks, title, mode, initial, quizKey, reviewChoices, test });
   }
 
-  async function start(timer: number, review?: boolean) {
+  async function start(timer: number, review?: boolean, test = false) {
     if (!pick) return;
     setLoading(true);
     try {
@@ -129,7 +129,7 @@ function Index() {
       }
       localStorage.setItem("qb_timer", String(timer));
       setSavedTimer(timer);
-      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, (pick.imagesOnly ? `images:${pick.path}` : pick.path) ?? `${pick.kind}:${pick.subtitle ?? pick.title}`);
+      await launch(review ? qs : shuffle(qs), review ? 0 : timer, pick.title, review ? "review" : "practice", undefined, (pick.imagesOnly ? `images:${pick.path}` : pick.path) ?? `${pick.kind}:${pick.subtitle ?? pick.title}`, undefined, !review && test);
       setPick(null);
     } catch (error) {
       setMessage(offlineErrorMessage(error, "Couldn't open these questions. Please try again."));
@@ -202,6 +202,7 @@ function Index() {
             userId={user.id}
             bookmarks={quiz.marks}
             mode={quiz.mode}
+            test={!!quiz.test}
             goal={streak.goal}
             todayCount={streak.streak.today}
             initial={quiz.initial}
@@ -209,7 +210,7 @@ function Index() {
             onAnswered={() => void streak.refresh()}
             onProgress={(p) => {
               const cur = loadSession();
-              if (quiz.mode === "practice" && cur) saveSession({ ...cur, ...p });
+              if (quiz.mode === "practice" && !quiz.test && cur) saveSession({ ...cur, ...p });
             }}
             onFinish={(r) => {
               if (quiz.mode === "practice") saveSession(null);
