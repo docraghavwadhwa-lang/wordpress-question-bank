@@ -89,6 +89,30 @@ export type Database = {
         }
         Relationships: []
       }
+      colleges: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          normalized_name: string | null
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          normalized_name?: string | null
+          state: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          normalized_name?: string | null
+          state?: string
+        }
+        Relationships: []
+      }
       decks: {
         Row: {
           depth: number
@@ -115,14 +139,17 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admission_year: number | null
           avatar_url: string | null
           city: string | null
           college: string | null
+          college_state: string | null
           created_at: string
           dob: string | null
           full_name: string | null
           id: string
           last_celebrated_streak: number
+          onboarding_completed_at: string | null
           phone: string | null
           streak_goal: number
           streak_target_days: number
@@ -131,14 +158,17 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admission_year?: number | null
           avatar_url?: string | null
           city?: string | null
           college?: string | null
+          college_state?: string | null
           created_at?: string
           dob?: string | null
           full_name?: string | null
           id: string
           last_celebrated_streak?: number
+          onboarding_completed_at?: string | null
           phone?: string | null
           streak_goal?: number
           streak_target_days?: number
@@ -147,14 +177,17 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admission_year?: number | null
           avatar_url?: string | null
           city?: string | null
           college?: string | null
+          college_state?: string | null
           created_at?: string
           dob?: string | null
           full_name?: string | null
           id?: string
           last_celebrated_streak?: number
+          onboarding_completed_at?: string | null
           phone?: string | null
           streak_goal?: number
           streak_target_days?: number
@@ -277,6 +310,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_onboarding: {
+        Args: {
+          _admission_year: number
+          _college: string
+          _phone: string
+          _state: string
+          _study_year: string
+        }
+        Returns: undefined
+      }
       qb_blitz_rank: {
         Args: { _day: string }
         Returns: {
