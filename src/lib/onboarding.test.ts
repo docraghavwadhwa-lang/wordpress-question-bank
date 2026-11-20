@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { COURSES, ONBOARDING_STEPS, completionKey, needsOnboarding, onboardingSchema } from "./onboarding";
+import { COURSES, ONBOARDING_STEPS, collegeSchema, completionKey, needsOnboarding, onboardingSchema } from "./onboarding";
 
 describe("First-sign-in setup rules", () => {
-  it("offers MBBS First through Fourth year only", () => {
-    expect([...COURSES]).toEqual(["MBBS - First year", "MBBS - Second year", "MBBS - Third year", "MBBS - Fourth year"]);
+  it("offers MBBS years, internship and post-MBBS", () => {
+    expect([...COURSES]).toEqual(["MBBS - First year", "MBBS - Second year", "MBBS - Third year", "MBBS - Fourth year", "Housemanship / Internship", "Post MBBS"]);
+  });
+  it("accepts admission years from 2000 onwards only", () => {
+    expect(collegeSchema.safeParse({ college: "Medical College", state: "Delhi", admissionYear: 2000 }).success).toBe(true);
+    expect(collegeSchema.safeParse({ college: "Medical College", state: "Delhi", admissionYear: 1999 }).success).toBe(false);
   });
   it("collects course, college, then phone in that order", () => {
     expect([...ONBOARDING_STEPS]).toEqual(["course", "college", "phone"]);

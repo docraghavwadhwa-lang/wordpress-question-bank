@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId } from "./subscriptions";
+import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId, lockedSubjects } from "./subscriptions";
 describe("subscription rules", () => {
   it("uses the supplied manual UPI payment destination", () => { expect(manualPaymentUpiId).toBe("docraghavwadhwa-1@okicici"); });
   it("makes 10% of each subject free, rounded down to whole questions", () => { expect(freeQuestionCount(340)).toBe(34); expect(freeQuestionCount(1072)).toBe(107); });
@@ -9,4 +9,11 @@ describe("subscription rules", () => {
   it("rejects discounts outside 1–100 percent", () => { expect(couponSchema.safeParse({code:"TEST",percent:101,enabled:true}).success).toBe(false); });
   it("allocates calendar months with start and end dates", () => { expect(allocationEnd("2026-11-20",12)).toBe("2027-11-20"); expect(allocationEnd("2026-01-31",1)).toBe("2026-02-28"); });
   it("allows access only during the approved period", () => { const s={starts_at:"2026-11-20T00:00:00Z",ends_at:"2027-11-20T00:00:00Z",revoked:false}; expect(subscriptionActive(s,Date.parse("2026-11-21"))).toBe(true); expect(subscriptionActive(s,Date.parse("2027-11-20"))).toBe(false); expect(subscriptionActive({...s,revoked:true},Date.parse("2026-11-21"))).toBe(false); });
+  it("locks subjects outside the active plan's coverage", () => {
+    const subs = [{ plan_id: "base", starts_at: "2026-11-20T00:00:00Z", ends_at: "2027-11-20T00:00:00Z", revoked: false }];
+    const coverage = [{ plan_id: "base", subject: "Anatomy" }, { plan_id: "panacea", subject: "Medicine" }];
+    expect([...lockedSubjects(subs, coverage, ["Anatomy", "Medicine"], Date.parse("2026-11-21"))]).toEqual(["Medicine"]);
+    expect(lockedSubjects([], coverage, ["Anatomy"], Date.parse("2026-11-21")).has("Anatomy")).toBe(true);
+    expect(lockedSubjects(subs, coverage, ["Anatomy"], Date.parse("2028-01-01")).has("Anatomy")).toBe(true);
+  });
 });

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, Bookmark, CircleAlert, History, Clock, Flame, PlayCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
 import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
+import { fetchAccess, fetchPlanSubjects, lockedSubjects } from "@/lib/subscriptions";
 import { OpeningScreen } from "@/components/qbank/OpeningScreen";
 
 function Landing() {
@@ -73,6 +74,8 @@ function Index() {
   const stats = useQuery({ queryKey: ["stats", user?.id], queryFn: fetchStats, enabled: !!user });
   const marked = useQuery({ queryKey: ["marked", user?.id], queryFn: fetchMarked, enabled: !!user });
   const reviews = useQuery({ queryKey: ["quiz-reviews", user?.id], queryFn: () => user ? fetchQuizReviews(user.id) : Promise.resolve([]), enabled: !!user });
+  const access = useQuery({ queryKey: ["access", user?.id], queryFn: fetchAccess, enabled: !!user });
+  const planSubjects = useQuery({ queryKey: ["plan-subjects"], queryFn: fetchPlanSubjects, enabled: !!user });
   const streak = useStreak(user?.id);
   const [pick, setPick] = useState<Pick | null>(null);
   const [loading, setLoading] = useState(false);
@@ -182,6 +185,10 @@ function Index() {
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
   const recent = latestReviews(reviews.data ?? [], user.id, now.getTime());
+  const locked = useMemo(() => {
+    if (access.data?.admin) return new Set<string>();
+    return lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
+  }, [access.data, planSubjects.data, decks.data]);
   return (
     <div className="min-h-screen">
       <AppHeader onHome={goHome} />
@@ -227,7 +234,7 @@ function Index() {
             </div>
             {decks.isLoading && <p className="text-muted-foreground">Loading subjects…</p>}
             {decks.error && <p className="text-destructive">{offlineErrorMessage(decks.error, "Couldn't load subjects. Please refresh.")}</p>}
-            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
+            {decks.data && <SubjectGrid decks={decks.data} marked={marked.data} locked={locked} onPick={(p) => { setMessage(undefined); setPick(p); }} />}
           </>
         ) : (
           <>

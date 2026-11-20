@@ -16,6 +16,12 @@ export function subscriptionActive(s: { starts_at: string; ends_at: string; revo
 export const money = (paise: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(paise / 100);
 export const dateLabel = (date: string) => new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 export async function fetchPlans() { const { data, error } = await supabase.from("subscription_plans").select("*").order("price_year"); if (error) throw error; return data ?? []; }
+export async function fetchPlanSubjects() { const { data, error } = await supabase.from("plan_subjects").select("*"); if (error) throw error; return data ?? []; }
+/** Subjects the user has no active subscription for; their paid questions stay locked (10% of each subject stays free). */
+export function lockedSubjects(subscriptions: { plan_id: string; starts_at: string; ends_at: string; revoked: boolean }[], planSubjects: { plan_id: string; subject: string }[], subjects: string[], now = Date.now()) {
+  const covered = new Set(planSubjects.filter(ps => subscriptions.some(s => s.plan_id === ps.plan_id && subscriptionActive(s, now))).map(ps => ps.subject));
+  return new Set(subjects.filter(s => !covered.has(s)));
+}
 export async function fetchAccess() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return { admin: false, subscriptions: [] };

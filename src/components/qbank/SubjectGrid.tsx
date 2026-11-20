@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, Bookmark, CircleAlert, Search, Lock } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes" };
 type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
 
-export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; onPick: (p: Pick) => void }) {
+export function SubjectGrid({ decks, marked, locked, onPick }: { decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
   const [open, setOpen] = useState<string | null>(null);
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
@@ -26,17 +26,18 @@ export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?:
       hits.length ? <><p className="mb-3 text-xs text-muted-foreground">{hits.length} matches</p><div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
         const parts = deckParts(d.path); const title = d.depth === 1 ? subjectLabel(d.path) : parts.at(-1) ?? d.path;
         const subtitle = [subjectLabel(parts[0] ?? d.subject), ...parts.slice(1, -1)].join(" › ");
+        const isLocked = locked?.has(d.subject);
         return <Button variant="ghost" key={d.path} type="button" onClick={() => onPick({ title, ...(d.depth > 1 ? { subtitle } : {}), path: d.path, total: d.question_count })} className="flex h-auto w-full items-center justify-between gap-3 whitespace-normal rounded-none px-4 py-3 text-left hover:bg-secondary">
           <span className="min-w-0"><span className="block break-words font-medium text-primary">{title}</span>{d.depth > 1 && <span className="block break-words text-xs font-normal text-muted-foreground">{subtitle}</span>}</span>
-          <span className="shrink-0 text-xs font-normal text-muted-foreground">{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
+          <span className="flex shrink-0 items-center gap-2 text-xs font-normal text-muted-foreground">{isLocked && <LockBadge />}{d.question_count} Qs <ChevronRight className="ml-1 inline h-3 w-3" /></span>
         </Button>;
       })}</div></> : <p className="text-sm text-muted-foreground">No subjects, topics or subtopics match “{q}”.</p>
     ) : (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {subjects.map((s) => (
         <div key={s.path} className={cn(open === s.path && "sm:col-span-2 lg:col-span-3")}>
-          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} onClick={() => setOpen(open === s.path ? null : s.path)} />
-          {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} onPick={onPick} />}
+          <Tile label={subjectLabel(s.path)} icon={(() => { const I = subjectIcon(s.path); return <I className="h-5 w-5" strokeWidth={1.5} />; })()} active={open === s.path} locked={locked?.has(s.subject)} onClick={() => setOpen(open === s.path ? null : s.path)} />
+          {open === s.path && <SubjectPanel subject={s} decks={decks} marked={marked} locked={locked} onPick={onPick} />}
         </div>
       ))}
     </div>
@@ -45,7 +46,11 @@ export function SubjectGrid({ decks, marked, onPick }: { decks: Deck[]; marked?:
   );
 }
 
-function Tile({ label, icon, active, onClick }: { label: string; icon?: React.ReactNode; active?: boolean; onClick: () => void }) {
+function LockBadge() {
+  return <span title="Locked — 10% free, unlock the rest with a Pro plan" className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent"><Lock className="h-3 w-3" />Pro</span>;
+}
+
+function Tile({ label, icon, active, locked, onClick }: { label: string; icon?: React.ReactNode; active?: boolean; locked?: boolean; onClick: () => void }) {
   return (
     <Button variant="study"
       type="button"
@@ -59,14 +64,16 @@ function Tile({ label, icon, active, onClick }: { label: string; icon?: React.Re
         {icon}
       </span>
       <span className="min-w-0 flex-1 break-words font-display text-lg leading-snug tracking-tight">{label}</span>
+      {locked && <LockBadge />}
       <ChevronRight className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", active && "rotate-90")} />
     </Button>
   );
 }
 
-function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; onPick: (p: Pick) => void }) {
+function SubjectPanel({ subject, decks, marked, locked, onPick }: { subject: Deck; decks: Deck[]; marked?: MarkedSets | undefined; locked?: Set<string> | undefined; onPick: (p: Pick) => void }) {
   const [openSec, setOpenSec] = useState<string | null>(null);
   const sections = decks.filter((d) => d.depth === 2 && d.subject === subject.path);
+  const isLocked = locked?.has(subject.subject);
   return (
     <div className="mt-3 border-l-2 border-primary/20 py-3 pl-4 sm:pl-5">
       <div className="mb-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -92,6 +99,7 @@ function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks
                 className="flex h-auto w-full items-center gap-3 whitespace-normal rounded-none bg-transparent px-4 py-3 text-left text-foreground shadow-none hover:bg-muted"
               >
                 <span className="min-w-0 flex-1 break-words font-medium leading-snug">{name}</span>
+                {isLocked && <LockBadge />}
                 <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
               </Button>
               {isOpen && (
@@ -104,6 +112,7 @@ function SubjectPanel({ subject, decks, marked, onPick }: { subject: Deck; decks
                         <ChapterBtn
                           flat
                           label={cn2}
+                          locked={isLocked}
                           onClick={() => onPick({ title: cn2, subtitle: `${subject.path} › ${name}`, path: ch.path, total: ch.question_count })}
                         />
                         <MarkChips path={ch.path} title={cn2} subtitle={`${subject.path} › ${name}`} marked={marked} onPick={onPick} />
@@ -142,7 +151,7 @@ function MarkChips({ path, title, subtitle, marked, onPick }: { path: string; ti
   );
 }
 
-function ChapterBtn({ label, strong, flat, onClick }: { label: string; strong?: boolean; flat?: boolean; onClick: () => void }) {
+function ChapterBtn({ label, strong, flat, locked, onClick }: { label: string; strong?: boolean; flat?: boolean; locked?: boolean; onClick: () => void }) {
   return (
     <Button variant="study"
       type="button"
@@ -153,7 +162,8 @@ function ChapterBtn({ label, strong, flat, onClick }: { label: string; strong?: 
         strong && "border-accent/50 font-semibold text-primary",
       )}
     >
-      {label}
+      <span className="min-w-0 flex-1">{label}</span>
+      {locked && <Lock className="ml-2 h-3.5 w-3.5 shrink-0 text-accent" />}
     </Button>
   );
 }
