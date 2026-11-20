@@ -8,7 +8,7 @@ export async function signInWithGoogle() {
     try { await nativeGoogleSignIn(); } catch (e) { toast.error((e as Error).message); }
     return;
   }
-  const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
+  const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin, queryParams: { prompt: "select_account" } } });
   if (error) toast.error(error.message);
 }
 

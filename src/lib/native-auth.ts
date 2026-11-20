@@ -21,7 +21,7 @@ export function isNativeApp(): boolean {
 export async function nativeGoogleSignIn() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: APP_AUTH_CALLBACK, skipBrowserRedirect: true },
+    options: { redirectTo: APP_AUTH_CALLBACK, skipBrowserRedirect: true, queryParams: { prompt: "select_account" } },
   });
   if (error) throw error;
   // External hosts are opened by Capacitor in the system browser.

@@ -54,7 +54,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const hideTop = isApp;
 
   async function signOut() {
-    await supabase.rpc("release_account_device");
+    try { await supabase.rpc("release_account_device"); } catch { /* still sign out */ }
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut({ scope: "local" });
