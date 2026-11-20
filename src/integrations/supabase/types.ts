@@ -137,6 +137,113 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_coupons: {
+        Row: {
+          code: string
+          created_at: string
+          enabled: boolean
+          percent: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          enabled?: boolean
+          percent: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          enabled?: boolean
+          percent?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_requests: {
+        Row: {
+          approved_by: string | null
+          coupon_code: string | null
+          created_at: string
+          discount_percent: number
+          id: string
+          months: number
+          payment_reference: string
+          plan_id: string
+          status: string
+          total_paise: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_by?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          months: number
+          payment_reference: string
+          plan_id: string
+          status?: string
+          total_paise: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_by?: string | null
+          coupon_code?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          months?: number
+          payment_reference?: string
+          plan_id?: string
+          status?: string
+          total_paise?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_subjects: {
+        Row: {
+          plan_id: string
+          subject: string
+        }
+        Insert: {
+          plan_id: string
+          subject: string
+        }
+        Update: {
+          plan_id?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_subjects_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           admission_year: number | null
@@ -236,6 +343,7 @@ export type Database = {
           deck_path: string
           explanation: string | null
           id: number
+          is_free: boolean
           options: Json
           sort_key: string
           stem: string
@@ -246,6 +354,7 @@ export type Database = {
           deck_path: string
           explanation?: string | null
           id: number
+          is_free?: boolean
           options?: Json
           sort_key?: string
           stem: string
@@ -256,6 +365,7 @@ export type Database = {
           deck_path?: string
           explanation?: string | null
           id?: number
+          is_free?: boolean
           options?: Json
           sort_key?: string
           stem?: string
@@ -305,11 +415,143 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string
+          enabled: boolean
+          id: string
+          name: string
+          price_two_year: number
+          price_year: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          enabled?: boolean
+          id: string
+          name: string
+          price_two_year: number
+          price_year: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          price_two_year?: number
+          price_year?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          approved_by: string
+          created_at: string
+          ends_at: string
+          id: string
+          payment_request_id: string | null
+          plan_id: string
+          revoked: boolean
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_by: string
+          created_at?: string
+          ends_at: string
+          id?: string
+          payment_request_id?: string | null
+          plan_id: string
+          revoked?: boolean
+          starts_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_by?: string
+          created_at?: string
+          ends_at?: string
+          id?: string
+          payment_request_id?: string | null
+          plan_id?: string
+          revoked?: boolean
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: true
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_students: {
+        Args: { _offset?: number; _search?: string }
+        Returns: {
+          college: string
+          email: string
+          full_name: string
+          study_year: string
+          user_id: string
+        }[]
+      }
+      approve_subscription: {
+        Args: {
+          _months: number
+          _plan: string
+          _request?: string
+          _start: string
+          _user: string
+        }
+        Returns: string
+      }
       complete_onboarding: {
         Args: {
           _admission_year: number
@@ -320,6 +562,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_subject_access: { Args: { _subject: string }; Returns: boolean }
       qb_blitz_rank: {
         Args: { _day: string }
         Returns: {
@@ -348,9 +598,28 @@ export type Database = {
           total: number
         }[]
       }
+      quote_plan: {
+        Args: { _coupon?: string; _months: number; _plan: string }
+        Returns: {
+          discount_percent: number
+          total_paise: number
+        }[]
+      }
+      refresh_free_questions: { Args: never; Returns: undefined }
+      reject_payment: { Args: { _request: string }; Returns: undefined }
+      revoke_subscription: { Args: { _id: string }; Returns: undefined }
+      submit_payment_request: {
+        Args: {
+          _coupon: string
+          _months: number
+          _plan: string
+          _reference: string
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -477,6 +746,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
