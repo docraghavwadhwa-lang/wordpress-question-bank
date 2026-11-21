@@ -18,6 +18,7 @@ import { Route as PlansRouteImport } from './routes/plans'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
+import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
 import { Route as ApiPublicPushQotdRouteImport } from './routes/api/public/push-qotd'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
@@ -65,6 +66,12 @@ const AuthenticatedStatsRoute = AuthenticatedStatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicCashfreeWebhookRoute =
+  ApiPublicCashfreeWebhookRouteImport.update({
+    id: '/api/public/cashfree-webhook',
+    path: '/api/public/cashfree-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPushQotdRoute = ApiPublicPushQotdRouteImport.update({
   id: '/api/public/push-qotd',
   path: '/api/public/push-qotd',
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
+  '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
   '/api/public/push-qotd': typeof ApiPublicPushQotdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/profile'
     | '/stats'
+    | '/api/public/cashfree-webhook'
     | '/api/public/push-qotd'
     | '/api/public/razorpay-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/profile'
     | '/stats'
+    | '/api/public/cashfree-webhook'
     | '/api/public/push-qotd'
     | '/api/public/razorpay-webhook'
   id:
@@ -151,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/profile'
     | '/_authenticated/stats'
+    | '/api/public/cashfree-webhook'
     | '/api/public/push-qotd'
     | '/api/public/razorpay-webhook'
   fileRoutesById: FileRoutesById
@@ -162,6 +175,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
   PlansRoute: typeof PlansRoute
+  ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
   ApiPublicPushQotdRoute: typeof ApiPublicPushQotdRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
@@ -231,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedStatsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/cashfree-webhook': {
+      id: '/api/public/cashfree-webhook'
+      path: '/api/public/cashfree-webhook'
+      fullPath: '/api/public/cashfree-webhook'
+      preLoaderRoute: typeof ApiPublicCashfreeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/push-qotd': {
       id: '/api/public/push-qotd'
       path: '/api/public/push-qotd'
@@ -270,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
   PlansRoute: PlansRoute,
+  ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
   ApiPublicPushQotdRoute: ApiPublicPushQotdRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }

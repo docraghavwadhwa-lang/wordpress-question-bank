@@ -265,6 +265,8 @@ export type Database = {
       payment_requests: {
         Row: {
           approved_by: string | null
+          cashfree_environment: string | null
+          cashfree_order_id: string | null
           coupon_code: string | null
           created_at: string
           discount_percent: number
@@ -277,9 +279,12 @@ export type Database = {
           total_paise: number
           updated_at: string
           user_id: string
+          verified_paid_at: string | null
         }
         Insert: {
           approved_by?: string | null
+          cashfree_environment?: string | null
+          cashfree_order_id?: string | null
           coupon_code?: string | null
           created_at?: string
           discount_percent?: number
@@ -292,9 +297,12 @@ export type Database = {
           total_paise: number
           updated_at?: string
           user_id: string
+          verified_paid_at?: string | null
         }
         Update: {
           approved_by?: string | null
+          cashfree_environment?: string | null
+          cashfree_order_id?: string | null
           coupon_code?: string | null
           created_at?: string
           discount_percent?: number
@@ -307,6 +315,7 @@ export type Database = {
           total_paise?: number
           updated_at?: string
           user_id?: string
+          verified_paid_at?: string | null
         }
         Relationships: [
           {
@@ -924,6 +933,15 @@ export type Database = {
           total_paise: number
         }[]
       }
+      record_cashfree_payment: {
+        Args: {
+          _environment: string
+          _order: string
+          _paid: number
+          _request: string
+        }
+        Returns: boolean
+      }
       refresh_free_questions: { Args: never; Returns: undefined }
       register_account_device: {
         Args: { _device: string; _name: string; _replace?: string }
@@ -931,6 +949,41 @@ export type Database = {
       }
       reject_payment: { Args: { _request: string }; Returns: undefined }
       release_account_device: { Args: never; Returns: undefined }
+      reserve_cashfree_payment: {
+        Args: {
+          _coupon: string
+          _discount: number
+          _environment: string
+          _months: number
+          _plan: string
+          _total: number
+          _user: string
+        }
+        Returns: {
+          approved_by: string | null
+          cashfree_environment: string | null
+          cashfree_order_id: string | null
+          coupon_code: string | null
+          created_at: string
+          discount_percent: number
+          id: string
+          months: number
+          payment_reference: string
+          plan_id: string
+          razorpay_order_id: string | null
+          status: string
+          total_paise: number
+          updated_at: string
+          user_id: string
+          verified_paid_at: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "payment_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       revoke_subscription: { Args: { _id: string }; Returns: undefined }
       submit_payment_request: {
         Args: {

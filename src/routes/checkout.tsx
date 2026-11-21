@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { trackPurchase } from "@/lib/admin";
-import { startRazorpayCheckout, confirmRazorpayCheckout } from "@/lib/razorpay.functions";
+import { startCashfreeCheckout, confirmCashfreeCheckout } from "@/lib/cashfree.functions";
+import { cashfreeCheckoutMode } from "@/lib/cashfree";
 import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, manualPaymentUpiId, DEFAULT_COUPON, checkoutCoupon } from "@/lib/subscriptions";
 
 export const Route = createFileRoute("/checkout")({
@@ -20,12 +21,11 @@ export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout | Elixir Pro" }, { name: "description", content: "Apply your Elixir offer and securely pay for your chosen Pro plan." }, { property: "og:title", content: "Elixir Pro checkout" }, { property: "og:description", content: "Your chosen plan, included NIRMAYACARE offer and secure payment." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: CheckoutPage,
 });
-type CheckoutOptions = { key: string; order_id: string; amount: number; currency: string; name: string; prefill: { email: string }; handler: () => void; modal: { ondismiss: () => void } };
-type CheckoutWindow = Window & { Razorpay?: new (options: CheckoutOptions) => { open: () => void; on: (name: string, callback: (response: { error?: { description?: string } }) => void) => void } };
+type CheckoutWindow = Window & { Cashfree?: (options: { mode: "sandbox" | "production" }) => { checkout: (options: { paymentSessionId: string; redirectTarget: "_modal" }) => Promise<{ error?: { message?: string }; paymentDetails?: unknown }> } };
 async function loadCheckout() {
-  if ((window as CheckoutWindow).Razorpay) return;
+  if ((window as CheckoutWindow).Cashfree) return;
   await new Promise<void>((resolve, reject) => {
-    const script = document.createElement("script"); script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    const script = document.createElement("script"); script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
     script.onload = () => resolve(); script.onerror = () => { script.remove(); reject(new Error("Couldn't load payment. Please try again.")); };
     document.body.appendChild(script);
   });
@@ -36,20 +36,21 @@ function CheckoutPage() {
   const plans = useQuery({ queryKey: ["plans"], queryFn: fetchPlans });
   const plan = plans.data?.find(row => row.id === planId);
   const [coupon, setCoupon] = useState(DEFAULT_COUPON);
-  const [step, setStep] = useState<"coupon" | "payment" | "complete">("coupon");
+  const [step, setStep] = useState<"coupon" | "payment" | "received" | "complete">("coupon");
   const [quote, setQuote] = useState<{ total_paise: number; discount_percent: number } | null>(null);
   const [busy, setBusy] = useState(false); const [reference, setReference] = useState("");
-  useEffect(() => { if (user && step !== "complete") void trackPurchase(step === "coupon" ? "coupon_page" : "payment_page", planId, months).catch(() => {}); }, [user?.id, step, planId, months]);
-  const startFn = useServerFn(startRazorpayCheckout); const confirmFn = useServerFn(confirmRazorpayCheckout);
+  useEffect(() => { if (user && step !== "complete") void trackPurchase(step === "received" ? "verification_pending" : step === "coupon" ? "coupon_page" : "payment_page", planId, months).catch(() => {}); }, [user?.id, step, planId, months]);
+  const startFn = useServerFn(startCashfreeCheckout); const confirmFn = useServerFn(confirmCashfreeCheckout);
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     async function checkPending() {
       const { data: { session } } = await supabase.auth.getSession(); if (!session) return;
       const rows = await fetchPayments();
-      for (const row of rows.filter(row => row.user_id === session.user.id && row.status === "pending" && row.razorpay_order_id && row.plan_id === planId)) {
+      for (const row of rows.filter(row => row.user_id === session.user.id && row.status === "pending" && row.cashfree_order_id && row.plan_id === planId)) {
         const result = await confirmFn({ data: { token: session.access_token, requestId: row.id } });
         if (result.status === "approved" && !cancelled) { setStep("complete"); await qc.invalidateQueries({ queryKey: ["access"] }); }
+        else if (result.status === "received" && !cancelled) setStep("received");
       }
     }
     void checkPending().catch(() => {});
@@ -67,15 +68,19 @@ function CheckoutPage() {
       const { data: { session } } = await supabase.auth.getSession(); if (!session) throw new Error("Please sign in again");
       const token = session.access_token;
       const order = await startFn({ data: { token, plan: plan.id, months: months as 12 | 24, coupon: checkoutCoupon(coupon) } });
-      await loadCheckout(); const Razorpay = (window as CheckoutWindow).Razorpay; if (!Razorpay) throw new Error("Payment couldn't open");
-      const confirm = async () => {
-        try { const result = await confirmFn({ data: { token, requestId: order.requestId } }); if (result.status === "approved") { setStep("complete"); toast.success("Payment received — your plan is active"); } else toast.info("Payment not completed yet. You can try again."); await qc.invalidateQueries({ queryKey: ["access"] }); }
-        catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't check payment"); }
-        finally { setBusy(false); }
-      };
-      const checkout = new Razorpay({ key: order.keyId, order_id: order.orderId, amount: order.amount, currency: "INR", name: "Elixir by Nirmaya Care", prefill: { email: order.email }, handler: () => void confirm(), modal: { ondismiss: () => { void trackPurchase("payment_cancelled", plan.id, months).catch(() => {}); void confirm(); } } });
-      checkout.on("payment.failed", response => { void trackPurchase("payment_failed", plan.id, months).catch(() => {}); toast.error(response.error?.description ?? "Payment failed"); setBusy(false); }); checkout.open(); void trackPurchase("payment_opened", plan.id, months).catch(() => {});
-    } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't start payment"); setBusy(false); }
+      if (order.received) { setStep("received"); return; }
+      await loadCheckout(); const Cashfree = (window as CheckoutWindow).Cashfree; if (!Cashfree) throw new Error("Payment couldn't open");
+      void trackPurchase("payment_opened", plan.id, months).catch(() => {});
+      const response = await Cashfree({ mode: cashfreeCheckoutMode(order.environment) }).checkout({ paymentSessionId: order.paymentSessionId, redirectTarget: "_modal" });
+      // A browser callback is never proof of payment. Always check the order server-side.
+      const result = await confirmFn({ data: { token, requestId: order.requestId } });
+      if (result.status === "approved") { setStep("complete"); toast.success("Your subscription is active"); }
+      else if (result.status === "received") { setStep("received"); toast.success("Payment received — awaiting approval"); }
+      else if (response.error) { void trackPurchase("payment_failed", plan.id, months).catch(() => {}); toast.error(response.error.message ?? "Payment failed. You can try again."); }
+      else { void trackPurchase("payment_cancelled", plan.id, months).catch(() => {}); toast.info("Payment not completed yet. You can try again."); }
+      await Promise.all([qc.invalidateQueries({ queryKey: ["access"] }), qc.invalidateQueries({ queryKey: ["admin", "payments"] })]);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't start payment"); }
+    finally { setBusy(false); }
   }
   async function manual() {
     if (!plan) return; setBusy(true);
@@ -87,7 +92,7 @@ function CheckoutPage() {
     <Button variant="ghost" asChild className="mb-8 -ml-3"><Link to="/plans"><ArrowLeft />Plans</Link></Button>
     {plans.isPending ? <p>Loading plan…</p> : !plan ? <p role="alert" className="text-destructive">This plan is unavailable. Please choose another plan.</p> : <>
       <div className="mb-8 flex items-center gap-2 text-xs font-semibold uppercase text-accent"><Crown className="h-4 w-4" />{plan.name} · {months === 12 ? "1 year" : "2 years"}</div>
-      {step === "complete" ? <><Check className="mb-4 h-12 w-12 text-success" /><h1 className="text-4xl text-primary">You're Pro</h1><p className="mt-3 text-muted-foreground">Your subscription is active.</p><Button asChild className="mt-8 w-full"><Link to="/" hash="qbanks">Back to Q-banks</Link></Button></> : <>
+      {step === "complete" || step === "received" ? <><Check className="mb-4 h-12 w-12 text-success" /><h1 className="text-4xl text-primary">{step === "complete" ? "You're Pro" : "Payment received"}</h1><p className="mt-3 text-muted-foreground">{step === "complete" ? "Your subscription is active." : "Your payment is verified. Your subscription will unlock after administrator approval."}</p><Button asChild className="mt-8 w-full"><Link to="/" hash="qbanks">Back to Q-banks</Link></Button></> : <>
       <h1 className="text-4xl text-primary">{step === "coupon" ? "Your Elixir offer" : "Your next chapter"}</h1>
       <p className="mt-3 text-sm text-muted-foreground">{step === "coupon" ? "The NIRMAYACARE offer is already included. Have another code?" : "Questions, answers and explanations for your chosen plan."}</p>
       {!user ? <Button asChild className="mt-8 w-full"><Link to="/auth">Continue with Google</Link></Button> : step === "coupon" ? <div className="mt-10">

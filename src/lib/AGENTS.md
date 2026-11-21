@@ -1,1 +1,2 @@
 - Day-based trials use the normal subscriptions access path through an invoker RPC and a role-checked helper in a non-exposed schema; existing subject access and expiry rules remain authoritative.
+- Payment credentials stay server-only; reserve orders under a per-student/plan lock, verify provider order identity, owner, currency and stored total, and record receipt without granting access until administrator approval. Webhooks verify raw-body HMAC before any reads or writes.
