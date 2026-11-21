@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { isNativeApp } from "@/lib/native-auth";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Crown } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -19,6 +20,9 @@ export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = tru
   const toPlans = () => setProOpen(true);
   const subjects = useMemo(() => decks.filter((d) => d.depth === 1).sort((a, b) => compareSubjects(a.path, b.path)), [decks]);
   const [q, setQ] = useState("");
+  // The website shows its own header branding, so the centred logo appears only in the app.
+  const [native, setNative] = useState(false);
+  useEffect(() => setNative(isNativeApp()), []);
   const term = q.trim().toLowerCase();
   const scoped = open && open !== IMAGES ? decks.filter(d => d.subject === open) : decks;
   const hits = useMemo(() => searchDecks(scoped, term), [scoped, term]);
@@ -26,7 +30,7 @@ export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = tru
 
   return (
     <>
-    <QuestionBrand />
+    {native && <QuestionBrand />}
     <label className="mb-5 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchLabel} aria-label={searchLabel} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />

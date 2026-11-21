@@ -576,9 +576,11 @@ export type Database = {
           enabled: boolean
           id: string
           name: string
+          original_price_three_year: number | null
           original_price_two_year: number | null
           original_price_year: number | null
           perks: string[]
+          price_three_year: number | null
           price_two_year: number
           price_year: number
           updated_at: string
@@ -589,9 +591,11 @@ export type Database = {
           enabled?: boolean
           id: string
           name: string
+          original_price_three_year?: number | null
           original_price_two_year?: number | null
           original_price_year?: number | null
           perks?: string[]
+          price_three_year?: number | null
           price_two_year: number
           price_year: number
           updated_at?: string
@@ -602,9 +606,11 @@ export type Database = {
           enabled?: boolean
           id?: string
           name?: string
+          original_price_three_year?: number | null
           original_price_two_year?: number | null
           original_price_year?: number | null
           perks?: string[]
+          price_three_year?: number | null
           price_two_year?: number
           price_year?: number
           updated_at?: string
@@ -714,9 +720,11 @@ export type Database = {
           enabled: boolean
           id: string
           name: string
+          original_price_three_year: number | null
           original_price_two_year: number | null
           original_price_year: number | null
           perks: string[]
+          price_three_year: number | null
           price_two_year: number
           price_year: number
           updated_at: string

@@ -40,7 +40,7 @@ export function PushToggle() {
   return (
     <Button variant="outline" size="sm" className="gap-2" onClick={toggle} disabled={busy} aria-pressed={on}>
       {on ? <BellRing className="h-4 w-4 text-accent" /> : <Bell className="h-4 w-4" />}
-      Daily reminders · {busy ? "Turning on…" : on ? "8 AM On" : "Off"}
+      Daily reminders{busy ? " · Turning on…" : ""}
     </Button>
   );
 }

@@ -68,7 +68,6 @@ export function QuestionOfTheDay() {
           <QuestionHtml html={d.explanation} className="mt-3 leading-relaxed" />
         </details>
       )}
-      <p className="mt-4 text-xs text-muted-foreground">A new question every day. This one doesn't count towards your streak.</p>
     </section>
   );
 }

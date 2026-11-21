@@ -46,7 +46,10 @@ export async function confirmCashfreeRequest(requestId: string): Promise<"approv
     _request: row.id, _order: order.order_id, _paid: row.total_paise, _environment: CASHFREE_ENVIRONMENT,
   });
   if (recordError) throw recordError;
-  return recorded ? "received" : "unknown";
+  if (!recorded) return "unknown";
+  // A verified payment allocates access automatically; report approved once the subscription exists.
+  const { data: after } = await supabaseAdmin.from("payment_requests").select("status").eq("id", row.id).maybeSingle();
+  return after?.status === "approved" ? "approved" : "received";
 }
 export async function verifyCashfreeSignature(body: string, timestamp: string | null, signature: string | null, secret: string) {
   if (!timestamp || !/^\d{10,16}$/.test(timestamp) || !signature || !/^[A-Za-z0-9+/]{43}=$/.test(signature)) return false;

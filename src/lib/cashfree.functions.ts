@@ -15,7 +15,7 @@ async function authenticatedPaymentUser(token: string) {
   return { user: data.user, asUser };
 }
 export const startCashfreeCheckout = createServerFn({ method: "POST" })
-  .inputValidator(d => z.object({ token: z.string().min(10), plan: z.string().min(1).max(40), months: z.union([z.literal(12), z.literal(24)]), coupon: z.string().max(32) }).parse(d))
+  .inputValidator(d => z.object({ token: z.string().min(10), plan: z.string().min(1).max(40), months: z.union([z.literal(12), z.literal(24), z.literal(36)]), coupon: z.string().max(32) }).parse(d))
   .handler(async ({ data }) => {
     const { user, asUser } = await authenticatedPaymentUser(data.token);
     const { cashfreeRequest, cashfreeCredentials, CashfreeError } = await import("./cashfree.server");

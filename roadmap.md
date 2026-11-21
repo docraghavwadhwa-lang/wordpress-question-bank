@@ -1,4 +1,10 @@
 # Tasks
+- [x] Master prompt batch 1: AIR-PG default coupon, Reagent rename (PSM/FMT → Catalyst, legacy Base kept), Catalyst 2y ₹4,199, 3-year plans, dark plan buttons, red invalid-coupon line, auto-activation after Cashfree, college list hides after pick, Daily reminders label, QOTD note removed, website subject-page logo removed.
+- [ ] Trials: Request-a-trial button (locked card + plans page), 14-day message, "Get in touch with team" call, admin approve/edit days, home countdown, offline download frozen in trial, trial engagement in admin.
+- [ ] Gold crown + plan details popup for Pro users; Pro users can save all their questions offline.
+- [ ] Info (how to use) guide in bottom bar; Add-to-Home-Screen guide image with Elixir logo.
+- [ ] Android: Elixir logo on notifications; five daily notifications (8 AM, 12 PM, 4 PM, 8 PM, 9 PM) — needs APK rebuild.
+- [ ] Admin plan editor: add 3-year price fields.
 - [x] Replace Razorpay checkout with live Cashfree; live credentials accepted, old connector removed, stored totals/coupons/history/manual approval preserved, 22 tests passed, desktop/mobile checkout and unsigned-webhook rejection checked.
 - [ ] Activate and verify signed-in Cashfree checkout — needs Cashfree domain allowlisting and publishing; external unmanaged Google authentication prevents a real student payment check here.
 - [x] Center question/Q-bank branding and add default-light account-menu switching; isolated desktop and phone screens verified.

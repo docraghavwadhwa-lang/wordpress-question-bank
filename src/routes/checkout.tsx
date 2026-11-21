@@ -14,11 +14,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackPurchase } from "@/lib/admin";
 import { startCashfreeCheckout, confirmCashfreeCheckout } from "@/lib/cashfree.functions";
 import { cashfreeCheckoutMode } from "@/lib/cashfree";
-import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, manualPaymentUpiId, DEFAULT_COUPON, checkoutCoupon } from "@/lib/subscriptions";
+import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, manualPaymentUpiId, DEFAULT_COUPON, checkoutCoupon, planMonths, planPrice } from "@/lib/subscriptions";
 
 export const Route = createFileRoute("/checkout")({
-  validateSearch: (search) => z.object({ plan: z.string().catch("panacea"), months: z.coerce.number().refine(n => n === 12 || n === 24).catch(12) }).parse(search),
-  head: () => ({ meta: [{ title: "Checkout | Elixir Pro" }, { name: "description", content: "Apply your Elixir offer and securely pay for your chosen Pro plan." }, { property: "og:title", content: "Elixir Pro checkout" }, { property: "og:description", content: "Your chosen plan, included NIRMAYACARE offer and secure payment." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  validateSearch: (search) => z.object({ plan: z.string().catch("panacea"), months: z.coerce.number().refine(n => n === 12 || n === 24 || n === 36).catch(12) }).parse(search),
+  head: () => ({ meta: [{ title: "Checkout | Elixir Pro" }, { name: "description", content: "Apply your Elixir offer and securely pay for your chosen Pro plan." }, { property: "og:title", content: "Elixir Pro checkout" }, { property: "og:description", content: "Your chosen plan, included AIR-PG offer and secure payment." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: CheckoutPage,
 });
 type CheckoutWindow = Window & { Cashfree?: (options: { mode: "sandbox" | "production" }) => { checkout: (options: { paymentSessionId: string; redirectTarget: "_modal" }) => Promise<{ error?: { message?: string }; paymentDetails?: unknown }> } };
@@ -38,7 +38,7 @@ function CheckoutPage() {
   const [coupon, setCoupon] = useState(DEFAULT_COUPON);
   const [step, setStep] = useState<"coupon" | "payment" | "received" | "complete">("coupon");
   const [quote, setQuote] = useState<{ total_paise: number; discount_percent: number } | null>(null);
-  const [busy, setBusy] = useState(false); const [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false); const [couponError, setCouponError] = useState(""); const [reference, setReference] = useState("");
   useEffect(() => { if (user && step !== "complete") void trackPurchase(step === "received" ? "verification_pending" : step === "coupon" ? "coupon_page" : "payment_page", planId, months).catch(() => {}); }, [user?.id, step, planId, months]);
   const startFn = useServerFn(startCashfreeCheckout); const confirmFn = useServerFn(confirmCashfreeCheckout);
   useEffect(() => {
@@ -58,8 +58,9 @@ function CheckoutPage() {
   }, [user?.id, planId]);
   async function next() {
     if (!user || !plan) return; setBusy(true);
+    setCouponError("");
     try { setQuote(await quotePlan(plan.id, months, checkoutCoupon(coupon))); setStep("payment"); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Coupon unavailable"); }
+    catch (e) { const message = e instanceof Error ? e.message : ""; if (/coupon/i.test(message)) setCouponError("The coupon you have applied is invalid"); else toast.error(message || "Couldn't check your offer"); }
     finally { setBusy(false); }
   }
   async function pay() {
@@ -67,7 +68,7 @@ function CheckoutPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession(); if (!session) throw new Error("Please sign in again");
       const token = session.access_token;
-      const order = await startFn({ data: { token, plan: plan.id, months: months as 12 | 24, coupon: checkoutCoupon(coupon) } });
+      const order = await startFn({ data: { token, plan: plan.id, months: planMonths(months), coupon: checkoutCoupon(coupon) } });
       if (order.received) { setStep("received"); return; }
       await loadCheckout(); const Cashfree = (window as CheckoutWindow).Cashfree; if (!Cashfree) throw new Error("Payment couldn't open");
       void trackPurchase("payment_opened", plan.id, months).catch(() => {});
@@ -91,17 +92,18 @@ function CheckoutPage() {
   return <div className="min-h-screen"><AppHeader /><main className="mx-auto max-w-lg px-6 py-8 sm:py-12">
     <Button variant="ghost" asChild className="mb-8 -ml-3"><Link to="/plans"><ArrowLeft />Plans</Link></Button>
     {plans.isPending ? <p>Loading plan…</p> : !plan ? <p role="alert" className="text-destructive">This plan is unavailable. Please choose another plan.</p> : <>
-      <div className="mb-8 flex items-center gap-2 text-xs font-semibold uppercase text-accent"><Crown className="h-4 w-4" />{plan.name} · {months === 12 ? "1 year" : "2 years"}</div>
-      {step === "complete" || step === "received" ? <><Check className="mb-4 h-12 w-12 text-success" /><h1 className="text-4xl text-primary">{step === "complete" ? "You're Pro" : "Payment received"}</h1><p className="mt-3 text-muted-foreground">{step === "complete" ? "Your subscription is active." : "Your payment is verified. Your subscription will unlock after administrator approval."}</p><Button asChild className="mt-8 w-full"><Link to="/" hash="qbanks">Back to Q-banks</Link></Button></> : <>
+      <div className="mb-8 flex items-center gap-2 text-xs font-semibold uppercase text-accent"><Crown className="h-4 w-4" />{plan.name} · {months / 12} {months === 12 ? "year" : "years"}</div>
+      {step === "complete" || step === "received" ? <><Check className="mb-4 h-12 w-12 text-success" /><h1 className="text-4xl text-primary">{step === "complete" ? "You're Pro" : "Payment received"}</h1><p className="mt-3 text-muted-foreground">{step === "complete" ? "Your subscription is active." : "Your payment is verified. Your plan is being activated — refresh in a moment."}</p><Button asChild className="mt-8 w-full"><Link to="/" hash="qbanks">Back to Q-banks</Link></Button></> : <>
       <h1 className="text-4xl text-primary">{step === "coupon" ? "Your Elixir offer" : "Your next chapter"}</h1>
-      <p className="mt-3 text-sm text-muted-foreground">{step === "coupon" ? "The NIRMAYACARE offer is already included. Have another code?" : "Questions, answers and explanations for your chosen plan."}</p>
+      <p className="mt-3 text-sm text-muted-foreground">{step === "coupon" ? `The ${DEFAULT_COUPON} offer is already included. Have another code?` : "Questions, answers and explanations for your chosen plan."}</p>
       {!user ? <Button asChild className="mt-8 w-full"><Link to="/auth">Continue with Google</Link></Button> : step === "coupon" ? <div className="mt-10">
         <Label htmlFor="checkout-coupon" className="flex items-center gap-2"><Ticket className="h-4 w-4 text-accent" />Coupon code</Label>
-        <Input id="checkout-coupon" className="mt-3 h-12" value={coupon} onChange={event => setCoupon(event.target.value.toUpperCase())} maxLength={32} placeholder={DEFAULT_COUPON} />
-        <p className="mt-3 flex items-center gap-2 text-xs text-success"><Check className="h-4 w-4" />{checkoutCoupon(coupon) === DEFAULT_COUPON ? "NIRMAYACARE applied to all accounts" : "Your code will be checked before payment"}</p>
-        <Button className="mt-10 h-12 w-full" disabled={busy} onClick={() => void next()}>{busy ? "Checking…" : "Next"}<ArrowRight /></Button>
+        <Input id="checkout-coupon" className="mt-3 h-12" value={coupon} onChange={event => { setCoupon(event.target.value.toUpperCase()); setCouponError(""); }} maxLength={32} placeholder={DEFAULT_COUPON} />
+        <p className="mt-3 flex items-center gap-2 text-xs text-success"><Check className="h-4 w-4" />{checkoutCoupon(coupon) === DEFAULT_COUPON ? `${DEFAULT_COUPON} applied to all accounts` : "Your code will be checked before payment"}</p>
+        {couponError && <p role="alert" className="mt-8 text-sm font-medium text-destructive">{couponError}</p>}
+        <Button className={`${couponError ? "mt-3" : "mt-10"} h-12 w-full`} disabled={busy} onClick={() => void next()}>{busy ? "Checking…" : "Next"}<ArrowRight /></Button>
       </div> : <div className="mt-8">
-        <dl className="space-y-4 border-y py-6 text-sm"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Plan</dt><dd>{plan.name} · {months} months</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Offer</dt><dd className="text-success">{checkoutCoupon(coupon)}</dd></div><div className="flex items-center justify-between gap-3 pt-2"><dt className="font-semibold">Total to pay</dt><dd className="text-3xl font-semibold text-primary">{money(quote?.total_paise ?? (months === 12 ? plan.price_year : plan.price_two_year))}</dd></div></dl>
+        <dl className="space-y-4 border-y py-6 text-sm"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Plan</dt><dd>{plan.name} · {months} months</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Offer</dt><dd className="text-success">{checkoutCoupon(coupon)}</dd></div><div className="flex items-center justify-between gap-3 pt-2"><dt className="font-semibold">Total to pay</dt><dd className="text-3xl font-semibold text-primary">{money(quote?.total_paise ?? planPrice(plan, planMonths(months)))}</dd></div></dl>
         <Button className="mt-6 h-12 w-full" disabled={busy || !quote} onClick={() => void pay()}>{busy ? "Please wait…" : "Pay"}</Button>
         <Button variant="ghost" className="mt-2 w-full" disabled={busy} onClick={() => setStep("coupon")}>Change coupon</Button>
         <details className="mt-8 text-sm"><summary className="cursor-pointer text-muted-foreground">Or pay manually via UPI</summary><p className="mt-3 text-muted-foreground">Pay {money(quote?.total_paise ?? 0)} and submit your transaction ID for verification.</p><Input className="mt-3" value={manualPaymentUpiId} readOnly aria-label="UPI ID" /><Button variant="outline" className="mt-2" onClick={() => void navigator.clipboard.writeText(manualPaymentUpiId).then(() => toast.success("UPI ID copied")).catch(() => toast.error("Couldn't copy UPI ID"))}>Copy UPI ID</Button><Label htmlFor="payment-reference" className="mt-5 block">UPI transaction ID</Label><Input id="payment-reference" className="mt-2" value={reference} onChange={event => setReference(event.target.value)} maxLength={150} /><Button className="mt-3" disabled={busy || reference.trim().length < 3} onClick={() => void manual()}>Submit for verification</Button></details>

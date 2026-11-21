@@ -2,10 +2,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
 export const manualPaymentUpiId = "docraghavwadhwa-1@okicici";
-export const DEFAULT_COUPON = "NIRMAYACARE";
+export const DEFAULT_COUPON = "AIR-PG";
 export function checkoutCoupon(value: string) { return value.trim().toUpperCase() || DEFAULT_COUPON; }
 export const couponSchema = z.object({ code: z.string().trim().toUpperCase().regex(/^[A-Z0-9_-]{3,32}$/), percent: z.number().int().min(1).max(100), enabled: z.boolean() });
 export const allocationSchema = z.object({ months: z.number().int().min(1).max(36), start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });
+export type PlanMonths = 12 | 24 | 36;
+export const planMonths = (m: unknown): PlanMonths => (m === 24 || m === 36 ? m : 12);
+export function planPrice(plan: { price_year: number; price_two_year: number } & Record<string, unknown>, months: PlanMonths) { return months === 12 ? plan.price_year : months === 24 ? plan.price_two_year : Number(plan["price_three_year"] ?? 0); }
+export function planOriginalPrice(plan: { price_year: number; price_two_year: number; original_price_year: number | null; original_price_two_year: number | null } & Record<string, unknown>, months: PlanMonths) { const o = months === 12 ? plan.original_price_year : months === 24 ? plan.original_price_two_year : (plan["original_price_three_year"] as number | null | undefined); return o ?? planPrice(plan, months); }
+export const planName = (id: string) => ({ base: "Elixir Base", reagent: "Elixir Reagent", catalyst: "Elixir Catalyst", panacea: "Elixir Panacea" } as Record<string, string>)[id] ?? "Elixir Pro";
 export function freeQuestionCount(total: number) { return Math.floor(total * 0.1); }
 export function discountedPrice(paise: number, percent: number) { return Math.round(paise * (100 - percent) / 100); }
 export function allocationEnd(start: string, months: number) {
