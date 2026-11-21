@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { compareSubjects, subjectLabel, deckParts, searchDecks } from "@/lib/subjects";
 import { QuestionBrand } from "./QuestionBrand";
 import { Button } from "@/components/ui/button";
+import { TrialRequestButton } from "./TrialRequest";
 
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes"; imagesOnly?: boolean };
 type MarkedSets = { bookmarks: Marked[]; mistakes: Marked[] };
@@ -63,6 +64,7 @@ export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = tru
         <DialogHeader className="sm:text-center"><DialogTitle className="text-center font-display text-2xl text-primary">Unlock with Pro</DialogTitle>
         <DialogDescription className="text-center">This Q-bank is part of Elixir Pro. Subscribe to unlock every Q-bank, full subjects and explanations.</DialogDescription></DialogHeader>
         <Button asChild className="mt-2 w-full"><Link to="/plans" onClick={() => setProOpen(false)}>Go Pro</Link></Button>
+        <TrialRequestButton />
         <Button variant="ghost" className="w-full" onClick={() => setProOpen(false)}>Maybe later</Button>
       </DialogContent>
     </Dialog>

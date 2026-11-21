@@ -3,9 +3,16 @@ import { CloudDownload, RefreshCw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { downloadAllQuestions, loadOfflineSummary } from "@/lib/offline-data";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { fetchAccess } from "@/lib/subscriptions";
+import { downloadsAllowed } from "@/lib/trials";
 
 /** Free samples remain offline; paid questions require a live subscription check. */
 export function OfflineDownload() {
+  const { user } = useAuth();
+  const access = useQuery({ queryKey: ["access", user?.id], queryFn: fetchAccess, enabled: !!user });
+  const allowed = !!access.data && downloadsAllowed(access.data.subscriptions, access.data.admin);
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [count, setCount] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -50,11 +57,11 @@ export function OfflineDownload() {
             <span className="block text-xs text-muted-foreground">
               {savedAt
                 ? `${count.toLocaleString()} questions saved`
-                : "Free samples offline · Pro requires internet"}
+                : !allowed ? "Offline downloads are unavailable during trials" : "Save free samples and your subscribed subjects"}
             </span>
           </span>
         </span>
-        <Button variant={savedAt ? "ghost" : "default"} className="h-auto min-h-9 max-w-32 whitespace-normal text-center" disabled={busy} onClick={() => void download()}>
+        <Button variant={savedAt ? "ghost" : "default"} className="h-auto min-h-9 max-w-32 whitespace-normal text-center" disabled={busy || !allowed} onClick={() => void download()}>
           {busy ? (
             `Downloading… ${pct}%`
           ) : savedAt ? (

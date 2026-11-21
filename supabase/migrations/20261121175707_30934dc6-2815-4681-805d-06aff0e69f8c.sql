@@ -1,0 +1,17 @@
+ALTER FUNCTION public.request_trial() SET SCHEMA elixir_private;
+ALTER FUNCTION public.record_trial_visit() SET SCHEMA elixir_private;
+ALTER FUNCTION public.admin_review_trial(uuid,integer,boolean) SET SCHEMA elixir_private;
+ALTER FUNCTION public.admin_trial_engagement(uuid) SET SCHEMA elixir_private;
+ALTER FUNCTION public.offline_access_grant() SET SCHEMA elixir_private;
+ALTER FUNCTION public.admin_save_plan_three_year(text,text,text,integer,integer,integer,integer,integer,integer,boolean,text[],text[]) SET SCHEMA elixir_private;
+CREATE FUNCTION public.request_trial() RETURNS uuid LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.request_trial(); $$;
+CREATE FUNCTION public.record_trial_visit() RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.record_trial_visit(); $$;
+CREATE FUNCTION public.admin_review_trial(_request uuid,_days integer DEFAULT 14,_approve boolean DEFAULT true) RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.admin_review_trial(_request,_days,_approve); $$;
+CREATE FUNCTION public.admin_trial_engagement(_user uuid) RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.admin_trial_engagement(_user); $$;
+CREATE FUNCTION public.offline_access_grant() RETURNS jsonb LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.offline_access_grant(); $$;
+CREATE FUNCTION public.admin_save_plan_three_year(_id text,_name text,_description text,_year integer,_two_year integer,_three_year integer,_original_year integer,_original_two_year integer,_original_three_year integer,_enabled boolean,_subjects text[],_perks text[]) RETURNS void LANGUAGE sql SECURITY INVOKER SET search_path=public AS $$ SELECT elixir_private.admin_save_plan_three_year(_id,_name,_description,_year,_two_year,_three_year,_original_year,_original_two_year,_original_three_year,_enabled,_subjects,_perks); $$;
+REVOKE ALL ON FUNCTION public.request_trial(),public.record_trial_visit(),public.admin_review_trial(uuid,integer,boolean),public.admin_trial_engagement(uuid),public.offline_access_grant(),public.admin_save_plan_three_year(text,text,text,integer,integer,integer,integer,integer,integer,boolean,text[],text[]) FROM PUBLIC,anon;
+GRANT EXECUTE ON FUNCTION public.request_trial(),public.record_trial_visit(),public.admin_review_trial(uuid,integer,boolean),public.admin_trial_engagement(uuid),public.offline_access_grant(),public.admin_save_plan_three_year(text,text,text,integer,integer,integer,integer,integer,integer,boolean,text[],text[]) TO authenticated;
+CREATE POLICY trial_request_device ON public.trial_requests AS RESTRICTIVE FOR ALL TO authenticated USING(public.device_session_active()) WITH CHECK(public.device_session_active());
+CREATE POLICY trial_activity_device ON public.trial_activity AS RESTRICTIVE FOR ALL TO authenticated USING(public.device_session_active()) WITH CHECK(public.device_session_active());
+CREATE INDEX trial_request_subscription_idx ON public.trial_requests(subscription_id);

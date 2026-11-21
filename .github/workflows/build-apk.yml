@@ -44,6 +44,7 @@ jobs:
           find . -name 'splash.png' -delete
           mkdir -p drawable-nodpi && cp ../../../../../splash_logo.png drawable-nodpi/splash_logo.png
           cp ../../../../../splash.xml drawable/splash.xml
+          cp ../../../../../ic_stat_elixir.xml drawable/ic_stat_elixir.xml
           sed -i 's#<item name="android:background">@drawable/splash</item>#<item name="android:background">@drawable/splash</item><item name="android:windowBackground">@drawable/splash</item>#' values/styles.xml || true
       - name: Build APK
         working-directory: mobile/android

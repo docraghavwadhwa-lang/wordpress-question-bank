@@ -17,6 +17,10 @@
     "backgroundColor": "#178C8E"
   },
   "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_elixir",
+      "iconColor": "#178C8E"
+    },
     "SplashScreen": {
       "launchShowDuration": 0,
       "launchAutoHide": true,

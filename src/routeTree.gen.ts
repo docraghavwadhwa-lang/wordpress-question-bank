@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as GuideRouteImport } from './routes/guide'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -44,6 +45,11 @@ const AuthRoute = AuthRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuideRoute = GuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlansRoute = PlansRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/checkout': typeof CheckoutRoute
+  '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/checkout'
+    | '/guide'
     | '/plans'
     | '/admin'
     | '/profile'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/checkout'
+    | '/guide'
     | '/plans'
     | '/admin'
     | '/profile'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/auth'
     | '/checkout'
+    | '/guide'
     | '/plans'
     | '/_authenticated/admin'
     | '/_authenticated/profile'
@@ -174,6 +186,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   CheckoutRoute: typeof CheckoutRoute
+  GuideRoute: typeof GuideRoute
   PlansRoute: typeof PlansRoute
   ApiPublicCashfreeWebhookRoute: typeof ApiPublicCashfreeWebhookRoute
   ApiPublicPushQotdRoute: typeof ApiPublicPushQotdRoute
@@ -215,6 +228,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guide': {
+      id: '/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof GuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plans': {
@@ -290,6 +310,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   CheckoutRoute: CheckoutRoute,
+  GuideRoute: GuideRoute,
   PlansRoute: PlansRoute,
   ApiPublicCashfreeWebhookRoute: ApiPublicCashfreeWebhookRoute,
   ApiPublicPushQotdRoute: ApiPublicPushQotdRoute,

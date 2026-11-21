@@ -18,6 +18,7 @@ import { fetchAccess } from "@/lib/subscriptions";
 import { Button } from "@/components/ui/button";
 
 import { useAppearance } from "@/components/AppearanceProvider";
+import { ProControl } from "./ProControl";
 
 function AppearanceItem() { const { appearance, toggle } = useAppearance(); const dark = appearance === "dark"; return <DropdownMenuItem onClick={toggle}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}{dark ? "Light mode" : "Dark mode"}</DropdownMenuItem>; }
 
@@ -75,7 +76,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
-        <Button asChild size="icon" variant="outline"><Link to="/plans" aria-label="Pro subscription plans" title="Pro subscription plans"><Crown /></Link></Button>
+        <ProControl compact />
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
             <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} />
@@ -108,7 +109,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
         )}
         {user ? (
           <div className="flex shrink-0 items-center gap-1 sm:gap-3">
-            <Button asChild size="sm" variant="secondary"><Link to="/plans"><Crown />Pro</Link></Button>
+            <ProControl />
             <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
               <BarChart3 className="h-4 w-4" /> Progress
             </Link>

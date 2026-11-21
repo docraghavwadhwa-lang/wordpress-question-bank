@@ -1,7 +1,8 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const backend = vi.hoisted(() => ({ requests: [] as { table: string; from: number; to: number }[], failAt: -1, failOnce: false }));
-vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: (table: string) => {
+vi.mock("./offline-license.functions", () => ({ issueOfflineLicense: vi.fn() }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { auth: { getSession: async () => ({ data: { session: null } }) }, from: (table: string) => {
   let from = 0, to = 999, head = false;
   const builder = {
     select: (_: string, options?: { head?: boolean }) => { head = !!options?.head; return builder; },

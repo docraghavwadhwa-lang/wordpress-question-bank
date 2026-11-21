@@ -4,6 +4,7 @@ import { useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchAccess } from "@/lib/subscriptions";
 import { fetchFeatures, featureAvailable, type FeatureKey } from "@/lib/features";
+import { reminderIds } from "@/lib/reminders";
 export function useFeatures() {
   const { user } = useAuth();
   const flags = useQuery({ queryKey: ["features"], queryFn: fetchFeatures, staleTime: 15000, refetchInterval: 30000 });
@@ -17,7 +18,7 @@ export function FeatureRouteGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (f.enabled("reminders")) return;
     const ln = (window as unknown as { Capacitor?: { Plugins?: { LocalNotifications?: { cancel: (o: unknown) => Promise<unknown> } } } }).Capacitor?.Plugins?.LocalNotifications;
-    if (ln) void ln.cancel({ notifications: [{ id: 8 }] }).then(() => localStorage.removeItem("el-reminder")).catch(() => {});
+    if (ln) void ln.cancel({ notifications: reminderIds() }).then(() => localStorage.removeItem("el-reminder")).catch(() => {});
   }, [f.enabled("reminders")]);
   return disabled ? <main className="mx-auto max-w-xl px-6 py-16"><h1 className="text-3xl text-primary">Temporarily unavailable</h1><p className="mt-3 text-muted-foreground">This feature is currently turned off.</p><a className="mt-6 inline-block text-primary underline" href="/">Return home</a></main> : children;
 }

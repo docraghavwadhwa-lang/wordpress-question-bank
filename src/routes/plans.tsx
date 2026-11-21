@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Crown, Check, ArrowLeft, Ticket } from "lucide-react";
 import { AppHeader } from "@/components/qbank/AppHeader";
+import { TrialRequestButton } from "@/components/qbank/TrialRequest";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/use-auth";
@@ -32,5 +33,6 @@ function PlansPage() {
       <ul className="my-5 flex-1 space-y-2.5 text-sm">{[coverage.data?.filter(p => p.plan_id === plan.id).map(p => subjectLabel(p.subject)).join(", ") || "Included subjects", ...plan.perks].map(perk => <li key={perk} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />{perk}</li>)}</ul>
       <Button asChild><Link to="/checkout" search={{ plan: plan.id, months }}>Choose plan</Link></Button>
     </article>)}</div>
+    <section className="mt-8 flex flex-wrap items-center justify-between gap-4 border-y py-6"><div><h2 className="text-2xl text-primary">Try the complete Q-bank</h2><p className="mt-1 text-sm text-muted-foreground">Request a 14-day trial · approval may take up to 24 hours</p></div><div className="w-full sm:w-52"><TrialRequestButton /></div></section>
   </main></div>;
 }

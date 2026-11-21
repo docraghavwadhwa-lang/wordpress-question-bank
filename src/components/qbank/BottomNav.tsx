@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BarChart3, House, NotebookPen } from "lucide-react";
+import { BarChart3, House, NotebookPen, Eye } from "lucide-react";
 import { useFeatures } from "./FeatureGate";
 import { cn } from "@/lib/utils";
 
@@ -11,12 +11,13 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
     { label: "Home", icon: House, to: "/", hash: "", active: pathname === "/" && hash !== "qbanks" },
     { label: "Q-Banks", icon: NotebookPen, to: "/", hash: "qbanks", active: pathname === "/" && hash === "qbanks" },
     { label: "Progress", icon: BarChart3, to: "/stats", hash: "", active: pathname.startsWith("/stats") },
+    { label: "Info", icon: Eye, to: "/guide", hash: "", active: pathname === "/guide" },
   ] as const;
   return (
     <>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-        <div className="mx-auto grid max-w-md grid-cols-3">
-          {tabs.filter(t => t.label === "Home" || features.enabled(t.label === "Progress" ? "progress" : "qbanks")).map((t) => (
+        <div className="mx-auto grid max-w-md grid-cols-4">
+          {tabs.filter(t => t.label === "Home" || t.label === "Info" || features.enabled(t.label === "Progress" ? "progress" : "qbanks")).map((t) => (
             <Link
               key={t.label}
               to={t.to}

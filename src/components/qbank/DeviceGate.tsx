@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { registerDevice, type DeviceResult } from "@/lib/device-access";
 import { Button } from "@/components/ui/button";
 import { OpeningScreen } from "./OpeningScreen";
+import { refreshOfflineLicense } from "@/lib/offline-data";
 
 export function DeviceGate({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
@@ -20,7 +21,7 @@ export function DeviceGate({ children }: { children: ReactNode }) {
     try {
       const next = await registerDevice(replace);
       setResult(next);
-      if (next.status === "active") { setAllowed(user.id); localStorage.setItem(`elixir-device-approved:${user.id}`, "yes"); }
+      if (next.status === "active") { setAllowed(user.id); localStorage.setItem(`elixir-device-approved:${user.id}`, "yes"); await refreshOfflineLicense(); }
       else { setAllowed(null); localStorage.removeItem(`elixir-device-approved:${user.id}`); await qc.cancelQueries(); qc.clear(); }
       if (next.status === "revoked") await supabase.auth.signOut({ scope: "local" });
     } catch (e) { setError(e instanceof Error ? e.message : "Couldn't check your devices. Please try again."); }

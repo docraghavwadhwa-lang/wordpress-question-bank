@@ -1,10 +1,14 @@
 import { openDB, type DBSchema } from "idb";
 import { supabase } from "@/integrations/supabase/client";
 import type { Deck, Question } from "@/lib/qbank";
+import { issueOfflineLicense } from "./offline-license.functions";
+import { verifyOfflineLicense, licenseSchema, type OfflineLicense } from "./offline-license";
+import { fetchAccess } from "./subscriptions";
+import { downloadsAllowed } from "./trials";
 
 export type StoredQuestion = Question & { subject: string; sort_key?: string; is_free?: boolean };
 export type OfflineData = { decks: Deck[]; questions: StoredQuestion[]; savedAt: string };
-export type OfflineSummary = { savedAt: string; count: number; generation: string };
+export type OfflineSummary = { savedAt: string; count: number; generation: string; license?: OfflineLicense };
 type QuestionRow = StoredQuestion & { generation: string; answerable: number; free: number };
 type DeckRow = Deck & { generation: string };
 interface BankDB extends DBSchema {
@@ -68,8 +72,26 @@ async function pruneExcept(generation?: string) {
 }
 export async function clearOfflineData() { await pruneExcept(); }
 
-function allowedRows(rows: StoredQuestion[], _active: OfflineSummary) {
-  return rows.filter(q => q.is_free === true);
+async function paidSubjects(active: OfflineSummary) {
+  if (!active.license) return [];
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+  let sid: unknown;
+  try { sid = JSON.parse(atob(session.access_token.split('.')[1]?.replace(/-/g,'+').replace(/_/g,'/') ?? ''))['session_id']; } catch { return []; }
+  if (typeof sid !== 'string') return [];
+  return verifyOfflineLicense(active.license, session.user.id, sid);
+}
+async function allowedRows(rows: StoredQuestion[], active: OfflineSummary) {
+  const subjects = new Set(await paidSubjects(active));
+  return rows.filter(q => q.is_free === true || subjects.has(q.subject));
+}
+/** Revalidate on reconnect; signed expiry/owner/session remain enforced without a network. */
+export async function refreshOfflineLicense() {
+  const active = await loadOfflineSummary(); if (!active?.license) return;
+  try {
+    const license = await issueOfflineLicense(); const db = await database();
+    try { await db.put('meta', { ...active, license }, 'active'); } finally { db.close(); }
+  } catch { const db = await database(); try { const { license: _old, ...free } = active; await db.put('meta', free, 'active'); } finally { db.close(); } }
 }
 
 /** Reads only indexed chapter rows, not the entire bank. */
@@ -84,7 +106,7 @@ export async function offlineDeckQuestions(path: string): Promise<StoredQuestion
       index.getAll([active.generation, path]),
       index.getAll(IDBKeyRange.bound([active.generation, path + " > "], [active.generation, path + " > \uffff"])),
     ]);
-    return allowedRows([...exact, ...children].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? "") || a.id - b.id), active);
+    return await allowedRows([...exact, ...children].sort((a, b) => (a.sort_key ?? "").localeCompare(b.sort_key ?? "") || a.id - b.id), active);
   } finally { db.close(); }
 }
 export async function offlineDecks(): Promise<Deck[] | null> {
@@ -99,18 +121,20 @@ export async function offlineQuestionsByIds(ids: number[]): Promise<StoredQuesti
   try {
     const tx = db.transaction("questions");
     const rows = await Promise.all(ids.map(id => tx.store.get([active.generation, id])));
-    return allowedRows(rows.filter((q): q is QuestionRow => q !== undefined), active);
+    return await allowedRows(rows.filter((q): q is QuestionRow => q !== undefined), active);
   } finally { db.close(); }
 }
 /** Only keys are read for deterministic daily selection; HTML stays on disk. */
 export async function offlineQuestionIds(subject?: string): Promise<number[] | null> {
   const active = await loadOfflineSummary(); if (!active) return null;
+  const paid = await paidSubjects(active);
   const db = await database();
   try {
     const keys = subject === undefined
       ? await db.getAllKeysFromIndex("questions", "answerable", IDBKeyRange.bound([active.generation, 1, 0], [active.generation, 1, Number.MAX_SAFE_INTEGER]))
       : await db.getAllKeysFromIndex("questions", "subject", IDBKeyRange.bound([active.generation, subject, 0], [active.generation, subject, Number.MAX_SAFE_INTEGER]));
     const free = new Set((await db.getAllKeysFromIndex("questions", "free", IDBKeyRange.bound([active.generation, 1, 0], [active.generation, 1, Number.MAX_SAFE_INTEGER]))).map(key => key[1]));
+    for (const s of paid) for (const key of await db.getAllKeysFromIndex("questions", "subject", IDBKeyRange.bound([active.generation, s, 0], [active.generation, s, Number.MAX_SAFE_INTEGER]))) free.add(key[1]);
     return keys.map(key => key[1]).filter(id => free.has(id));
   } finally { db.close(); }
 }
@@ -137,6 +161,15 @@ async function retryRead<T>(request: (signal: AbortSignal) => PromiseLike<{ data
 let downloading = false;
 export async function downloadAllQuestions(onProgress?: (done: number, total: number) => void): Promise<OfflineSummary> {
   if (downloading) throw new Error("Download already in progress");
+  const { data: { session } } = await supabase.auth.getSession();
+  const access = session ? await fetchAccess() : { admin: false, subscriptions: [] };
+  if (!downloadsAllowed(access.subscriptions, access.admin)) throw new Error("Offline downloads are unavailable during trials");
+  const license = session ? await issueOfflineLicense() : undefined;
+  const paid = license ? licenseSchema.parse(JSON.parse(license.payload)).subjects.filter(s => Date.parse(s.expiresAt) > Date.now()).map(s => s.subject) : [];
+  const readQuestions = () => {
+    const query = supabase.from("questions");
+    return query;
+  };
   downloading = true;
   const generation = crypto.randomUUID();
   const db = await database().catch(error => { downloading = false; throw error; });
@@ -152,12 +185,18 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
       await tx.done;
       if (rows.length < 1000) break;
     }
-    const counted = await networkRead(supabase.from("questions").select("id", { count: "exact", head: true }).eq("is_free", true));
+    let countQuery = readQuestions().select("id", { count: "exact", head: true });
+    countQuery = paid.length ? countQuery.or(`is_free.eq.true,subject.in.(${paid.map(s => JSON.stringify(s)).join(',')})`) : countQuery.eq("is_free", true);
+    const counted = await networkRead(countQuery);
     if (counted.error) throw counted.error;
     const total = counted.count ?? 0;
     let count = 0;
     for (let from = 0; ; from += 1000) {
-      const data = await retryRead(signal => supabase.from("questions").select("id, deck_path, subject, stem, options, answer, explanation, sort_key, is_free").eq("is_free", true).order("sort_key").order("id").range(from, from + 999).abortSignal(signal));
+      const data = await retryRead(signal => {
+        let query = readQuestions().select("id, deck_path, subject, stem, options, answer, explanation, sort_key, is_free");
+        query = paid.length ? query.or(`is_free.eq.true,subject.in.(${paid.map(s => JSON.stringify(s)).join(',')})`) : query.eq("is_free", true);
+        return query.order("sort_key").order("id").range(from, from + 999).abortSignal(signal);
+      });
       const rows = (data ?? []) as unknown as StoredQuestion[];
       const tx = db.transaction("questions", "readwrite");
       for (const q of rows) void tx.store.put({ ...q, generation, answerable: q.answer == null ? 0 : 1, free: q.is_free ? 1 : 0 });
@@ -167,7 +206,7 @@ export async function downloadAllQuestions(onProgress?: (done: number, total: nu
       if (rows.length < 1000) break;
     }
     if (!count || (total && count !== total) || await db.count("questions", IDBKeyRange.bound([generation, 0], [generation, Number.MAX_SAFE_INTEGER])) !== count) throw new Error("Incomplete download — please try again");
-    const summary = { generation, count, savedAt: new Date().toISOString() };
+    const summary: OfflineSummary = { generation, count, savedAt: new Date().toISOString(), ...(license ? { license } : {}) };
     await db.put("meta", summary, "active");
     await pruneExcept(generation);
     // The old large Cache API snapshot is deliberately not parsed or migrated.

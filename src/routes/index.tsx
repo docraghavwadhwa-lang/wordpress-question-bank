@@ -27,6 +27,7 @@ import { GoogleSignInButton } from "@/components/qbank/GoogleSignInButton";
 import { fetchAccess, fetchPlanSubjects, lockedSubjects } from "@/lib/subscriptions";
 import { Feature, useFeatures } from "@/components/qbank/FeatureGate";
 import { OpeningScreen } from "@/components/qbank/OpeningScreen";
+import { TrialCountdown } from "@/components/qbank/TrialRequest";
 
 function Landing() {
   return (
@@ -98,6 +99,9 @@ function Index() {
   useEffect(() => {
     setSavedTimer(Number(localStorage.getItem("qb_timer") ?? 0) || 0);
     setPaused(loadSession());
+    const tool = new URLSearchParams(window.location.search).get("tool");
+    if (tool === "bookmarks" || tool === "mistakes") setStudyTool(tool);
+    if (tool === "blitz") document.getElementById("daily-blitz")?.scrollIntoView();
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
   }, []);
@@ -200,6 +204,7 @@ function Index() {
       <Celebration days={streak.celebrate} stats={streak.celebrationStats} onClose={streak.closeCelebration} />
 
       <main className={`mx-auto max-w-5xl px-4 ${isApp ? "py-5" : "py-8 sm:py-12"}`}>
+        {!quiz && !qbanks && <TrialCountdown />}
         {quiz ? (
           <Quiz
             key={quiz.title + quiz.mode + (quiz.initial?.index ?? "new")}
@@ -266,7 +271,7 @@ function Index() {
                 <span className="block h-full rounded-full bg-accent transition-all" style={{ width: `${Math.min(100, (100 * streak.streak.today) / streak.goal)}%` }} />
               </span>
             </Link></Feature>
-            <Feature name="daily_blitz"><div className="mb-4">
+            <Feature name="daily_blitz"><div id="daily-blitz" className="mb-4">
               <BlitzCard day={day} loading={loading} onStart={() => void startBlitz()} />
             </div></Feature>
             {paused && features.enabled("qbanks") && (

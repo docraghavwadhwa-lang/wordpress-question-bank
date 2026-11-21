@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import type { Pick } from "./SubjectGrid";
 import { Link } from "@tanstack/react-router";
 import { ClipboardCheck, Lightbulb } from "lucide-react";
+import { TrialRequestButton } from "./TrialRequest";
 
 const MODES = [
   { id: "quiz", label: "Quiz mode", icon: Lightbulb, how: ["See the answer and explanation right after each question", "Skip and revisit skipped questions before submitting"] },
@@ -47,6 +48,7 @@ export function QuizSettings({
           </DialogDescription>
         </DialogHeader>
         {message?.includes("locked") && <Button asChild variant="outline"><Link to="/plans">Unlock with Pro</Link></Button>}
+        {message?.includes("locked") && <TrialRequestButton />}
         {pick?.kind !== "bookmarks" && <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Mode">
             {MODES.filter(m => allowTest || m.id !== "test").map(m => <button key={m.id} type="button" role="radio" aria-checked={effectiveMode === m.id} onClick={() => setMode(m.id)} className={cn("flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-semibold transition-colors", effectiveMode === m.id ? "border-primary bg-secondary text-primary" : "text-foreground hover:bg-muted")}><m.icon className="h-5 w-5" />{m.label}</button>)}
