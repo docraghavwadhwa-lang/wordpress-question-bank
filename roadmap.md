@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Replace Razorpay checkout with Cashfree while preserving offer totals, coupons, purchase history, and administrator approval; awaiting secure Cashfree credentials.
 - [x] Center question/Q-bank branding and add default-light account-menu switching; isolated desktop and phone screens verified.
 - [x] Add administrator trials with 7-, 14-, 21-day presets and custom days; 18 tests and sample trial submission passed, private-helper privileges verified.
 - [ ] Verify real administrator trial allocation and student access readback — external unmanaged authentication supplies no test session.
