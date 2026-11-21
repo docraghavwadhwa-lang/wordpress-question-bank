@@ -731,6 +731,17 @@ export type Database = {
         }
         Returns: string
       }
+      admin_allocate_trial: {
+        Args: {
+          _days: number
+          _note?: string
+          _plan: string
+          _start: string
+          _subscription?: string
+          _user: string
+        }
+        Returns: string
+      }
       admin_bank_content: {
         Args: { _offset?: number; _search?: string; _subject: string }
         Returns: {
