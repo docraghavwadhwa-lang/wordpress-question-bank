@@ -625,6 +625,7 @@ export type Database = {
           created_at: string
           ends_at: string
           id: string
+          is_trial: boolean
           payment_request_id: string | null
           plan_id: string
           revoked: boolean
@@ -639,6 +640,7 @@ export type Database = {
           created_at?: string
           ends_at: string
           id?: string
+          is_trial?: boolean
           payment_request_id?: string | null
           plan_id: string
           revoked?: boolean
@@ -653,6 +655,7 @@ export type Database = {
           created_at?: string
           ends_at?: string
           id?: string
+          is_trial?: boolean
           payment_request_id?: string | null
           plan_id?: string
           revoked?: boolean
@@ -679,6 +682,86 @@ export type Database = {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trial_activity: {
+        Row: {
+          created_at: string
+          day: string
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_activity_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trial_requests: {
+        Row: {
+          created_at: string
+          days: number
+          id: string
+          reviewed_by: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days?: number
+          id?: string
+          reviewed_by?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days?: number
+          id?: string
+          reviewed_by?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trial_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trial_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -796,6 +879,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_review_trial: {
+        Args: { _approve?: boolean; _days?: number; _request: string }
+        Returns: undefined
+      }
       admin_save_plan: {
         Args: {
           _description: string
@@ -820,6 +907,23 @@ export type Database = {
           _original_year: number
           _perks: string[]
           _subjects: string[]
+          _two_year: number
+          _year: number
+        }
+        Returns: undefined
+      }
+      admin_save_plan_three_year: {
+        Args: {
+          _description: string
+          _enabled: boolean
+          _id: string
+          _name: string
+          _original_three_year: number
+          _original_two_year: number
+          _original_year: number
+          _perks: string[]
+          _subjects: string[]
+          _three_year: number
           _two_year: number
           _year: number
         }
@@ -855,6 +959,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_trial_engagement: { Args: { _user: string }; Returns: Json }
       admin_update_access: {
         Args: {
           _amount: number
@@ -897,6 +1002,7 @@ export type Database = {
         Returns: boolean
       }
       has_subject_access: { Args: { _subject: string }; Returns: boolean }
+      offline_access_grant: { Args: never; Returns: Json }
       public_feature_availability: {
         Args: never
         Returns: {
@@ -950,6 +1056,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_trial_visit: { Args: never; Returns: undefined }
       refresh_free_questions: { Args: never; Returns: undefined }
       register_account_device: {
         Args: { _device: string; _name: string; _replace?: string }
@@ -957,6 +1064,7 @@ export type Database = {
       }
       reject_payment: { Args: { _request: string }; Returns: undefined }
       release_account_device: { Args: never; Returns: undefined }
+      request_trial: { Args: never; Returns: string }
       reserve_cashfree_payment: {
         Args: {
           _coupon: string
