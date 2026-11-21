@@ -1,0 +1,2 @@
+- Appearance is controlled by the shared provider with a device-local preference; reading storage after hydration preserves safe public rendering.
+- Question and Q-bank headers reuse QuestionBrand so app and website branding remains consistent.

@@ -1,0 +1,1 @@
+- Day-based trials use the normal subscriptions access path through an invoker RPC and a role-checked helper in a non-exposed schema; existing subject access and expiry rules remain authoritative.

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck, Phone } from "lucide-react";
+import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck, Phone, Moon, Sun } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,10 @@ import { isNativeApp } from "@/lib/native-auth";
 import { BottomNav } from "@/components/qbank/BottomNav";
 import { fetchAccess } from "@/lib/subscriptions";
 import { Button } from "@/components/ui/button";
+
+import { useAppearance } from "@/components/AppearanceProvider";
+
+function AppearanceItem() { const { appearance, toggle } = useAppearance(); const dark = appearance === "dark"; return <DropdownMenuItem onClick={toggle}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}{dark ? "Light mode" : "Dark mode"}</DropdownMenuItem>; }
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
   const initials = (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -83,6 +87,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
             <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
             {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
             <GetHelpItem />
+            <AppearanceItem />
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
           </DropdownMenuContent>
@@ -119,6 +124,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
                 <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
                 {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
                 <GetHelpItem />
+            <AppearanceItem />
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
               </DropdownMenuContent>

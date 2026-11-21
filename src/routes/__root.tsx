@@ -15,6 +15,7 @@ import { registerAppServiceWorker } from "@/lib/sw-register";
 import { initNativeAuth } from "@/lib/native-auth";
 import { OnboardingGate } from "@/components/qbank/OnboardingGate";
 import { FeatureRouteGate } from "@/components/qbank/FeatureGate";
+import { AppearanceProvider } from "@/components/AppearanceProvider";
 import { DeviceGate } from "@/components/qbank/DeviceGate";
 
 import appCss from "../styles.css?url";
@@ -145,10 +146,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AppearanceProvider>
       <OfflineBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <DeviceGate><OnboardingGate><FeatureRouteGate><Outlet /></FeatureRouteGate></OnboardingGate></DeviceGate>
       <Toaster />
+      </AppearanceProvider>
     </QueryClientProvider>
   );
 }

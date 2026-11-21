@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatAverage, recordAttempt, setBookmark, type Question } from "@/lib/qbank";
 import { answerFeedback } from "@/lib/feedback";
 import { cn } from "@/lib/utils";
+import { QuestionBrand } from "./QuestionBrand";
 import { QuestionHtml } from "./QuestionHtml";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -204,6 +205,7 @@ export function Quiz({
 
   return (
     <div className="relative mx-auto max-w-3xl rounded-2xl border bg-card p-5 shadow-sm sm:p-8">
+      <QuestionBrand />
       <div className="pointer-events-none absolute right-6 top-14 z-10">
         {xp.map((k) => (
           <span key={k} className="qb-xp absolute right-0 font-display text-xl font-semibold text-success">+10 XP</span>

@@ -1,3 +1,4 @@
+import { trialSchema } from "./trials";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { isNativeApp } from "./native-auth";
@@ -17,6 +18,7 @@ export async function consoleUsers(search = "", offset = 0, journeys = false) {
   const { data, error } = await supabase.rpc("admin_console_users", { _search: search, _offset: offset, _journeys: journeys }); if (error) throw error; return data ?? [];
 }
 export async function allPlans() { const { data, error } = await supabase.rpc("admin_all_plans"); if (error) throw error; return data ?? []; }
+export async function allocateTrial(input: z.input<typeof trialSchema>, subscription?: string) { const d = trialSchema.parse(input); const { error } = await supabase.rpc("admin_allocate_trial", { _user: d.user, _plan: d.plan, _days: d.days, _start: d.start, _note: d.note, ...(subscription ? { _subscription: subscription } : {}) }); if (error) throw error; }
 export async function allocateCustom(input: z.input<typeof customAccessSchema>, request?: string) {
   const d = customAccessSchema.parse(input);
   const { error } = await supabase.rpc("admin_allocate_access", { _user: d.user, _plan: d.plan, _months: d.months, _start: d.start, _amount: d.amount, _note: d.note, ...(request ? { _request: request } : {}) }); if (error) throw error;

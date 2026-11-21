@@ -7,6 +7,7 @@ import { subjectIcon } from "./subject-icons";
 import { inDeck, type Deck, type Marked } from "@/lib/qbank";
 import { cn } from "@/lib/utils";
 import { compareSubjects, subjectLabel, deckParts, searchDecks } from "@/lib/subjects";
+import { QuestionBrand } from "./QuestionBrand";
 import { Button } from "@/components/ui/button";
 
 export type Pick = { title: string; subtitle?: string; path?: string; total?: number; ids?: number[]; kind?: "bookmarks" | "mistakes"; imagesOnly?: boolean };
@@ -25,6 +26,7 @@ export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = tru
 
   return (
     <>
+    <QuestionBrand />
     <label className="mb-5 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchLabel} aria-label={searchLabel} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
