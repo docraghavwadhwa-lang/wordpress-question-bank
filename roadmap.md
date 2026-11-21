@@ -1,4 +1,6 @@
 # Tasks
+- [ ] Center question/Q-bank branding and add default-light appearance switching in the account menu.
+- [ ] Add administrator day-based trials with 7-, 14-, 21-day presets and custom days; verify trial and appearance rules.
 - [x] Expand administration with purchase journeys, student detail/edit views, editable plans/content/benefits, twelve feature controls, custom paid/free access, and audit history.
 - [x] Verify admin rules through rollback-only database checks and 27 tests; isolated student edit/free six-month allocation and desktop/mobile tabs checked.
 - [ ] Verify real signed-in administration save/readback and checkout journey — external unmanaged Supabase provides no test session.
