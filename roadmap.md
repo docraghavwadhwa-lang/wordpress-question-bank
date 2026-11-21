@@ -1,4 +1,5 @@
 # Tasks
+- [ ] Complete all remaining master-prompt features together; verify available flows and identify publication/device-only checks.
 - [x] Master prompt batch 1: AIR-PG default coupon, Reagent rename (PSM/FMT → Catalyst, legacy Base kept), Catalyst 2y ₹4,199, 3-year plans, dark plan buttons, red invalid-coupon line, auto-activation after Cashfree, college list hides after pick, Daily reminders label, QOTD note removed, website subject-page logo removed.
 - [ ] Trials: Request-a-trial button (locked card + plans page), 14-day message, "Get in touch with team" call, admin approve/edit days, home countdown, offline download frozen in trial, trial engagement in admin.
 - [ ] Gold crown + plan details popup for Pro users; Pro users can save all their questions offline.
