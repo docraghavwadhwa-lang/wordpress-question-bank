@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { freeQuestionCount, discountedPrice, allocationEnd, subscriptionActive, couponSchema, manualPaymentUpiId, lockedSubjects, checkoutCoupon } from "./subscriptions";
 describe("subscription rules", () => {
+  it("unlocks every subject during an approved trial", () => { const subs = [{ plan_id: "reagent", is_trial: true, starts_at: "2026-11-21", ends_at: "2026-12-05", revoked: false }]; expect([...lockedSubjects(subs, [{ plan_id: "reagent", subject: "Anatomy" }], ["Anatomy", "Medicine"], Date.parse("2026-11-22"))]).toEqual([]); expect([...lockedSubjects(subs, [{ plan_id: "reagent", subject: "Anatomy" }], ["Anatomy", "Medicine"], Date.parse("2026-12-06"))]).toEqual(["Anatomy", "Medicine"]); });
   it("applies AIR-PG by default while allowing a replacement coupon", () => { expect(checkoutCoupon("")).toBe("AIR-PG"); expect(checkoutCoupon(" air-pg ")).toBe("AIR-PG"); expect(checkoutCoupon(" college20 ")).toBe("COLLEGE20"); });
   it("uses the supplied manual UPI payment destination", () => { expect(manualPaymentUpiId).toBe("docraghavwadhwa-1@okicici"); });
   it("makes 10% of each subject free, rounded down to whole questions", () => { expect(freeQuestionCount(340)).toBe(34); expect(freeQuestionCount(1072)).toBe(107); });

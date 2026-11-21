@@ -1,2 +1,5 @@
 - Day-based trials use the normal subscriptions access path through an invoker RPC and a role-checked helper in a non-exposed schema; existing subject access and expiry rules remain authoritative.
-- Payment credentials stay server-only; reserve orders under a per-student/plan lock, verify provider order identity, owner, currency and stored total, and record receipt without granting access until administrator approval. Webhooks verify raw-body HMAC before any reads or writes.
+- Payment credentials stay server-only; reserve orders under a per-student/plan lock and verify provider order identity, owner, currency and stored total before automatic activation. Webhooks verify raw-body HMAC before any reads or writes; manual receipts still require administrator approval.
+- Trial requests and engagement use owner/admin-only records and private role-checked helpers; approved trials unlock all subjects but cannot receive paid offline grants, keeping request events separate from access approval.
+- App server-function calls attach the current bearer through one shared function middleware, preserving server authentication for offline-license issuance.
+- Paid offline grants use Ed25519 with a server-only seed derived from the service credential; regenerate the pinned public key if that credential rotates, or verification fails closed.

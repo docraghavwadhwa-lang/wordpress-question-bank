@@ -17,8 +17,8 @@
 - Subject ordering and display aliases live in the browser-safe subjects module; preserve stored deck paths so downloads and quiz history keep working.
 - Home study tools reuse the study Button variant and subject-grouped selection; keep reminder behavior and offline-download activation unchanged during visual changes.
 - Free access = a hash-shuffled 10% of each subject's chapter decks (decks.is_free, set by refresh_free_questions); whole-subject/section practice stays locked. Deck metadata remains public; question RLS allows free samples or active subject-scoped subscriptions, with database-verified admin RPCs for approval — client gates alone cannot protect paid content.
-- Subscription-era offline downloads use a new IndexedDB namespace and store only free samples; never shared-cache question or account responses — old full-bank caches must not bypass paid access.
-- Original and offer prices are stored separately; payment requests use database-computed totals and are unverified until admin approval — browser prices and submitted references are not payment proof.
+- Offline downloads use IndexedDB, never shared question/account caches; signed owner/session/expiry grants protect paid rows and recheck on reconnect (see src/lib/AGENTS.md).
+- Original and offer prices stay separate; database totals and verified Cashfree receipts activate access, while manual references require admin approval — browser events never prove payment.
 - Questions come from the Prepladder .apkg (note_id = questions.id, deck root "Prepladder" dropped, General Medicine→Medicine, OBG→"Obstetrics & Gyenacology"); images are webp in public/qimg because public storage buckets are blocked; attempts/bookmarks have no FK to questions so history survives re-imports.
 - Question stems/options/explanations are trusted Anki HTML rendered with dangerouslySetInnerHTML.
 - Streaks/stats come from the `attempts` table via SQL functions (qb_daily_counts, qb_subject_stats, qb_reset); reset sets `archived` instead of deleting so streak history survives resets.

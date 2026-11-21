@@ -81,6 +81,7 @@ async function paidSubjects(active: OfflineSummary) {
   if (typeof sid !== 'string') return [];
   return verifyOfflineLicense(active.license, session.user.id, sid);
 }
+export async function offlineAccessibleSubjects() { const active = await loadOfflineSummary(); return active ? paidSubjects(active) : []; }
 async function allowedRows(rows: StoredQuestion[], active: OfflineSummary) {
   const subjects = new Set(await paidSubjects(active));
   return rows.filter(q => q.is_free === true || subjects.has(q.subject));

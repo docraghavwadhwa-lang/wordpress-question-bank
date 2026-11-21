@@ -25,16 +25,21 @@ export const dateLabel = (date: string) => new Date(date).toLocaleDateString("en
 export async function fetchPlans() { const { data, error } = await supabase.from("subscription_plans").select("*").order("price_year"); if (error) throw error; return data ?? []; }
 export async function fetchPlanSubjects() { const { data, error } = await supabase.from("plan_subjects").select("*"); if (error) throw error; return data ?? []; }
 /** Subjects the user has no active subscription for; their paid questions stay locked (10% of each subject stays free). */
-export function lockedSubjects(subscriptions: { plan_id: string; starts_at: string; ends_at: string; revoked: boolean }[], planSubjects: { plan_id: string; subject: string }[], subjects: string[], now = Date.now()) {
+export function lockedSubjects(subscriptions: { plan_id: string; starts_at: string; ends_at: string; revoked: boolean; is_trial?: boolean }[], planSubjects: { plan_id: string; subject: string }[], subjects: string[], now = Date.now()) {
+  if (subscriptions.some(s => s.is_trial && subscriptionActive(s, now))) return new Set<string>();
   const covered = new Set(planSubjects.filter(ps => subscriptions.some(s => s.plan_id === ps.plan_id && subscriptionActive(s, now))).map(ps => ps.subject));
   return new Set(subjects.filter(s => !covered.has(s)));
 }
 export async function fetchAccess() {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { admin: false, subscriptions: [] };
+  if (!session) return { admin: false, subscriptions: [], offlineSubjects: [] as string[] };
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    const { offlineAccessibleSubjects } = await import("./offline-data");
+    return { admin: false, subscriptions: [], offlineSubjects: await offlineAccessibleSubjects() };
+  }
   const [roles, subs] = await Promise.all([supabase.from("user_roles").select("role").eq("user_id", session.user.id), supabase.from("subscriptions").select("*").eq("user_id", session.user.id).order("ends_at", { ascending: false })]);
   if (roles.error) throw roles.error; if (subs.error) throw subs.error;
-  return { admin: roles.data.some(r => r.role === "admin"), subscriptions: subs.data };
+  return { admin: roles.data.some(r => r.role === "admin"), subscriptions: subs.data, offlineSubjects: [] as string[] };
 }
 export async function fetchPayments() { const { data, error } = await supabase.from("payment_requests").select("*").order("created_at", { ascending: false }).limit(100); if (error) throw error; return data ?? []; }
 export async function quotePlan(plan: string, months: number, coupon: string) { const { data, error } = await supabase.rpc("quote_plan", { _plan: plan, _months: months, _coupon: coupon }); if (error) throw error; const quote = data?.[0]; if (!quote) throw new Error("Quote unavailable"); return quote; }

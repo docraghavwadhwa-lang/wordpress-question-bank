@@ -1,13 +1,14 @@
 # Tasks
-- [ ] Complete all remaining master-prompt features together; verify available flows and identify publication/device-only checks.
+- [x] Complete remaining master-prompt feature code; 46 checks pass, desktop/phone guides and trial dialog verified. Signed-in readback and Android delivery remain external checks.
 - [x] Master prompt batch 1: AIR-PG default coupon, Reagent rename (PSM/FMT → Catalyst, legacy Base kept), Catalyst 2y ₹4,199, 3-year plans, dark plan buttons, red invalid-coupon line, auto-activation after Cashfree, college list hides after pick, Daily reminders label, QOTD note removed, website subject-page logo removed.
-- [ ] Trials: Request-a-trial button (locked card + plans page), 14-day message, "Get in touch with team" call, admin approve/edit days, home countdown, offline download frozen in trial, trial engagement in admin.
-- [ ] Gold crown + plan details popup for Pro users; Pro users can save all their questions offline.
-- [ ] Info (how to use) guide in bottom bar; Add-to-Home-Screen guide image with Elixir logo.
-- [ ] Android: Elixir logo on notifications; five daily notifications (8 AM, 12 PM, 4 PM, 8 PM, 9 PM) — needs APK rebuild.
-- [ ] Admin plan editor: add 3-year price fields.
+- [x] Trials: Request-a-trial button (locked card + plans page), 14-day message, "Get in touch with team" call, admin approve/edit days, home countdown, offline download frozen in trial, trial engagement in admin.
+- [x] Gold crown + plan details popup for Pro users; Pro users can save all their questions offline.
+- [x] Info (how to use) guide in bottom bar; Add-to-Home-Screen guide image with Elixir logo.
+- [x] Android notification code and build artwork: Elixir symbol and five local-time reminders (8 AM, 12 PM, 4 PM, 8 PM, 9 PM).
+- [ ] Android APK rebuild/install and real notification delivery — GitHub Actions runs after code sync; no Android device or authenticated repository build control in this session.
+- [x] Admin plan editor: add 3-year price fields.
 - [x] Replace Razorpay checkout with live Cashfree; live credentials accepted, old connector removed, stored totals/coupons/history/manual approval preserved, 22 tests passed, desktop/mobile checkout and unsigned-webhook rejection checked.
-- [ ] Activate and verify signed-in Cashfree checkout — needs Cashfree domain allowlisting and publishing; external unmanaged Google authentication prevents a real student payment check here.
+- [ ] Activate and verify signed-in Cashfree checkout — domain approved; needs publishing and a real payment; external unmanaged Google authentication prevents a real student payment check here.
 - [x] Center question/Q-bank branding and add default-light account-menu switching; isolated desktop and phone screens verified.
 - [x] Add administrator trials with 7-, 14-, 21-day presets and custom days; 18 tests and sample trial submission passed, private-helper privileges verified.
 - [ ] Verify real administrator trial allocation and student access readback — external unmanaged authentication supplies no test session.

@@ -198,6 +198,7 @@ function Index() {
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
   const recent = features.enabled("reviews") ? latestReviews(reviews.data ?? [], user.id, Math.max(now.getTime(), Date.now()) + 300000) : [];
   const locked = access.data?.admin ? new Set<string>() : lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
+  for (const subject of access.data?.offlineSubjects ?? []) locked.delete(subject);
   return (
     <div className="min-h-screen">
       <AppHeader onHome={goHome} />
