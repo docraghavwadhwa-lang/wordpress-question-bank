@@ -100,6 +100,10 @@ export function Quiz({
   }, [left, timer, done, finished]);
 
   function finish(reachedEnd = i + 1 === questions.length && done) {
+    if (!reachedEnd && revisiting && mode === "practice") {
+      if (skipped.length) { setSubmitOpen(true); return; }
+      reachedEnd = true;
+    }
     setFinished(true);
     onFinish?.({ score, answered, seconds: spent.total, choices, completed: reachedEnd });
   }
@@ -206,6 +210,15 @@ export function Quiz({
   return (
     <div className="relative mx-auto max-w-3xl rounded-2xl border bg-card p-5 shadow-sm sm:p-8">
       <QuestionBrand />
+      <div className="mb-5 flex gap-1.5 overflow-x-auto pb-2" aria-label="Question palette">
+        {questions.map((question, n) => {
+          if (revisiting && !revisitList.includes(n)) return null;
+          const saved = review ? reviewChoices : choices;
+          const attempted = Object.prototype.hasOwnProperty.call(saved ?? {}, question.id);
+          const correct = saved?.[question.id] === question.answer;
+          return <Button key={question.id} variant="outline" size="sm" onClick={() => setI(n)} aria-label={`Go to question ${n + 1}`} aria-current={n === i ? "step" : undefined} className={cn("h-9 min-w-9 shrink-0 px-2 tabular-nums", attempted && (test ? "border-primary bg-secondary text-primary" : correct ? "border-success bg-success-soft text-success" : "border-destructive bg-danger-soft text-destructive"), n === i && "ring-2 ring-ring ring-offset-2 ring-offset-card")}>{n + 1}</Button>;
+        })}
+      </div>
       <div className="pointer-events-none absolute right-6 top-14 z-10">
         {xp.map((k) => (
           <span key={k} className="qb-xp absolute right-0 font-display text-xl font-semibold text-success">+10 XP</span>
@@ -295,9 +308,6 @@ export function Quiz({
             {!last && <Button variant="outline" onClick={() => setI(i + 1)}>Next</Button>}
             <Button onClick={() => setSubmitOpen(true)}>Submit test</Button>
           </div>
-        </div>
-        <div className="mt-6 flex flex-wrap gap-1.5" aria-label="Question palette">
-          {questions.map((question, n) => <button key={question.id} type="button" onClick={() => setI(n)} aria-label={`Question ${n + 1}`} aria-current={n === i} className={cn("h-8 w-8 rounded-md border text-xs font-semibold", choices[question.id] ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground", n === i && "ring-2 ring-accent")}>{n + 1}</button>)}
         </div>
         <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Submit test?</DialogTitle><DialogDescription>{questions.length - Object.keys(choices).length} of {questions.length} questions unanswered. Answers and explanations appear after you submit.</DialogDescription><Button onClick={submitTest}>Submit test</Button><Button variant="outline" onClick={() => setSubmitOpen(false)}>Keep going</Button></DialogContent></Dialog>
       </> : <>

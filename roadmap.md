@@ -1,4 +1,6 @@
 # Tasks
+- [x] Apply approved navigation, device transition, question palette, revisit review, streak settings, previous-attempt and Cashfree-only checkout updates; isolated checks pass.
+- [x] Add seconds to trial countdown and Buy now dialog with Pro plans and team call; desktop and phone layouts and skipped-only submission checked.
 - [x] Complete remaining master-prompt feature code; 46 checks pass, desktop/phone guides and trial dialog verified. Signed-in readback and Android delivery remain external checks.
 - [x] Master prompt batch 1: AIR-PG default coupon, Reagent rename (PSM/FMT → Catalyst, legacy Base kept), Catalyst 2y ₹4,199, 3-year plans, dark plan buttons, red invalid-coupon line, auto-activation after Cashfree, college list hides after pick, Daily reminders label, QOTD note removed, website subject-page logo removed.
 - [x] Trials: Request-a-trial button (locked card + plans page), 14-day message, "Get in touch with team" call, admin approve/edit days, home countdown, offline download frozen in trial, trial engagement in admin.

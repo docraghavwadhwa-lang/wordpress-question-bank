@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { latestReviews, type QuizReview } from "./quiz-reviews";
+import { availableReviews, latestReviews, type QuizReview } from "./quiz-reviews";
 
 const now = Date.parse("2026-11-19T07:00:00Z");
 const row = (hours: number, id = "one", quiz_key = "Anatomy"): QuizReview => ({
@@ -19,5 +19,12 @@ describe("completed quiz review rules", () => {
   });
   it("never mixes reviews between signed-in users", () => {
     expect(latestReviews([row(1)], "user-b", now)).toEqual([]);
+  });
+  it("offers each previous attempt for the same bank without duplicate synced rows", () => {
+    expect(availableReviews([row(5, "old"), row(1, "latest"), row(1, "latest")], "user-a", now).map(r => r.id)).toEqual(["latest", "old"]);
+  });
+  it("keeps previous attempt history owner-scoped and expires at 72 hours", () => {
+    expect(availableReviews([row(71), row(72, "expired")], "user-a", now).map(r => r.id)).toEqual(["one"]);
+    expect(availableReviews([row(1)], "user-b", now)).toEqual([]);
   });
 });

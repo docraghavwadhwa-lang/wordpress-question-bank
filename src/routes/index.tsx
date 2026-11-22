@@ -19,7 +19,7 @@ import { QuestionOfTheDay, QuoteOfTheDay } from "@/components/qbank/Daily";
 import { PushToggle } from "@/components/qbank/PushToggle";
 import { OfflineDownload } from "@/components/qbank/OfflineDownload";
 import { Bookmarks } from "@/components/qbank/Bookmarks";
-import { fetchQuizReviews, latestReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
+import { fetchQuizReviews, availableReviews, REVIEW_WINDOW_MS, saveQuizReview, type QuizReview } from "@/lib/quiz-reviews";
 import { toast } from "sonner";
 import { isNativeApp } from "@/lib/native-auth";
 import { offlineErrorMessage } from "@/lib/offline-data";
@@ -67,7 +67,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type ActiveQuiz = { qs: Question[]; timer: number; marks: Set<number>; title: string; quizKey: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined; reviewChoices?: Record<string, string | null> | undefined; test?: boolean };
+type ActiveQuiz = { runId: string; qs: Question[]; timer: number; marks: Set<number>; title: string; quizKey: string; mode: "practice" | "blitz" | "review"; initial?: QuizProgress | undefined; reviewChoices?: Record<string, string | null> | undefined; test?: boolean };
 
 function Index() {
   const { user, ready } = useAuth();
@@ -84,6 +84,7 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string>();
   const [quiz, setQuiz] = useState<ActiveQuiz | null>(null);
+  const [completedReview, setCompletedReview] = useState<QuizReview | null>(null);
   const [savedTimer, setSavedTimer] = useState(0);
   const [paused, setPaused] = useState<SavedSession | null>(null);
   const [studyTool, setStudyTool] = useState<"bookmarks" | "mistakes" | null>(null);
@@ -119,7 +120,8 @@ function Index() {
     if (mode === "practice" && !test) {
       saveSession({ title, quizKey, ids: qs.map((q) => q.id), timer, index: initial?.index ?? 0, score: initial?.score ?? 0, answered: initial?.answered ?? 0, spent: initial?.spent ?? { total: 0, count: 0 }, choices: initial?.choices ?? {} });
     }
-    setQuiz({ qs, timer, marks, title, mode, initial, quizKey, reviewChoices, test });
+    setCompletedReview(null);
+    setQuiz({ runId: crypto.randomUUID(), qs, timer, marks, title, mode, initial, quizKey, reviewChoices, test });
   }
 
   async function start(timer: number, review?: boolean, test = false) {
@@ -174,7 +176,7 @@ function Index() {
 
   async function openReview(row: QuizReview) {
     if (!features.enabled("reviews")) return;
-    if (!user || !latestReviews([row], user.id).length) {
+    if (!user || !availableReviews([row], user.id).length) {
       toast.error("This review has expired.");
       void reviews.refetch();
       return;
@@ -196,7 +198,7 @@ function Index() {
   const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
   const needed = Math.max(0, streak.goal - streak.streak.today);
   const lateNight = now.getHours() >= 20 && streak.streak.current > 0 && !streak.streak.todayDone;
-  const recent = features.enabled("reviews") ? latestReviews(reviews.data ?? [], user.id, Math.max(now.getTime(), Date.now()) + 300000) : [];
+  const recent = features.enabled("reviews") ? availableReviews([...(completedReview ? [completedReview] : []), ...(reviews.data ?? [])], user.id, Math.max(now.getTime(), Date.now()) + 300000) : [];
   const locked = access.data?.admin ? new Set<string>() : lockedSubjects(access.data?.subscriptions ?? [], planSubjects.data ?? [], (decks.data ?? []).filter(d => d.depth === 1).map(d => d.subject));
   for (const subject of access.data?.offlineSubjects ?? []) locked.delete(subject);
   return (
@@ -208,7 +210,7 @@ function Index() {
         {!quiz && !qbanks && <TrialCountdown />}
         {quiz ? (
           <Quiz
-            key={quiz.title + quiz.mode + (quiz.initial?.index ?? "new")}
+            key={quiz.runId}
             questions={quiz.qs}
             timer={quiz.timer}
             userId={user.id}
@@ -229,6 +231,7 @@ function Index() {
               if (quiz.mode === "practice") saveSession(null);
               if (quiz.mode === "practice" && r.completed && features.enabled("reviews")) {
                 const row: QuizReview = { id: crypto.randomUUID(), user_id: user.id, quiz_key: quiz.quizKey, title: quiz.title, question_ids: quiz.qs.map(q => q.id), choices: r.choices, score: r.score, answered: r.answered, completed_at: new Date().toISOString() };
+                setCompletedReview(row);
                 qc.setQueryData<QuizReview[]>(["quiz-reviews", user.id], old => [row, ...(old ?? [])]);
                 void saveQuizReview(row).then(() => qc.invalidateQueries({ queryKey: ["quiz-reviews", user.id] })).catch(() => toast.error("Review saved on this device; online sync failed."));
               }

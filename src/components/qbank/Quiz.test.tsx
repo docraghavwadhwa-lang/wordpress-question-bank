@@ -55,8 +55,36 @@ describe("test mode", () => {
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
     expect(onFinish).not.toHaveBeenCalled();
-    fireEvent.click(screen.getAllByRole("button", { name: "Submit test" })[0]!);
-    fireEvent.click(screen.getAllByRole("button", { name: "Submit test" }).at(-1)!);
+    const openSubmit = screen.getAllByRole("button", { name: "Submit test" })[0];
+    if (!openSubmit) throw new Error("Submit test button missing");
+    fireEvent.click(openSubmit);
+    const confirmSubmit = screen.getAllByRole("button", { name: "Submit test" }).at(-1);
+    if (!confirmSubmit) throw new Error("Submit confirmation missing");
+    fireEvent.click(confirmSubmit);
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 2, choices: { 1: "A", 2: "B" }, completed: true }));
   });
+});
+it("submitting a finished skipped-only revisit captures a completed review", () => {
+  const onFinish = vi.fn();
+  render(<Quiz questions={questions} timer={0} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
+  fireEvent.click(screen.getByRole("button", { name: "Skip" }));
+  fireEvent.click(screen.getByRole("button", { name: "A. First" }));
+  fireEvent.click(screen.getByRole("button", { name: "Finish" }));
+  fireEvent.click(screen.getByRole("button", { name: "Revisit skipped questions" }));
+  expect(screen.queryByRole("button", { name: "Go to question 2" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
+  fireEvent.click(screen.getByRole("button", { name: "End session" }));
+  expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ completed: true, answered: 2, score: 1, choices: { 1: "B", 2: "A" } }));
+});
+it("jumping to an answered quiz question does not score it again", () => {
+  const onFinish = vi.fn();
+  render(<Quiz questions={questions} timer={0} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
+  fireEvent.click(screen.getByRole("button", { name: "A. First" }));
+  fireEvent.click(screen.getByRole("button", { name: "Go to question 2" }));
+  fireEvent.click(screen.getByRole("button", { name: "Go to question 1" }));
+  fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
+  fireEvent.click(screen.getByRole("button", { name: "Go to question 2" }));
+  fireEvent.click(screen.getByRole("button", { name: "A. First" }));
+  fireEvent.click(screen.getByRole("button", { name: "Finish" }));
+  expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 2, answered: 2, choices: { 1: "A", 2: "A" } }));
 });

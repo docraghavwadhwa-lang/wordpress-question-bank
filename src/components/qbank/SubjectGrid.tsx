@@ -1,7 +1,7 @@
 import { isNativeApp } from "@/lib/native-auth";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Crown } from "lucide-react";
+import { Crown, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, Bookmark, CircleAlert, Search, Lock, Star, Image as ImageIcon } from "lucide-react";
 import { subjectIcon } from "./subject-icons";
@@ -32,10 +32,12 @@ export function SubjectGrid({ decks, marked, locked, onPick, imagesEnabled = tru
   return (
     <>
     {native && <QuestionBrand />}
-    <label className="mb-5 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
+    <div className="mb-5 flex items-center gap-2"><label className="min-w-0 flex-1 flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchLabel} aria-label={searchLabel} className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
     </label>
+    {!open && <Button asChild variant="outline" size="icon" className="shrink-0 rounded-full" title="Elixir guide"><Link to="/guide" aria-label="Elixir guide"><Info className="h-5 w-5" /></Link></Button>}
+    </div>
     {term ? (
       hits.length ? <><p className="mb-3 text-xs text-muted-foreground">{hits.length} matches</p><div className="divide-y rounded-lg border bg-card">{hits.map((d) => {
         const parts = deckParts(d.path); const title = d.depth === 1 ? subjectLabel(d.path) : parts.at(-1) ?? d.path;

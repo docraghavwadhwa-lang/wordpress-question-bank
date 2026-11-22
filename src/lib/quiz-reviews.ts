@@ -20,13 +20,24 @@ export function latestReviews(rows: QuizReview[], userId: string, now = Date.now
   return [...latest.values()].sort((a, b) => Date.parse(b.completed_at) - Date.parse(a.completed_at));
 }
 
+/** Keep each completed attempt available within the same owner-only review window. */
+export function availableReviews(rows: QuizReview[], userId: string, now = Date.now()): QuizReview[] {
+  const unique = new Map<string, QuizReview>();
+  for (const row of rows) {
+    const time = Date.parse(row.completed_at);
+    if (row.user_id !== userId || !Number.isFinite(time) || time > now || now - time >= REVIEW_WINDOW_MS) continue;
+    if (!unique.has(row.id)) unique.set(row.id, row);
+  }
+  return [...unique.values()].sort((a, b) => Date.parse(b.completed_at) - Date.parse(a.completed_at));
+}
+
 function key(userId: string) { return `qb_reviews:${userId}`; }
 function read(userId: string): QuizReview[] {
-  try { return latestReviews(JSON.parse(localStorage.getItem(key(userId)) ?? "[]"), userId); }
+  try { return availableReviews(JSON.parse(localStorage.getItem(key(userId)) ?? "[]"), userId); }
   catch { return []; }
 }
 function cache(userId: string, rows: QuizReview[]) {
-  localStorage.setItem(key(userId), JSON.stringify(latestReviews(rows, userId)));
+  localStorage.setItem(key(userId), JSON.stringify(availableReviews(rows, userId)));
 }
 export async function saveQuizReview(row: QuizReview) {
   cache(row.user_id, [row, ...read(row.user_id)]);
@@ -45,7 +56,7 @@ export async function fetchQuizReviews(userId: string): Promise<QuizReview[]> {
       rows.push(...(data ?? []) as QuizReview[]);
       if (!data || data.length < 1000) break;
     }
-    const merged = latestReviews([...rows, ...local], userId);
+    const merged = availableReviews([...rows, ...local], userId);
     cache(userId, merged);
     return merged;
   } catch (error) {

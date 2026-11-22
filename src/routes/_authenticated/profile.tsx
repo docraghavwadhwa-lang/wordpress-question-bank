@@ -9,17 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchProfile, photoToDataUrl, updateProfile, type Profile } from "@/lib/profile";
-import { TARGET_DAYS, TIERS } from "@/lib/streak";
-import { cn } from "@/lib/utils";
 import { SubscriptionStatus } from "@/components/qbank/SubscriptionStatus";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
       { title: "Your profile | Elixir" },
-      { name: "description", content: "Edit your photo, personal details and daily streak goal." },
+      { name: "description", content: "Manage your photo, personal details and Elixir subscription." },
       { property: "og:title", content: "Your profile | Elixir by Nirmaya Care" },
-      { property: "og:description", content: "Edit your photo, personal details and daily streak goal." },
+      { property: "og:description", content: "Manage your photo, personal details and Elixir subscription." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -33,7 +31,6 @@ function ProfilePage() {
   const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => user ? fetchProfile(user.id) : Promise.resolve(null), enabled: !!user });
   const [form, setForm] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
-  const [daysText, setDaysText] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -58,8 +55,6 @@ function ProfilePage() {
         full_name: form.full_name?.trim().slice(0, 100) || null,
         phone: form.phone?.trim().slice(0, 20) || null,
         avatar_url: form.avatar_url ?? null,
-        streak_goal: form.streak_goal ?? 20,
-        streak_target_days: form.streak_target_days ?? 30,
       };
       await updateProfile(user.id, patch);
       await qc.invalidateQueries({ queryKey: ["profile", user.id] });
@@ -108,55 +103,6 @@ function ProfilePage() {
             <div className="sm:col-span-2">
               <div className="space-y-1.5"><Label>College</Label><Input value={form.college ?? ""} disabled /><p className="text-xs text-muted-foreground">Year of study and college are locked after setup and can't be changed.</p></div>
             </div>
-          </div>
-        </section>
-
-        <section className="mt-6 rounded-2xl border bg-card p-6">
-          <h2 className="font-display text-2xl text-primary">Your streak</h2>
-          <p className="text-sm text-muted-foreground">Choose how many questions you'll do each day.</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            {TIERS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => set("streak_goal", t.goal)}
-                className={cn("rounded-xl border-2 p-4 text-left transition-colors", form.streak_goal === t.goal ? "border-accent bg-accent/10" : "border-border hover:border-accent/50")}
-              >
-                <div className="font-display text-2xl text-primary">{t.name}</div>
-                <div className="text-sm font-semibold text-accent">{t.goal} questions / day</div>
-                <p className="mt-1 text-xs text-muted-foreground">{t.blurb}</p>
-              </button>
-            ))}
-          </div>
-          <p className="mt-6 text-sm font-medium text-primary">How long do you want to build this streak?</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {TARGET_DAYS.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => set("streak_target_days", d)}
-                className={cn("rounded-full border px-4 py-1.5 text-sm", form.streak_target_days === d ? "border-primary bg-primary text-primary-foreground" : "hover:border-primary/50")}
-              >
-                {d} days
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Or enter your own:</span>
-            <Input
-              type="text"
-              inputMode="numeric"
-              className="w-28"
-              value={daysText ?? String(form.streak_target_days ?? "")}
-              onChange={(e) => {
-                const t = e.target.value.replace(/\D/g, "").slice(0, 4);
-                setDaysText(t);
-                const n = Number(t);
-                if (n >= 1 && n <= 1000) set("streak_target_days", n);
-              }}
-              onBlur={() => setDaysText(null)}
-            />
-            <span className="text-muted-foreground">days</span>
           </div>
         </section>
 

@@ -56,7 +56,7 @@ export function QuizSettings({
           <ul className="space-y-1 rounded-xl bg-muted/60 px-4 py-3 text-xs text-muted-foreground">{active.how.map(h => <li key={h} className="flex gap-2"><span className="text-accent">•</span>{h}</li>)}</ul>
         </div>}
         {attempts.length > 0 && onReview && <div className="space-y-2 rounded-xl border px-4 py-3">
-          <p className="text-sm font-semibold text-primary">Previous attempts</p>
+          <p className="text-sm font-semibold text-primary">Review previous attempts</p>
           {attempts.map(a => <div key={a.id} className="flex items-center justify-between gap-2 text-xs text-muted-foreground"><span>{a.label}</span><Button size="sm" variant="outline" disabled={loading} onClick={() => onReview(a.id)}>Review</Button></div>)}
         </div>}
         <div className="space-y-2">

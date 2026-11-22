@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Clock, Flame, Medal, RotateCcw, Target } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/qbank/AppHeader";
+import { StreakSettings } from "@/components/qbank/StreakSettings";
 import { Celebration } from "@/components/qbank/Celebration";
 import {
   AlertDialog,
@@ -53,15 +54,15 @@ function StatsPage() {
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">Your journey</p>
         <h1 className="text-5xl text-primary">Progress & <em>streak</em></h1>
 
+        <StreakSettings userId={user?.id} profile={s.profile.data} />
+
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={Flame} label="Current streak" value={`${s.streak.current} days`} />
           <StatCard icon={Medal} label="Longest streak" value={`${s.streak.longest} days`} />
           <StatCard icon={Target} label={`Today · ${tier.name}`} value={`${Math.min(s.streak.today, s.goal)} / ${s.goal}`} bar={s.streak.today / s.goal} />
           <StatCard icon={Clock} label={`${target}-day goal`} value={`${Math.min(s.streak.current, target)} / ${target}`} bar={s.streak.current / target} />
         </div>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Change your daily goal or streak length in your <Link to="/profile" className="font-medium text-primary underline underline-offset-4">profile</Link>.
-        </p>
+
 
         <div className="mt-10 grid gap-6 lg:grid-cols-5">
           <StreakCalendar counts={s.counts} goal={s.goal} />

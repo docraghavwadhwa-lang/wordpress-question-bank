@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Phone, Hourglass } from "lucide-react";
+import { Phone, Hourglass, Crown } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -21,11 +21,14 @@ export function TrialRequestButton() {
 }
 
 export function TrialCountdown() {
-  const { user } = useAuth(); const [now, setNow] = useState(Date.now());
+  const { user } = useAuth(); const [now, setNow] = useState(Date.now()); const [buyOpen, setBuyOpen] = useState(false);
   const access = useQuery({ queryKey: ["access", user?.id], queryFn: fetchAccess, enabled: !!user, refetchInterval: 60000 });
   const trial = access.data?.subscriptions.find(s => s.is_trial && subscriptionActive(s, now));
-  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 30000); return () => clearInterval(timer); }, []);
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
   useEffect(() => { if (!trial || !user) return; const visit = () => { if (navigator.onLine && document.visibilityState === "visible") void supabase.rpc("record_trial_visit").then(() => {}); }; visit(); document.addEventListener("visibilitychange", visit); return () => document.removeEventListener("visibilitychange", visit); }, [trial?.id, user?.id]);
   if (!trial) return null; const left = trialCountdown(trial.ends_at, now);
-  return <section aria-label="Trial countdown" className="mb-5 flex flex-wrap items-center justify-between gap-3 border-y bg-secondary/60 px-4 py-3"><span className="flex items-center gap-2 text-sm font-semibold text-primary"><Hourglass className="h-4 w-4" />Your full-access trial</span><div className="flex gap-4 tabular-nums">{Object.entries(left).map(([label, value]) => <div className="min-w-10 text-center" key={label}><span className="block text-xl font-semibold text-primary">{String(value).padStart(2,"0")}</span><span className="text-[10px] uppercase text-muted-foreground">{label}</span></div>)}</div></section>;
+  return <><section aria-label="Trial countdown" className="mb-5 flex flex-wrap items-center justify-between gap-3 border-y bg-secondary/60 px-4 py-3">
+    <span className="flex items-center gap-2 text-sm font-semibold text-primary"><Hourglass className="h-4 w-4" />Your full-access trial</span>
+    <div className="flex w-full flex-col items-center gap-3 sm:w-auto"><div className="grid w-full grid-cols-4 gap-2 tabular-nums sm:gap-4">{Object.entries(left).map(([label, value]) => <div className="min-w-10 text-center" key={label}><span className="block text-xl font-semibold text-primary">{String(value).padStart(2,"0")}</span><span className="text-[10px] uppercase text-muted-foreground">{label}</span></div>)}</div><Button size="sm" className="w-full" onClick={() => setBuyOpen(true)}>Buy now</Button></div>
+  </section><Dialog open={buyOpen} onOpenChange={setBuyOpen}><DialogContent className="sm:max-w-sm"><DialogHeader><DialogTitle className="font-display text-2xl text-primary">Continue with Elixir Pro</DialogTitle><DialogDescription>Choose your plan or speak with our team.</DialogDescription></DialogHeader><Button asChild><Link to="/plans" onClick={() => setBuyOpen(false)}><Crown />See Pro plans</Link></Button><Button asChild variant="outline"><a href="tel:+916360759145"><Phone />Call the team</a></Button></DialogContent></Dialog></>;
 }

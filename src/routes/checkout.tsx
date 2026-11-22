@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { trackPurchase } from "@/lib/admin";
 import { startCashfreeCheckout, confirmCashfreeCheckout } from "@/lib/cashfree.functions";
 import { cashfreeCheckoutMode } from "@/lib/cashfree";
-import { fetchPlans, fetchPayments, quotePlan, submitPayment, money, manualPaymentUpiId, DEFAULT_COUPON, checkoutCoupon, planMonths, planPrice } from "@/lib/subscriptions";
+import { fetchPlans, fetchPayments, quotePlan, money, DEFAULT_COUPON, checkoutCoupon, planMonths, planPrice } from "@/lib/subscriptions";
 
 export const Route = createFileRoute("/checkout")({
   validateSearch: (search) => z.object({ plan: z.string().catch("panacea"), months: z.coerce.number().refine(n => n === 12 || n === 24 || n === 36).catch(12) }).parse(search),
@@ -38,7 +38,7 @@ function CheckoutPage() {
   const [coupon, setCoupon] = useState(DEFAULT_COUPON);
   const [step, setStep] = useState<"coupon" | "payment" | "received" | "complete">("coupon");
   const [quote, setQuote] = useState<{ total_paise: number; discount_percent: number } | null>(null);
-  const [busy, setBusy] = useState(false); const [couponError, setCouponError] = useState(""); const [reference, setReference] = useState("");
+  const [busy, setBusy] = useState(false); const [couponError, setCouponError] = useState("");
   useEffect(() => { if (user && step !== "complete") void trackPurchase(step === "received" ? "verification_pending" : step === "coupon" ? "coupon_page" : "payment_page", planId, months).catch(() => {}); }, [user?.id, step, planId, months]);
   const startFn = useServerFn(startCashfreeCheckout); const confirmFn = useServerFn(confirmCashfreeCheckout);
   useEffect(() => {
@@ -83,12 +83,6 @@ function CheckoutPage() {
     } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't start payment"); }
     finally { setBusy(false); }
   }
-  async function manual() {
-    if (!plan) return; setBusy(true);
-    try { await submitPayment(plan.id, months, checkoutCoupon(coupon), reference); void trackPurchase("verification_pending", plan.id, months).catch(() => {}); toast.success("Payment reference sent for verification"); setReference(""); }
-    catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't submit payment"); }
-    finally { setBusy(false); }
-  }
   return <div className="min-h-screen"><AppHeader /><main className="mx-auto max-w-lg px-6 py-8 sm:py-12">
     <Button variant="ghost" asChild className="mb-8 -ml-3"><Link to="/plans"><ArrowLeft />Plans</Link></Button>
     {plans.isPending ? <p>Loading plan…</p> : !plan ? <p role="alert" className="text-destructive">This plan is unavailable. Please choose another plan.</p> : <>
@@ -106,7 +100,6 @@ function CheckoutPage() {
         <dl className="space-y-4 border-y py-6 text-sm"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Plan</dt><dd>{plan.name} · {months} months</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Offer</dt><dd className="text-success">{checkoutCoupon(coupon)}</dd></div><div className="flex items-center justify-between gap-3 pt-2"><dt className="font-semibold">Total to pay</dt><dd className="text-3xl font-semibold text-primary">{money(quote?.total_paise ?? planPrice(plan, planMonths(months)))}</dd></div></dl>
         <Button className="mt-6 h-12 w-full" disabled={busy || !quote} onClick={() => void pay()}>{busy ? "Please wait…" : "Pay"}</Button>
         <Button variant="ghost" className="mt-2 w-full" disabled={busy} onClick={() => setStep("coupon")}>Change coupon</Button>
-        <details className="mt-8 text-sm"><summary className="cursor-pointer text-muted-foreground">Or pay manually via UPI</summary><p className="mt-3 text-muted-foreground">Pay {money(quote?.total_paise ?? 0)} and submit your transaction ID for verification.</p><Input className="mt-3" value={manualPaymentUpiId} readOnly aria-label="UPI ID" /><Button variant="outline" className="mt-2" onClick={() => void navigator.clipboard.writeText(manualPaymentUpiId).then(() => toast.success("UPI ID copied")).catch(() => toast.error("Couldn't copy UPI ID"))}>Copy UPI ID</Button><Label htmlFor="payment-reference" className="mt-5 block">UPI transaction ID</Label><Input id="payment-reference" className="mt-2" value={reference} onChange={event => setReference(event.target.value)} maxLength={150} /><Button className="mt-3" disabled={busy || reference.trim().length < 3} onClick={() => void manual()}>Submit for verification</Button></details>
       </div>}
       </>}
     </>}
