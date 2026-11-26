@@ -90,7 +90,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Library & focus</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Sanctuary & focus</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}><BarChart3 className="h-4 w-4" /> Progress & streak</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
@@ -120,7 +120,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
             <NotificationBell />
             <ProControl />
             <Link to="/library" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
-              <BookOpen className="h-4 w-4" /> Library
+              <BookOpen className="h-4 w-4" /> Sanctuary
             </Link>
             <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
               <BarChart3 className="h-4 w-4" /> Progress
@@ -132,7 +132,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Library & focus</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Sanctuary & focus</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}><BarChart3 className="h-4 w-4" /> Progress & streak</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>

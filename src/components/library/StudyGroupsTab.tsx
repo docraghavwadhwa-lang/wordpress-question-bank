@@ -135,7 +135,7 @@ export function StudyGroupsTab({ currentUserId }: StudyGroupsTabProps) {
           {/* Join by Code Modal */}
           <Dialog open={joinModalOpen} onOpenChange={setJoinModalOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 flex-1 sm:flex-initial">
+              <Button variant="outline" size="sm" className="h-8 text-xs font-semibold gap-1.5 flex-1 sm:flex-initial text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm">
                 <KeyRound className="h-3.5 w-3.5" /> Join with Code
               </Button>
             </DialogTrigger>
@@ -168,7 +168,7 @@ export function StudyGroupsTab({ currentUserId }: StudyGroupsTabProps) {
           {/* Create Group Modal */}
           <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="h-8 text-xs gap-1.5 bg-primary text-primary-foreground flex-1 sm:flex-initial">
+              <Button size="sm" className="h-8 text-xs font-semibold gap-1.5 bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-sm flex-1 sm:flex-initial">
                 <Plus className="h-3.5 w-3.5" /> Create Group
               </Button>
             </DialogTrigger>
@@ -655,7 +655,7 @@ function GroupRoomView({
                         </span>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground/70 text-[11px] italic">Not studying right now</span>
+                      <span className="text-muted-foreground/70 text-[11px]">Not studying right now</span>
                     )}
                   </div>
 
@@ -695,7 +695,7 @@ function GroupRoomView({
           {/* Messages list */}
           <div ref={chatScrollRef} className="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
             {messages.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground text-xs italic space-y-1">
+              <div className="py-20 text-center text-muted-foreground text-xs space-y-1">
                 <p>No active messages in this session.</p>
                 <p className="text-[11px] text-muted-foreground/60">
                   Messages exist only while the app is open.

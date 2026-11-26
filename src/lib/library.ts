@@ -187,21 +187,13 @@ export async function fetchUserBuddies(userId: string): Promise<Buddy[]> {
 }
 
 export async function sendBuddyRequest(recipientId: string) {
-  // Use audited SECURITY DEFINER RPC to bypass RLS insertion issues and enforce active device check
+  // Exclusively route through audited SECURITY DEFINER RPC: validates device_session_active, prevents self-add, and handles duplicates gracefully
   const { data, error } = await (supabase as any).rpc("send_buddy_request", {
     target_user_id: recipientId,
   } as any);
 
   if (error) {
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) throw new Error("Authentication required");
-
-    const { error: insertErr } = await db.from("buddies").insert({
-      requester_id: authData.user.id,
-      recipient_id: recipientId,
-      status: "pending",
-    });
-    if (insertErr) throw insertErr;
+    throw new Error(error.message || "Failed to send buddy request");
   }
   return data;
 }

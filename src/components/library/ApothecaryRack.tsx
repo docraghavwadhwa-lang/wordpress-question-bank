@@ -116,7 +116,7 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
                       {formatFocusDuration(session.duration_seconds)}
                     </p>
                     {session.intent_note && (
-                      <p className="italic text-[10px] text-muted-foreground/80 truncate w-full mt-0.5" title={session.intent_note}>
+                      <p className="text-[10px] text-muted-foreground/80 truncate w-full mt-0.5" title={session.intent_note}>
                         "{session.intent_note}"
                       </p>
                     )}

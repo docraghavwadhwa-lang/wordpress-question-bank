@@ -22,6 +22,7 @@ import { LibraryLeaderboards } from "@/components/library/LibraryLeaderboards";
 import { StudyBuddiesTab } from "@/components/library/StudyBuddiesTab";
 import { StudyGroupsTab } from "@/components/library/StudyGroupsTab";
 import { ShareableStudyCardModal } from "@/components/library/ShareableStudyCard";
+import { StudyProfileSettingsDialog } from "@/components/library/StudyProfileSettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
+  Settings,
   FlaskConical,
   Trophy,
   Users,
@@ -111,6 +113,8 @@ function LibraryPage() {
   // Active view section
   const [activeSection, setActiveSection] = useState<LibrarySection>("focus");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   // Queries
   const profileQuery = useQuery({
@@ -200,6 +204,31 @@ function LibraryPage() {
       if (ambientSound) ambientSound.stop();
     };
   }, [soundscapeEnabled, activeSoundscape]);
+
+    const handleHeadphoneClick = () => {
+    ambientSound?.unlock();
+    if (soundscapeEnabled) {
+      ambientSound?.stop();
+      setSoundscapeEnabled(false);
+      toast.info("Ambient soundscape muted");
+    } else {
+      ambientSound?.setVolume(soundVolume);
+      ambientSound?.play(activeSoundscape);
+      setSoundscapeEnabled(true);
+      const label = SOUNDSCAPES.find((s) => s.id === activeSoundscape)?.label || "Ambient";
+      toast.success(`Playing ${label} (looping)`);
+    }
+  };
+
+  const handleSelectSoundscape = (id: SoundscapePreset) => {
+    ambientSound?.unlock();
+    setActiveSoundscape(id);
+    ambientSound?.setVolume(soundVolume);
+    ambientSound?.play(id);
+    setSoundscapeEnabled(true);
+    const label = SOUNDSCAPES.find((s) => s.id === id)?.label || "Ambient";
+    toast.success(`Playing ${label} (looping)`);
+  };
 
   const toggleSoundscape = () => {
     setSoundscapeEnabled((prev) => !prev);
@@ -383,14 +412,14 @@ function LibraryPage() {
       {/* ================= TOP NAVIGATION / SANCTUARY HEADER ================= */}
       <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-          {/* Top-Left: Menu Hamburger, Back, Share, Logo */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Top-Left: Menu Hamburger (≡), Back, Elixir Logo */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* 3-Line Hamburger Menu */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setDrawerOpen(true)}
-              className="h-9 w-9 rounded-lg text-[#F7F5F0] hover:bg-[#0D4347] hover:text-[#E5B95C]"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-[#F7F5F0] hover:bg-[#0D4347] hover:text-[#E5B95C] shrink-0"
               aria-label="Open sanctuary menu"
             >
               <Menu className="h-5 w-5" />
@@ -401,30 +430,18 @@ function LibraryPage() {
               variant="ghost"
               size="sm"
               onClick={() => navigate({ to: "/" })}
-              className="h-8 gap-1 px-2 text-xs text-[#F7F5F0]/80 hover:bg-[#0D4347] hover:text-[#F7F5F0]"
+              className="h-8 gap-1 px-1.5 sm:px-2 text-xs text-[#F7F5F0]/80 hover:bg-[#0D4347] hover:text-[#F7F5F0] shrink-0"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Back</span>
             </Button>
 
-            {/* Share Today's Progress Button */}
-            {user && (
-              <ShareableStudyCardModal
-                userName={profile?.full_name || user.email || "Doctor"}
-                userHandle={profile?.handle ?? null}
-                college={profile?.college ?? null}
-                todaySeconds={todayTotalSeconds}
-                completedVials={todayCompletedVials}
-                mcqsSolvedToday={todayMCQQuery.data ?? 0}
-              />
-            )}
-
-            {/* Sanctuary Branding */}
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[#0D4347]">
+            {/* Sanctuary Branding & Logo */}
+            <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-[#0D4347]">
               <img
                 src="/elixir-header-latest.webp"
                 alt="Elixir"
-                className="h-5 w-auto object-contain brightness-0 invert"
+                className="h-4.5 sm:h-5 w-auto object-contain brightness-0 invert shrink-0"
               />
               <span className="text-xs font-display font-medium text-[#E5B95C] tracking-wide">
                 Sanctuary
@@ -433,17 +450,17 @@ function LibraryPage() {
           </div>
 
           {/* Top-Right: Today's Goal Pill + Ambient Sound Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Today's Goal Button */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setGoalModalOpen(true)}
-              className="h-8 gap-1.5 rounded-full bg-[#0D4347]/60 hover:bg-[#0D4347] px-3 text-xs font-medium text-[#F7F5F0] border border-[#4BA09F]/30"
+              className="h-8 gap-1.5 rounded-full bg-[#0D4347]/60 hover:bg-[#0D4347] px-2.5 sm:px-3 text-xs font-medium text-[#F7F5F0] border border-[#4BA09F]/30 shrink-0"
               title="Click to edit today's focus goal"
             >
               <Target className="h-3.5 w-3.5 text-[#E5B95C]" />
-              <span>
+              <span className="text-xs">
                 {(todayTotalSeconds / 3600).toFixed(1)} / {dailyGoalHours}h
               </span>
             </Button>
@@ -454,12 +471,14 @@ function LibraryPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className={`h-8 w-8 rounded-full border transition-all ${
+                  onClick={handleHeadphoneClick}
+                  className={`h-8 w-8 rounded-full border transition-all shrink-0 ${
                     soundscapeEnabled
                       ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] shadow-sm animate-pulse"
                       : "bg-[#0D4347]/60 text-[#F7F5F0] border-[#4BA09F]/30 hover:bg-[#0D4347]"
                   }`}
                   aria-label={soundscapeEnabled ? "Ambient sound playing" : "Ambient sound muted"}
+                  title={soundscapeEnabled ? "Playing soundscape (tap to mute)" : "Soundscape muted (tap to play)"}
                 >
                   {soundscapeEnabled ? (
                     <Headphones className="h-4 w-4" />
@@ -536,27 +555,36 @@ function LibraryPage() {
 
       {/* ================= DASHBOARD DRAWER (SLIDE-OUT MENU) ================= */}
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="left" className="w-80 sm:w-96 bg-[#082428] border-r border-[#0D4347] text-[#F7F5F0] p-6">
+        <SheetContent side="left" className="w-80 sm:w-96 bg-[#082428] border-r border-[#0D4347] text-[#F7F5F0] p-6 overflow-y-auto">
           <SheetHeader className="text-left pb-4 border-b border-[#0D4347]">
-            <SheetTitle className="text-[#E5B95C] font-display text-xl flex items-center gap-2">
-              <Sparkles className="h-5 w-5" /> Sanctuary Dashboard
-            </SheetTitle>
+            <div className="flex items-center gap-2 mb-1">
+              <img
+                src="/elixir-header-latest.webp"
+                alt="Elixir"
+                className="h-5 w-auto object-contain brightness-0 invert"
+              />
+              <SheetTitle className="text-[#E5B95C] font-display text-xl font-bold">
+                Sanctuary Dashboard
+              </SheetTitle>
+            </div>
             <p className="text-xs text-[#F7F5F0]/70">
               Navigate your study spaces, alchemy rack, and peer circles.
             </p>
           </SheetHeader>
 
           {/* Navigation Grid with Large Icons & Titles Below */}
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-2 gap-2.5">
             {[
               { id: "focus", label: "Focus Timer", icon: Timer, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
               { id: "apothecary", label: "Apothecary", icon: FlaskConical, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "analytics", label: "Analytics", icon: BarChart2, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
-              { id: "leaderboards", label: "Ranks", icon: Trophy, color: "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30" },
-              { id: "buddies", label: "Study Buddies", icon: Users, color: "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30" },
-              { id: "groups", label: "Study Groups", icon: Compass, color: "text-[#A855F7] bg-[#A855F7]/10 border-[#A855F7]/30" },
-              { id: "todos", label: "To-Do List", icon: ListTodo, color: "text-[#F43F5E] bg-[#F43F5E]/10 border-[#F43F5E]/30" },
-              { id: "soundscapes", label: "Soundscapes", icon: Headphones, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+              { id: "leaderboards", label: "Ranks", icon: Trophy, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+              { id: "buddies", label: "Study Buddies", icon: Users, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "groups", label: "Study Groups", icon: Compass, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
+              { id: "todos", label: "To-Do List", icon: ListTodo, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+              { id: "soundscapes", label: "Soundscapes", icon: Headphones, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "share", label: "Share Progress", icon: Share2, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+              { id: "settings", label: "Settings", icon: Settings, color: "text-[#F4F1EA] bg-[#F4F1EA]/10 border-[#F4F1EA]/30" },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activeSection === item.id;
@@ -565,17 +593,27 @@ function LibraryPage() {
                   key={item.id}
                   type="button"
                   onClick={() => {
+                    if (item.id === "share") {
+                      setDrawerOpen(false);
+                      setShareModalOpen(true);
+                      return;
+                    }
+                    if (item.id === "settings") {
+                      setDrawerOpen(false);
+                      setSettingsModalOpen(true);
+                      return;
+                    }
                     setActiveSection(item.id as LibrarySection);
                     setDrawerOpen(false);
                   }}
-                  className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all text-center ${
+                  className={`flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl border transition-all text-center ${
                     isActive
                       ? "bg-[#0D4347] border-[#E5B95C] text-[#E5B95C] shadow-md ring-1 ring-[#E5B95C]"
                       : "bg-[#0D4347]/40 border-[#0D4347] hover:bg-[#0D4347]/80 text-[#F7F5F0]"
                   }`}
                 >
-                  <div className={`p-3 rounded-full border mb-2 ${item.color}`}>
-                    <Icon className="h-6 w-6" />
+                  <div className={`p-2.5 sm:p-3 rounded-full border mb-1.5 ${item.color}`}>
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
                   <span className="text-xs font-semibold tracking-wide">{item.label}</span>
                 </button>
@@ -777,7 +815,7 @@ function LibraryPage() {
                   </div>
 
                   {timerState.isPaused && (
-                    <p className="text-center text-[11px] text-[#F7F5F0]/70 italic">
+                    <p className="text-center text-[11px] text-[#F7F5F0]/70">
                       Pause is capped at 5 minutes to keep you accountable.
                     </p>
                   )}
@@ -792,7 +830,7 @@ function LibraryPage() {
                     {timerState.sessionTitle ? ` • ${timerState.sessionTitle}` : ""}
                   </p>
                   {timerState.intentNote && (
-                    <p className="text-[#F7F5F0]/80 italic mt-0.5">"{timerState.intentNote}"</p>
+                    <p className="text-[#F7F5F0]/80 mt-0.5">"{timerState.intentNote}"</p>
                   )}
                 </div>
               )}
@@ -829,7 +867,7 @@ function LibraryPage() {
                 {/* List items */}
                 <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
                   {todos.length === 0 ? (
-                    <p className="py-3 text-center text-[11px] text-[#F7F5F0]/50 italic">
+                    <p className="py-3 text-center text-[11px] text-[#F7F5F0]/50">
                       No tasks yet. Set goals to guide your study sessions.
                     </p>
                   ) : (
@@ -888,7 +926,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -911,7 +949,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -925,7 +963,7 @@ function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#F59E0B]">Study Leaderboards</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Study Leaderboards</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
                   Daily and weekly rankings resetting at midnight IST.
                 </p>
@@ -934,7 +972,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -948,7 +986,7 @@ function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#10B981]">Study Buddies</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Study Buddies</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
                   Connect with batchmates, track live presence, and send silent cheers.
                 </p>
@@ -957,7 +995,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -971,7 +1009,7 @@ function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#A855F7]">Study Groups</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Study Groups</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
                   Shared group distillations, live member presence, and ephemeral chat.
                 </p>
@@ -980,7 +1018,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -994,7 +1032,7 @@ function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#F43F5E]">Personal Study Tasks</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Personal Study Tasks</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
                   Daily checklist of Q-bank decks, PYQs, and medical revision topics.
                 </p>
@@ -1003,7 +1041,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -1080,7 +1118,7 @@ function LibraryPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -1178,6 +1216,30 @@ function LibraryPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+            {/* ================= MODAL: SHARE TODAY'S PROGRESS ================= */}
+      {user && (
+        <ShareableStudyCardModal
+          userName={profile?.full_name || user.email || "Doctor"}
+          userHandle={profile?.handle ?? null}
+          college={profile?.college ?? null}
+          todaySeconds={todayTotalSeconds}
+          completedVials={todayCompletedVials}
+          mcqsSolvedToday={todayMCQQuery.data ?? 0}
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+        />
+      )}
+
+      {/* ================= MODAL: SANCTUARY SETTINGS ================= */}
+      {user && (
+        <StudyProfileSettingsDialog
+          currentUserId={user.id}
+          profile={profile}
+          open={settingsModalOpen}
+          onOpenChange={setSettingsModalOpen}
+        />
+      )}
 
       {/* ================= MODAL: EDIT TODAY'S FOCUS GOAL ================= */}
       <Dialog open={goalModalOpen} onOpenChange={setGoalModalOpen}>

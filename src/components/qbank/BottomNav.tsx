@@ -12,7 +12,7 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
     { label: "Home", icon: House, to: "/", hash: "", active: pathname === "/" && hash !== "qbanks", feat: null },
     { label: "Q-Banks", icon: NotebookPen, to: "/", hash: "qbanks", active: pathname === "/" && hash === "qbanks", feat: "qbanks" as FeatureKey },
     { label: "Progress", icon: BarChart3, to: "/stats", hash: "", active: pathname.startsWith("/stats"), feat: "progress" as FeatureKey },
-    { label: "Library", icon: BookOpen, to: "/library", hash: "", active: pathname.startsWith("/library"), feat: "library" as FeatureKey },
+    { label: "Sanctuary", icon: BookOpen, to: "/library", hash: "", active: pathname.startsWith("/library"), feat: "library" as FeatureKey },
   ] as const;
 
   const visibleTabs = tabs.filter(t => !t.feat || features.enabled(t.feat));
@@ -29,7 +29,7 @@ export function BottomNav({ onHome }: { onHome?: (() => void) | undefined }) {
               hash={t.hash}
               preload={t.to === "/stats" || t.to === "/library" ? "render" : "intent"}
               onClick={() => {
-                if (t.label !== "Progress" && t.label !== "Library") onHome?.();
+                if (t.label !== "Progress" && t.label !== "Sanctuary" && t.label !== "Library") onHome?.();
                 window.scrollTo({ top: 0 });
               }}
               className={cn("relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold uppercase tracking-wider", t.active ? "text-primary" : "text-muted-foreground")}

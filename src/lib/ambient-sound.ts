@@ -1,6 +1,7 @@
 /**
- * Ambient Soundscapes Engine for Elixir Library Sanctuary.
- * Supports 8 seamless loopable audio tracks with automatic fallback to Web Audio procedural synthesis.
+ * Ambient Soundscapes Engine for Elixir Sanctuary.
+ * Supports 8 seamless loopable audio tracks with immediate user-gesture unlocking
+ * and automatic fallback to Web Audio procedural synthesis.
  */
 
 export type SoundscapePreset =
@@ -38,7 +39,7 @@ class AmbientSoundEngine {
   private activeNodes: { stop: () => void }[] = [];
   private currentAudio: HTMLAudioElement | null = null;
   private currentPreset: SoundscapePreset | null = null;
-  private volume: number = 0.5;
+  private volume: number = 0.7;
   private isPlaying: boolean = false;
   private listeners: Set<() => void> = new Set();
 
@@ -57,6 +58,18 @@ class AmbientSoundEngine {
         /* ignore */
       }
     });
+  }
+
+  public unlock() {
+    if (typeof window === "undefined") return;
+    try {
+      const ctx = this.getAudioContext();
+      if (ctx && ctx.state === "suspended") {
+        void ctx.resume();
+      }
+    } catch {
+      /* ignore */
+    }
   }
 
   private getAudioContext(): AudioContext {
@@ -139,6 +152,7 @@ class AmbientSoundEngine {
   }
 
   public toggle(preset?: SoundscapePreset) {
+    this.unlock();
     if (this.isPlaying) {
       this.stop();
     } else {
@@ -171,6 +185,7 @@ class AmbientSoundEngine {
 
   public play(preset: SoundscapePreset) {
     this.stop();
+    this.unlock();
     this.currentPreset = preset;
     this.isPlaying = true;
     this.notify();
@@ -180,26 +195,29 @@ class AmbientSoundEngine {
 
     if (audioPath && typeof window !== "undefined" && typeof Audio !== "undefined") {
       try {
-        const audio = new Audio(audioPath);
-        audio.loop = true; // Mandatory seamless continuous infinite loop
+        const audio = new Audio();
+        audio.src = audioPath;
+        audio.loop = true; // Seamless continuous infinite loop
         audio.volume = this.volume;
         audio.preload = "auto";
 
+        this.currentAudio = audio;
+
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              this.currentAudio = audio;
-            })
-            .catch(() => {
-              // Fallback to procedural synthesis on error or autoplay restrictions
-              this.playProcedural(preset);
-            });
-        } else {
-          this.currentAudio = audio;
+          playPromise.catch((err) => {
+            console.warn("Audio element play error, falling back to Web Audio synthesis:", err);
+            if (this.currentAudio === audio) {
+              this.currentAudio = null;
+            }
+            this.playProcedural(preset);
+          });
         }
 
         audio.onerror = () => {
+          if (this.currentAudio === audio) {
+            this.currentAudio = null;
+          }
           this.playProcedural(preset);
         };
         return;
