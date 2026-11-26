@@ -1245,6 +1245,25 @@ export type Database = {
         Returns: boolean
       }
       has_subject_access: { Args: { _subject: string }; Returns: boolean }
+      join_study_group: {
+        Args: { _code: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          daily_goal_minutes: number
+          description: string | null
+          id: string
+          invite_code: string
+          name: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "study_groups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       offline_access_grant: { Args: never; Returns: Json }
       public_feature_availability: {
         Args: never

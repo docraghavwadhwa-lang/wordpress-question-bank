@@ -274,21 +274,10 @@ export async function createStudyGroup(payload: {
   return group as StudyGroup;
 }
 
-export async function joinStudyGroupByCode(code: string, userId: string): Promise<StudyGroup> {
+export async function joinStudyGroupByCode(code: string, _userId: string): Promise<StudyGroup> {
   const cleanCode = code.trim().toUpperCase();
-  const { data: group, error: gErr } = await db
-    .from("study_groups")
-    .select("*")
-    .eq("invite_code", cleanCode)
-    .single();
+  const { data: group, error: gErr } = await db.rpc("join_study_group", { _code: cleanCode });
   if (gErr || !group) throw new Error("Invalid or expired invite code.");
-
-  const { error: mErr } = await db.from("study_group_members").insert({
-    group_id: group.id,
-    user_id: userId,
-    role: "member",
-  });
-  if (mErr && !mErr.message?.includes("duplicate")) throw mErr;
   return group as StudyGroup;
 }
 
