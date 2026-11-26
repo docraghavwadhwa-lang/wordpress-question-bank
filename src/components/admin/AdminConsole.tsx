@@ -1,6 +1,6 @@
 import { useState, useDeferredValue } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, RefreshCw, ShieldCheck, Phone, Pencil, Plus, Check, X, Users, Route, SlidersHorizontal, Crown, Ticket, BookOpen, History } from "lucide-react";
+import { Search, RefreshCw, ShieldCheck, Phone, Pencil, Plus, Check, X, Users, Route, SlidersHorizontal, Crown, Ticket, BookOpen, History, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,9 +21,10 @@ import { todayKey } from "@/lib/daily";
 
 import { TRIAL_PRESETS, trialEnd, trialSchema } from "@/lib/trials";
 import { Trials, TrialEngagement } from "./Trials";
+import { AdminNotifications } from "./AdminNotifications";
 
 type Target = { user: string; name: string; plan: string; amount: number; months: number; request?: string; subscription?: Subscription };
-const TAB_ITEMS = [{ key: "journeys", label: "Purchase progress", icon: Route }, { key: "students", label: "Students", icon: Users }, { key: "trials", label: "Trials", icon: Crown }, { key: "payments", label: "Payments", icon: Check }, { key: "access", label: "Subscriptions", icon: Crown }, { key: "plans", label: "Plans & pricing", icon: Crown }, { key: "features", label: "Features", icon: SlidersHorizontal }, { key: "content", label: "Q-bank content", icon: BookOpen }, { key: "coupons", label: "Coupons", icon: Ticket }, { key: "audit", label: "Change history", icon: History }];
+const TAB_ITEMS = [{ key: "journeys", label: "Purchase progress", icon: Route }, { key: "students", label: "Students", icon: Users }, { key: "notifications", label: "Notifications", icon: Bell }, { key: "trials", label: "Trials", icon: Crown }, { key: "payments", label: "Payments", icon: Check }, { key: "access", label: "Subscriptions", icon: Crown }, { key: "plans", label: "Plans & pricing", icon: Crown }, { key: "features", label: "Features", icon: SlidersHorizontal }, { key: "content", label: "Q-bank content", icon: BookOpen }, { key: "coupons", label: "Coupons", icon: Ticket }, { key: "audit", label: "Change history", icon: History }];
 function useAdminAction() {
   const qc = useQueryClient(); const [busy, setBusy] = useState(false);
   return { busy, run: async (fn: () => Promise<unknown>, message: string) => { setBusy(true); try { await fn(); toast.success(message); await qc.invalidateQueries({ predicate: q => ["admin", "features", "plans", "plan-subjects", "access", "decks"].includes(String(q.queryKey[0])) }); return true; } catch (e) { toast.error(e instanceof Error ? e.message : "Couldn't save this change"); return false; } finally { setBusy(false); } } };
@@ -38,6 +39,7 @@ export function AdminConsole() {
     <Tabs value={tab} onValueChange={setTab}><TabsList className="mb-6 flex h-auto w-full flex-wrap justify-start gap-1 bg-secondary p-1">{TAB_ITEMS.map(t => <TabsTrigger className="gap-2 px-3 py-2" key={t.key} value={t.key}><t.icon className="h-4 w-4" />{t.label}</TabsTrigger>)}</TabsList>
       <TabsContent value="journeys"><Students journeys onDetail={setDetail} onAllocate={allocate} /></TabsContent>
       <TabsContent value="students"><Students onDetail={setDetail} onAllocate={allocate} /></TabsContent>
+      <TabsContent value="notifications"><AdminNotifications onDetail={setDetail} /></TabsContent>
       <TabsContent value="trials"><Trials onDetail={setDetail} /></TabsContent>
       <TabsContent value="payments"><Payments onAllocate={allocate} onDetail={setDetail} /></TabsContent>
       <TabsContent value="access"><Access onEdit={s => setTarget({ user: s.user_id, name: s.user_id, plan: s.plan_id, amount: s.amount_paid_paise ?? 0, months: Math.max(1, Math.round((Date.parse(s.ends_at) - Date.parse(s.starts_at)) / (30.4375 * 86400000))), subscription: s })} onDetail={setDetail} /></TabsContent>

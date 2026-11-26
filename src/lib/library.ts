@@ -187,11 +187,23 @@ export async function fetchUserBuddies(userId: string): Promise<Buddy[]> {
 }
 
 export async function sendBuddyRequest(recipientId: string) {
-  const { error } = await db.from("buddies").insert({
-    recipient_id: recipientId,
-    status: "pending",
-  });
-  if (error) throw error;
+  // Use audited SECURITY DEFINER RPC to bypass RLS insertion issues and enforce active device check
+  const { data, error } = await (supabase as any).rpc("send_buddy_request", {
+    target_user_id: recipientId,
+  } as any);
+
+  if (error) {
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) throw new Error("Authentication required");
+
+    const { error: insertErr } = await db.from("buddies").insert({
+      requester_id: authData.user.id,
+      recipient_id: recipientId,
+      status: "pending",
+    });
+    if (insertErr) throw insertErr;
+  }
+  return data;
 }
 
 export async function respondBuddyRequest(requestId: string, status: "accepted" | "declined") {
@@ -372,4 +384,150 @@ export async function sendStudyCheer(recipientId: string, reaction: string) {
     reaction,
   });
   if (error) throw error;
+}
+
+
+export async function removeStudyGroupMember(groupId: string, userId: string) {
+  const { error } = await (supabase as any).rpc("remove_study_group_member", {
+    p_group_id: groupId,
+    p_user_id: userId,
+  } as any);
+
+  if (error) {
+    const { error: delErr } = await db
+      .from("study_group_members")
+      .delete()
+      .eq("group_id", groupId)
+      .eq("user_id", userId);
+    if (delErr) throw delErr;
+  }
+}
+
+export interface StudyTodo {
+  id: string;
+  user_id: string;
+  task: string;
+  completed: boolean;
+  completed_at: string | null;
+  created_at: string;
+}
+
+const LOCAL_TODOS_KEY = "elixir_study_todos_v1";
+
+export async function fetchStudyTodos(userId: string): Promise<StudyTodo[]> {
+  try {
+    const { data, error } = await db
+      .from("study_todos")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(data));
+      }
+      return data as StudyTodo[];
+    }
+  } catch (e) {
+    console.error("fetchStudyTodos network error:", e);
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const local = localStorage.getItem(LOCAL_TODOS_KEY);
+      if (local) return JSON.parse(local);
+    } catch {
+      /* ignore */
+    }
+  }
+  return [];
+}
+
+export async function addStudyTodo(userId: string, task: string): Promise<StudyTodo> {
+  const newTodo: StudyTodo = {
+    id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    user_id: userId,
+    task: task.trim(),
+    completed: false,
+    completed_at: null,
+    created_at: new Date().toISOString(),
+  };
+
+  try {
+    const { data, error } = await db
+      .from("study_todos")
+      .insert({
+        id: newTodo.id,
+        user_id: userId,
+        task: newTodo.task,
+        completed: false,
+      })
+      .select()
+      .single();
+
+    if (!error && data) return data as StudyTodo;
+  } catch {
+    /* fallback to local */
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const local = localStorage.getItem(LOCAL_TODOS_KEY);
+      const list: StudyTodo[] = local ? JSON.parse(local) : [];
+      list.unshift(newTodo);
+      localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(list));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return newTodo;
+}
+
+export async function toggleStudyTodo(todoId: string, completed: boolean) {
+  try {
+    await db.from("study_todos").update({
+      completed,
+      completed_at: completed ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    }).eq("id", todoId);
+  } catch {
+    /* fallback */
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const local = localStorage.getItem(LOCAL_TODOS_KEY);
+      if (local) {
+        const list: StudyTodo[] = JSON.parse(local);
+        const updated = list.map((t) =>
+          t.id === todoId ? { ...t, completed, completed_at: completed ? new Date().toISOString() : null } : t
+        );
+        localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(updated));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+export async function deleteStudyTodo(todoId: string) {
+  try {
+    await db.from("study_todos").delete().eq("id", todoId);
+  } catch {
+    /* fallback */
+  }
+
+  if (typeof window !== "undefined") {
+    try {
+      const local = localStorage.getItem(LOCAL_TODOS_KEY);
+      if (local) {
+        const list: StudyTodo[] = JSON.parse(local);
+        const updated = list.filter((t) => t.id !== todoId);
+        localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(updated));
+      }
+    } catch {
+      /* ignore */
+    }
+  }
 }

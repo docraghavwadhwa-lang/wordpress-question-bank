@@ -8,6 +8,7 @@ interface ApothecaryFlaskProps {
   size?: number;
   className?: string;
   showGlow?: boolean;
+  showLabels?: boolean;
 }
 
 export function ApothecaryFlask({
@@ -17,6 +18,7 @@ export function ApothecaryFlask({
   size = 180,
   className = "",
   showGlow = true,
+  showLabels = true,
 }: ApothecaryFlaskProps) {
   const tier: FlaskTier = getFlaskTierForDuration(durationMinutes);
   const clampedFill = Math.min(100, Math.max(0, fillPercent));
@@ -243,6 +245,7 @@ export function ApothecaryFlask({
       </svg>
 
       {/* Flask Title and Rarity Badge */}
+      {showLabels && (
       <div className="mt-1 flex flex-col items-center">
         <span className="text-xs font-semibold tracking-wide text-foreground">{tier.title}</span>
         <span
@@ -255,6 +258,7 @@ export function ApothecaryFlask({
           {isCracked ? "Cracked Vial" : isSealed ? "Sealed Elixir" : tier.rarity}
         </span>
       </div>
+      )}
     </div>
   );
 }

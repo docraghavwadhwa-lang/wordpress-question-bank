@@ -44,7 +44,7 @@ describe("Apothecary Flask Distillation", () => {
   });
 });
 
-describe("Library Feature Flag & Soundscapes", () => {
+describe("Library Feature Flag & Ambient Soundscapes", () => {
   it("includes 'library' in FEATURE_KEYS list", () => {
     expect(FEATURE_KEYS).toContain("library");
   });
@@ -59,12 +59,30 @@ describe("Library Feature Flag & Soundscapes", () => {
     expect(featureAvailable([{ key: "library", enabled: false }], "library", true)).toBe(true);
   });
 
-  it("provides 4 offline procedural soundscapes", () => {
-    expect(SOUNDSCAPES).toHaveLength(4);
+  it("provides 8 seamless loopable soundscapes matching custom audio assets", () => {
+    expect(SOUNDSCAPES).toHaveLength(8);
     const ids = SOUNDSCAPES.map((s) => s.id);
-    expect(ids).toContain("rain");
-    expect(ids).toContain("library");
-    expect(ids).toContain("cafe");
-    expect(ids).toContain("forest");
+    expect(ids).toEqual([
+      "rain",
+      "library",
+      "cafe",
+      "forest",
+      "lofi",
+      "whitenoise",
+      "fireplace",
+      "wind",
+    ]);
+
+    const slugs = SOUNDSCAPES.map((s) => s.slug);
+    expect(slugs).toEqual([
+      "monsoon-rain",
+      "quiet-library",
+      "cozy-cafe",
+      "mountain-forest",
+      "lofi",
+      "white-noise",
+      "fireplace-crackling",
+      "wind",
+    ]);
   });
 });

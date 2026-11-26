@@ -95,22 +95,32 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
                     fillPercent={100}
                     durationMinutes={minutes}
                     status={session.status}
-                    size={90}
+                    size={84}
                     showGlow={session.status === "completed"}
+                    showLabels={false}
                   />
-                  <div className="mt-2 w-full min-w-0">
-                    <p className="font-semibold text-xs text-foreground truncate">
+                  <div className="mt-2 w-full min-w-0 flex flex-col gap-1.5 items-center">
+                    {session.status === "abandoned" ? (
+                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-destructive/15 text-destructive border border-destructive/30 shadow-xs">
+                        CRACKED VIAL
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-full bg-accent/15 text-accent-foreground border border-accent/30">
+                        SEALED ELIXIR
+                      </span>
+                    )}
+                    <p className="font-semibold text-xs text-foreground truncate w-full" title={subjectLabel(session.subject)}>
                       {subjectLabel(session.subject)}
                     </p>
                     <p className="font-mono text-[11px] text-muted-foreground">
                       {formatFocusDuration(session.duration_seconds)}
                     </p>
                     {session.intent_note && (
-                      <p className="italic text-[10px] text-muted-foreground/80 truncate mt-0.5" title={session.intent_note}>
+                      <p className="italic text-[10px] text-muted-foreground/80 truncate w-full mt-0.5" title={session.intent_note}>
                         "{session.intent_note}"
                       </p>
                     )}
-                    <span className="text-[10px] text-muted-foreground/60 block mt-1">
+                    <span className="text-[10px] text-muted-foreground/60 block">
                       {dateStr}
                     </span>
                   </div>

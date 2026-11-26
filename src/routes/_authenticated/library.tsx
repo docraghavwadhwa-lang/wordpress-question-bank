@@ -1,11 +1,18 @@
-import { useState, useMemo, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { fetchProfile } from "@/lib/profile";
+import { fetchProfile, updateProfile } from "@/lib/profile";
 import { SUBJECT_ORDER, subjectLabel } from "@/lib/subjects";
 import { useLibraryTimer, type TimerMode } from "@/contexts/LibraryTimerContext";
-import { fetchUserStudySessions } from "@/lib/library";
+import {
+  fetchUserStudySessions,
+  fetchStudyTodos,
+  addStudyTodo,
+  toggleStudyTodo,
+  deleteStudyTodo,
+  type StudyTodo,
+} from "@/lib/library";
 import { formatFocusDuration } from "@/lib/apothecary";
 import { ambientSound, SOUNDSCAPES, type SoundscapePreset } from "@/lib/ambient-sound";
 import { ApothecaryFlask } from "@/components/library/ApothecaryFlask";
@@ -22,37 +29,90 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Menu,
+  ArrowLeft,
+  Share2,
+  Headphones,
+  HeadphoneOff,
+  Target,
   Play,
   Pause,
+  AlertTriangle,
   RotateCcw,
   Sparkles,
-  Volume2,
-  VolumeX,
-  Target,
-  ShieldAlert,
-  CheckCircle2,
   FlaskConical,
   Trophy,
   Users,
   BarChart2,
   Timer,
   Compass,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  Plus,
+  Volume2,
+  ListTodo,
 } from "lucide-react";
+import { toast } from "sonner";
+
+
+function getSoundscapeEmoji(preset: SoundscapePreset) {
+  switch (preset) {
+    case "rain": return "🌧️";
+    case "library": return "📚";
+    case "cafe": return "☕";
+    case "forest": return "🌲";
+    case "lofi": return "🎧";
+    case "whitenoise": return "📻";
+    case "fireplace": return "🔥";
+    case "wind": return "🍃";
+    default: return "🎵";
+  }
+}
 
 export const Route = createFileRoute("/_authenticated/library")({
   component: LibraryPage,
 });
 
+type LibrarySection = "focus" | "apothecary" | "analytics" | "leaderboards" | "buddies" | "groups" | "todos" | "soundscapes";
+
 function LibraryPage() {
   const { user } = useAuth();
-  const { state: timerState, startTimer, pauseTimer, resumeTimer, giveUpSession, completeSession } = useLibraryTimer();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const {
+    state: timerState,
+    startTimer,
+    pauseTimer,
+    resumeTimer,
+    cancelGracefully,
+    giveUpSession,
+    completeSession,
+    setTargetMinutes,
+  } = useLibraryTimer();
 
+  // Active view section
+  const [activeSection, setActiveSection] = useState<LibrarySection>("focus");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Queries
   const profileQuery = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: () => (user ? fetchProfile(user.id) : Promise.resolve(null)),
@@ -66,7 +126,6 @@ function LibraryPage() {
     refetchInterval: 15000,
   });
 
-  // Query MCQs solved today (IST)
   const todayMCQQuery = useQuery({
     queryKey: ["today_attempts_count", user?.id],
     queryFn: async () => {
@@ -83,30 +142,52 @@ function LibraryPage() {
     enabled: !!user,
   });
 
-  // Local Timer Setup Configuration
-  const [selectedSubject, setSelectedSubject] = useState<string>(SUBJECT_ORDER[0]!);
-  const [selectedMode, setSelectedMode] = useState<TimerMode>("pomodoro");
-  const [intentGoal, setIntentGoal] = useState("");
-  const [pomodoroMinutes, setPomodoroMinutes] = useState(25);
-  const [isDeepFocus, setIsDeepFocus] = useState(false);
-  const [dailyGoalHours, setDailyGoalHours] = useState(4);
-
-  // Soundscape audio state
-  const [soundscapeEnabled, setSoundscapeEnabled] = useState(false);
-  const [activeSoundscape, setActiveSoundscape] = useState<SoundscapePreset>("rain");
-  const [soundVolume, setSoundVolume] = useState(0.5);
+  // To-Do list query
+  const todosQuery = useQuery({
+    queryKey: ["user_study_todos", user?.id],
+    queryFn: () => (user ? fetchStudyTodos(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
 
   const profile = profileQuery.data ?? null;
   const sessions = sessionsQuery.data ?? [];
+  const todos = todosQuery.data ?? [];
+
+  // Goal & Audio state
+  const [dailyGoalHours, setDailyGoalHours] = useState<number>(4);
+  const [goalModalOpen, setGoalModalOpen] = useState(false);
+  const [customGoalInput, setCustomGoalInput] = useState("");
+
+  const [soundscapeEnabled, setSoundscapeEnabled] = useState(false);
+  const [activeSoundscape, setActiveSoundscape] = useState<SoundscapePreset>("rain");
+  const [soundVolume, setSoundVolume] = useState(0.6);
+
+  // Post-Time Setup Configuration Modal
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<string>(SUBJECT_ORDER[0]!);
+  const [sessionTitle, setSessionTitle] = useState("");
+  const [sessionGoal, setSessionGoal] = useState("");
+
+  // Ring duration in minutes (10 - 180 min)
+  const [ringMinutes, setRingMinutes] = useState<number>(
+    Math.round((timerState.targetSeconds || 25 * 60) / 60)
+  );
+
+  // Sync ring minutes with context
+  useEffect(() => {
+    if (!timerState.isRunning) {
+      setRingMinutes(Math.round((timerState.targetSeconds || 25 * 60) / 60));
+    }
+  }, [timerState.targetSeconds, timerState.isRunning]);
 
   // Update daily goal if profile exists
   useEffect(() => {
     if (profile?.daily_focus_goal_minutes) {
-      setDailyGoalHours(Math.max(1, Math.round(profile.daily_focus_goal_minutes / 60)));
+      setDailyGoalHours(Math.max(0.5, profile.daily_focus_goal_minutes / 60));
     }
   }, [profile?.daily_focus_goal_minutes]);
 
-  // Handle ambient sound engine changes
+  // Ambient sound engine sync
   useEffect(() => {
     if (!ambientSound) return;
     if (soundscapeEnabled) {
@@ -120,13 +201,17 @@ function LibraryPage() {
     };
   }, [soundscapeEnabled, activeSoundscape]);
 
+  const toggleSoundscape = () => {
+    setSoundscapeEnabled((prev) => !prev);
+  };
+
   const handleVolumeChange = (newVal: number[]) => {
-    const val = newVal[0] ?? 0.5;
+    const val = newVal[0] ?? 0.6;
     setSoundVolume(val);
     if (ambientSound) ambientSound.setVolume(val);
   };
 
-  // Today's stats calculation (IST)
+  // Today's focus calculations (IST)
   const { todayTotalSeconds, todayCompletedVials } = useMemo(() => {
     const nowIST = new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Kolkata",
@@ -154,7 +239,6 @@ function LibraryPage() {
       }
     });
 
-    // Add currently active session elapsed seconds
     if (timerState.isRunning && timerState.startedAtTimestamp) {
       totalSec += timerState.elapsedSeconds;
     }
@@ -162,387 +246,1002 @@ function LibraryPage() {
     return { todayTotalSeconds: totalSec, todayCompletedVials: completedVials };
   }, [sessions, timerState.isRunning, timerState.elapsedSeconds, timerState.startedAtTimestamp]);
 
-  // Goal ring percentage
   const goalTargetSeconds = dailyGoalHours * 3600;
   const goalProgressPercent = Math.min(100, Math.round((todayTotalSeconds / goalTargetSeconds) * 100));
 
-  // Current session timer display
+  // Current session calculations
   const isPomodoro = timerState.mode === "pomodoro";
   const timerDisplaySeconds = isPomodoro
     ? Math.max(0, timerState.targetSeconds - timerState.elapsedSeconds)
     : timerState.elapsedSeconds;
 
-  const currentDistillationPercent = isPomodoro
-    ? Math.min(100, Math.floor((timerState.elapsedSeconds / timerState.targetSeconds) * 100))
-    : Math.min(100, Math.floor((timerState.elapsedSeconds / (pomodoroMinutes * 60)) * 100));
+  // 10-Second Grace Period Countdown
+  const secondsSinceStart = timerState.sessionStartWallTime
+    ? Math.max(0, Math.floor((Date.now() - timerState.sessionStartWallTime) / 1000))
+    : timerState.elapsedSeconds;
+  const isWithinGracePeriod = timerState.isRunning && secondsSinceStart < 10;
+  const graceSecondsRemaining = Math.max(0, 10 - secondsSinceStart);
 
-  const handleStartFocus = async () => {
+  // Pause limit (5 min / 300s)
+  const pauseSecondsLeft = Math.max(0, 300 - timerState.pauseSecondsElapsed);
+
+  // Circular ring drag handling
+  const ringRef = useRef<SVGSVGElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const updateRingFromAngle = useCallback(
+    (clientX: number, clientY: number) => {
+      if (!ringRef.current || timerState.isRunning) return;
+      const rect = ringRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+
+      // Angle from top (12 o'clock) clockwise in radians
+      let theta = Math.atan2(dy, dx) + Math.PI / 2;
+      if (theta < 0) theta += 2 * Math.PI;
+
+      // Map 0 to 2*PI to 10 to 180 minutes
+      const frac = theta / (2 * Math.PI);
+      const mins = Math.round(10 + frac * 170);
+      const clamped = Math.max(10, Math.min(180, mins));
+      setRingMinutes(clamped);
+      setTargetMinutes(clamped);
+    },
+    [timerState.isRunning, setTargetMinutes]
+  );
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (timerState.isRunning) return;
+    setIsDragging(true);
+    updateRingFromAngle(e.clientX, e.clientY);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging || timerState.isRunning) return;
+    updateRingFromAngle(e.clientX, e.clientY);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+  };
+
+  // Start focus session after post-time setup modal
+  const handleConfirmStart = async () => {
+    setSetupModalOpen(false);
     await startTimer({
-      mode: selectedMode,
+      mode: "pomodoro",
       subject: selectedSubject,
-      intentNote: intentGoal,
-      targetMinutes: pomodoroMinutes,
-      isDeepFocus,
+      sessionTitle: sessionTitle.trim(),
+      intentNote: sessionGoal.trim(),
+      targetMinutes: ringMinutes,
     });
   };
 
+  // Save new daily goal
+  const handleSaveGoal = async () => {
+    const val = customGoalInput ? parseFloat(customGoalInput) : dailyGoalHours;
+    if (val && val > 0 && user?.id) {
+      setDailyGoalHours(val);
+      try {
+        await updateProfile(user.id, {
+          daily_focus_goal_minutes: Math.round(val * 60),
+        });
+        toast.success(`Today's focus target updated to ${val} hrs!`);
+      } catch {
+        toast.error("Could not save focus target");
+      }
+    }
+    setGoalModalOpen(false);
+    setCustomGoalInput("");
+  };
+
+  // To-Do Actions
+  const [newTodoText, setNewTodoText] = useState("");
+  const handleAddTodo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTodoText.trim() || !user?.id) return;
+    try {
+      await addStudyTodo(user.id, newTodoText);
+      setNewTodoText("");
+      void qc.invalidateQueries({ queryKey: ["user_study_todos"] });
+      toast.success("Task added to today's list");
+    } catch {
+      toast.error("Failed to add task");
+    }
+  };
+
+  const handleToggleTodo = async (id: string, completed: boolean) => {
+    await toggleStudyTodo(id, completed);
+    void qc.invalidateQueries({ queryKey: ["user_study_todos"] });
+  };
+
+  const handleDeleteTodo = async (id: string) => {
+    await deleteStudyTodo(id);
+    void qc.invalidateQueries({ queryKey: ["user_study_todos"] });
+  };
+
+  // Progress for the SVG ring
+  // If running: progress through current session
+  // If idle: fraction of ring max (180 mins)
+  const ringProgress = timerState.isRunning
+    ? Math.min(1, timerState.elapsedSeconds / Math.max(1, timerState.targetSeconds))
+    : (ringMinutes - 10) / 170;
+
+  const ringRadius = 120;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const strokeDashoffset = ringCircumference * (1 - ringProgress);
+
+  // Coordinates for the drag handle on the circle
+  const handleAngle = (ringProgress * 2 * Math.PI) - Math.PI / 2;
+  const handleX = 150 + ringRadius * Math.cos(handleAngle);
+  const handleY = 150 + ringRadius * Math.sin(handleAngle);
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-4 sm:py-6 space-y-6 pb-24">
-      {/* Header Banner */}
-      <section className="relative overflow-hidden rounded-2xl border border-primary/25 bg-gradient-to-r from-card via-card to-primary/5 p-5 sm:p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-semibold text-accent">
-              <Sparkles className="h-3.5 w-3.5" /> Study Sanctuary
+    <div className="min-h-screen bg-[#165E63] dark:bg-[#082428] text-[#F7F5F0] transition-colors selection:bg-[#E5B95C] selection:text-[#082428] pb-24">
+      {/* ================= TOP NAVIGATION / SANCTUARY HEADER ================= */}
+      <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 py-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+          {/* Top-Left: Menu Hamburger, Back, Share, Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* 3-Line Hamburger Menu */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDrawerOpen(true)}
+              className="h-9 w-9 rounded-lg text-[#F7F5F0] hover:bg-[#0D4347] hover:text-[#E5B95C]"
+              aria-label="Open sanctuary menu"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+
+            {/* Back Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: "/" })}
+              className="h-8 gap-1 px-2 text-xs text-[#F7F5F0]/80 hover:bg-[#0D4347] hover:text-[#F7F5F0]"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+
+            {/* Share Today's Progress Button */}
+            {user && (
+              <ShareableStudyCardModal
+                userName={profile?.full_name || user.email || "Doctor"}
+                userHandle={profile?.handle ?? null}
+                college={profile?.college ?? null}
+                todaySeconds={todayTotalSeconds}
+                completedVials={todayCompletedVials}
+                mcqsSolvedToday={todayMCQQuery.data ?? 0}
+              />
+            )}
+
+            {/* Sanctuary Branding */}
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-[#0D4347]">
+              <img
+                src="/elixir-header-latest.webp"
+                alt="Elixir"
+                className="h-5 w-auto object-contain brightness-0 invert"
+              />
+              <span className="text-xs font-display font-medium text-[#E5B95C] tracking-wide">
+                Sanctuary
+              </span>
             </div>
-            <h1 className="mt-1 font-display text-2xl sm:text-3xl font-bold text-foreground">
-              The Elixir Library
-            </h1>
-            <p className="mt-1 text-xs sm:text-sm text-muted-foreground max-w-xl">
-              Immersive focus timers, procedural ambient soundscapes, apothecary alchemy, batchmate study groups, and IST leaderboards.
-            </p>
           </div>
 
-          {/* Share Today's Progress Button */}
-          {user && (
-            <ShareableStudyCardModal
-              userName={profile?.full_name || user.email || "Doctor"}
-              userHandle={profile?.handle ?? null}
-              college={profile?.college ?? null}
-              todaySeconds={todayTotalSeconds}
-              completedVials={todayCompletedVials}
-              mcqsSolvedToday={todayMCQQuery.data ?? 0}
-            />
-          )}
-        </div>
-      </section>
+          {/* Top-Right: Today's Goal Pill + Ambient Sound Controls */}
+          <div className="flex items-center gap-2">
+            {/* Today's Goal Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setGoalModalOpen(true)}
+              className="h-8 gap-1.5 rounded-full bg-[#0D4347]/60 hover:bg-[#0D4347] px-3 text-xs font-medium text-[#F7F5F0] border border-[#4BA09F]/30"
+              title="Click to edit today's focus goal"
+            >
+              <Target className="h-3.5 w-3.5 text-[#E5B95C]" />
+              <span>
+                {(todayTotalSeconds / 3600).toFixed(1)} / {dailyGoalHours}h
+              </span>
+            </Button>
 
-      {/* Main Feature Tabs */}
-      <Tabs defaultValue="focus" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto p-1 bg-muted/70 gap-1 rounded-xl">
-          <TabsTrigger value="focus" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <Timer className="h-3.5 w-3.5 text-primary" /> Focus
-          </TabsTrigger>
-          <TabsTrigger value="apothecary" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <FlaskConical className="h-3.5 w-3.5 text-amber-500" /> Apothecary
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <BarChart2 className="h-3.5 w-3.5 text-accent" /> Analytics
-          </TabsTrigger>
-          <TabsTrigger value="leaderboards" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <Trophy className="h-3.5 w-3.5 text-yellow-500" /> Ranks
-          </TabsTrigger>
-          <TabsTrigger value="buddies" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <Users className="h-3.5 w-3.5 text-emerald-500" /> Buddies
-          </TabsTrigger>
-          <TabsTrigger value="groups" className="text-xs py-2 gap-1.5 data-[state=active]:bg-background">
-            <Compass className="h-3.5 w-3.5 text-sky-500" /> Groups
-          </TabsTrigger>
-        </TabsList>
-
-        {/* ================= TAB 1: FOCUS SANCTUARY ================= */}
-        <TabsContent value="focus" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            {/* Left 7 Cols: Focus Timer & Controls */}
-            <div className="md:col-span-7 rounded-2xl border border-border/60 bg-card p-5 sm:p-6 shadow-sm space-y-5">
-              {/* Timer Mode Pills */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-lg border border-border/40 text-xs">
-                  <Button
-                    size="sm"
-                    variant={selectedMode === "pomodoro" ? "default" : "ghost"}
-                    disabled={timerState.isRunning}
-                    className="h-7 text-xs px-3"
-                    onClick={() => setSelectedMode("pomodoro")}
-                  >
-                    Pomodoro
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={selectedMode === "stopwatch" ? "default" : "ghost"}
-                    disabled={timerState.isRunning}
-                    className="h-7 text-xs px-3"
-                    onClick={() => setSelectedMode("stopwatch")}
-                  >
-                    Stopwatch
-                  </Button>
-                </div>
-
-                {/* Strict Deep Focus Mode Switch */}
+            {/* Headphone Ambient Audio Control */}
+            <Popover>
+              <PopoverTrigger asChild>
                 <Button
-                  size="sm"
-                  variant={isDeepFocus ? "destructive" : "outline"}
-                  disabled={timerState.isRunning}
-                  onClick={() => setIsDeepFocus(!isDeepFocus)}
-                  className="h-7 text-xs gap-1.5 border-destructive/30"
-                  title="If enabled, leaving this tab for >10s cracks your apothecary flask"
+                  variant="ghost"
+                  size="icon"
+                  className={`h-8 w-8 rounded-full border transition-all ${
+                    soundscapeEnabled
+                      ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] shadow-sm animate-pulse"
+                      : "bg-[#0D4347]/60 text-[#F7F5F0] border-[#4BA09F]/30 hover:bg-[#0D4347]"
+                  }`}
+                  aria-label={soundscapeEnabled ? "Ambient sound playing" : "Ambient sound muted"}
                 >
-                  <ShieldAlert className="h-3.5 w-3.5" />
-                  {isDeepFocus ? "Deep Focus: ON" : "Deep Focus: OFF"}
+                  {soundscapeEnabled ? (
+                    <Headphones className="h-4 w-4" />
+                  ) : (
+                    <HeadphoneOff className="h-4 w-4 opacity-70" />
+                  )}
                 </Button>
-              </div>
-
-              {/* Subject Selector & Goal Note */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs font-semibold">Medical Subject</Label>
-                  <select
-                    disabled={timerState.isRunning}
-                    value={timerState.isRunning ? timerState.subject : selectedSubject}
-                    onChange={(e) => setSelectedSubject(e.target.value)}
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  >
-                    {SUBJECT_ORDER.map((subj) => (
-                      <option key={subj} value={subj}>
-                        {subjectLabel(subj)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {selectedMode === "pomodoro" && (
-                  <div>
-                    <Label className="text-xs font-semibold">Preset Focus Time</Label>
-                    <div className="flex gap-1.5 mt-1">
-                      {[25, 50, 90].map((mins) => (
-                        <Button
-                          key={mins}
-                          size="sm"
-                          disabled={timerState.isRunning}
-                          variant={pomodoroMinutes === mins ? "default" : "outline"}
-                          className="h-8 text-xs flex-1"
-                          onClick={() => setPomodoroMinutes(mins)}
-                        >
-                          {mins}m
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Session Intent Goal Note */}
-              <div>
-                <Label className="text-xs font-semibold">Goal for this session (Optional)</Label>
-                <Input
-                  disabled={timerState.isRunning}
-                  value={timerState.isRunning ? timerState.intentNote : intentGoal}
-                  onChange={(e) => setIntentGoal(e.target.value)}
-                  placeholder="e.g. Pathology Neoplasia PYQs or 50 Surgery Deck cards..."
-                  className="mt-1 text-xs h-8"
-                  maxLength={100}
-                />
-              </div>
-
-              {/* Main Clock Face & Daily Goal Progress Ring */}
-              <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-4 border-y border-border/40">
-                {/* Clock Display */}
-                <div className="text-center">
-                  <div className="font-mono text-5xl sm:text-6xl font-bold tracking-tight text-foreground">
-                    {formatFocusDuration(timerDisplaySeconds)}
-                  </div>
-                  <div className="mt-1 flex items-center justify-center gap-1.5 text-xs text-muted-foreground font-medium">
-                    <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-                    <span>{subjectLabel(timerState.isRunning ? timerState.subject : selectedSubject)}</span>
-                    {timerState.isDeepFocus && <span className="text-destructive font-bold">• Strict</span>}
-                  </div>
-                </div>
-
-                {/* Daily Goal Circular Progress */}
-                <div className="flex items-center gap-3 bg-muted/40 p-3 rounded-xl border border-border/40">
-                  <div className="relative h-14 w-14 flex items-center justify-center">
-                    <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        className="text-muted/60"
-                        strokeWidth="3.5"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className="text-accent transition-all duration-700"
-                        strokeDasharray={`${goalProgressPercent}, 100`}
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <Target className="absolute h-5 w-5 text-accent" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-semibold text-muted-foreground">Today's Goal</span>
-                    <p className="font-mono text-sm font-bold text-foreground">
-                      {formatFocusDuration(todayTotalSeconds)} / {dailyGoalHours}h
-                    </p>
-                    <span className="text-[10px] text-accent font-semibold">{goalProgressPercent}% completed</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons: Start, Pause, Resume, Give Up, Complete */}
-              <div className="flex items-center gap-3 pt-2">
-                {!timerState.isRunning && timerState.elapsedSeconds === 0 ? (
-                  <Button
-                    onClick={handleStartFocus}
-                    size="lg"
-                    className="w-full h-11 text-sm font-semibold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                  >
-                    <Play className="h-4 w-4" /> Start Focus Session
-                  </Button>
-                ) : (
-                  <>
-                    {timerState.isRunning ? (
-                      <Button
-                        onClick={pauseTimer}
-                        variant="secondary"
-                        className="flex-1 h-11 font-semibold gap-2 text-foreground"
-                      >
-                        <Pause className="h-4 w-4" /> Pause
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={resumeTimer}
-                        className="flex-1 h-11 font-semibold gap-2 bg-primary text-primary-foreground"
-                      >
-                        <Play className="h-4 w-4" /> Resume
-                      </Button>
-                    )}
-
-                    <Button
-                      onClick={giveUpSession}
-                      variant="outline"
-                      className="h-11 px-4 text-destructive border-destructive/30 hover:bg-destructive/10 text-xs font-semibold gap-1.5"
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" /> Give Up
-                    </Button>
-
-                    <Button
-                      onClick={completeSession}
-                      className="h-11 px-4 text-xs font-semibold gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
-                    >
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Seal Vial
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Right 5 Cols: Visual Apothecary Flask & Procedural Soundscapes */}
-            <div className="md:col-span-5 space-y-5">
-              {/* Apothecary Distillation Flask Live Display */}
-              <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card to-muted/20 p-5 text-center shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Apothecary Alembic
-                  </span>
-                  <span className="font-mono text-xs font-bold text-accent">
-                    {currentDistillationPercent}% Distilled
-                  </span>
-                </div>
-
-                <div className="py-2 flex justify-center">
-                  <ApothecaryFlask
-                    fillPercent={currentDistillationPercent}
-                    durationMinutes={Math.floor(timerState.elapsedSeconds / 60)}
-                    status={timerState.isRunning ? "running" : "completed"}
-                    size={170}
-                  />
-                </div>
-
-                <p className="text-[11px] text-muted-foreground italic px-2">
-                  "Sustained focus transforms raw effort into the sealed elixir of clinical intuition."
-                </p>
-              </div>
-
-              {/* Ambient Soundscapes Panel */}
-              <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm space-y-3">
-                <div className="flex items-center justify-between">
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-72 p-4 bg-[#082428] border border-[#0D4347] text-[#F7F5F0] shadow-xl">
+                <div className="flex items-center justify-between pb-3 border-b border-[#0D4347]">
                   <div className="flex items-center gap-2">
-                    {soundscapeEnabled ? (
-                      <Volume2 className="h-4 w-4 text-accent animate-pulse" />
-                    ) : (
-                      <VolumeX className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <h4 className="font-display font-semibold text-foreground text-xs uppercase tracking-wider">
-                      Ambient Soundscapes
-                    </h4>
+                    <Headphones className="h-4 w-4 text-[#E5B95C]" />
+                    <span className="font-semibold text-xs text-[#F7F5F0]">Ambient Soundscapes</span>
                   </div>
                   <Button
                     size="sm"
                     variant={soundscapeEnabled ? "default" : "outline"}
-                    className="h-6 text-[11px] px-2.5"
-                    onClick={() => setSoundscapeEnabled(!soundscapeEnabled)}
+                    className="h-6 px-2 text-[11px] bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90"
+                    onClick={toggleSoundscape}
                   >
-                    {soundscapeEnabled ? "Playing" : "Sound: Off"}
+                    {soundscapeEnabled ? "Playing" : "Muted"}
                   </Button>
                 </div>
 
-                {/* Soundscape Presets */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  {SOUNDSCAPES.map((sound) => (
-                    <Button
-                      key={sound.id}
-                      size="sm"
-                      variant={activeSoundscape === sound.id ? "default" : "secondary"}
-                      className="h-8 text-xs justify-start px-2.5 truncate"
-                      onClick={() => {
-                        setActiveSoundscape(sound.id);
-                        if (!soundscapeEnabled) setSoundscapeEnabled(true);
-                      }}
-                    >
-                      {sound.label}
-                    </Button>
-                  ))}
+                {/* Track Selector (8 Looping Tracks) */}
+                <div className="mt-3 space-y-1.5">
+                  <Label className="text-[11px] text-[#F7F5F0]/70 uppercase tracking-wider font-semibold">
+                    Looping Soundscape
+                  </Label>
+                  <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1">
+                    {SOUNDSCAPES.map((sc) => (
+                      <button
+                        key={sc.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveSoundscape(sc.id);
+                          if (!soundscapeEnabled) setSoundscapeEnabled(true);
+                        }}
+                        className={`flex items-center gap-1.5 rounded-md p-1.5 text-left text-xs transition-colors ${
+                          activeSoundscape === sc.id
+                            ? "bg-[#E5B95C]/20 text-[#E5B95C] font-semibold border border-[#E5B95C]/40"
+                            : "bg-[#0D4347]/40 text-[#F7F5F0]/80 hover:bg-[#0D4347]"
+                        }`}
+                      >
+                        <span className="text-sm">{getSoundscapeEmoji(sc.id)}</span>
+                        <span className="truncate">{sc.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Volume Slider */}
-                {soundscapeEnabled && (
-                  <div className="pt-2 flex items-center gap-3">
-                    <span className="text-[10px] uppercase font-semibold text-muted-foreground">Volume</span>
-                    <Slider
-                      value={[soundVolume]}
-                      max={1}
-                      step={0.05}
-                      onValueChange={handleVolumeChange}
-                      className="flex-1"
-                    />
-                    <span className="font-mono text-[10px] text-muted-foreground w-6 text-right">
-                      {Math.round(soundVolume * 100)}%
+                <div className="mt-4 space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] text-[#F7F5F0]/70">
+                    <span className="flex items-center gap-1">
+                      <Volume2 className="h-3 w-3" /> Volume
                     </span>
+                    <span>{Math.round(soundVolume * 100)}%</span>
                   </div>
-                )}
+                  <Slider
+                    value={[soundVolume]}
+                    onValueChange={handleVolumeChange}
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    className="py-1"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      </header>
+
+      {/* ================= DASHBOARD DRAWER (SLIDE-OUT MENU) ================= */}
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <SheetContent side="left" className="w-80 sm:w-96 bg-[#082428] border-r border-[#0D4347] text-[#F7F5F0] p-6">
+          <SheetHeader className="text-left pb-4 border-b border-[#0D4347]">
+            <SheetTitle className="text-[#E5B95C] font-display text-xl flex items-center gap-2">
+              <Sparkles className="h-5 w-5" /> Sanctuary Dashboard
+            </SheetTitle>
+            <p className="text-xs text-[#F7F5F0]/70">
+              Navigate your study spaces, alchemy rack, and peer circles.
+            </p>
+          </SheetHeader>
+
+          {/* Navigation Grid with Large Icons & Titles Below */}
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {[
+              { id: "focus", label: "Focus Timer", icon: Timer, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "apothecary", label: "Apothecary", icon: FlaskConical, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+              { id: "analytics", label: "Analytics", icon: BarChart2, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
+              { id: "leaderboards", label: "Ranks", icon: Trophy, color: "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30" },
+              { id: "buddies", label: "Study Buddies", icon: Users, color: "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30" },
+              { id: "groups", label: "Study Groups", icon: Compass, color: "text-[#A855F7] bg-[#A855F7]/10 border-[#A855F7]/30" },
+              { id: "todos", label: "To-Do List", icon: ListTodo, color: "text-[#F43F5E] bg-[#F43F5E]/10 border-[#F43F5E]/30" },
+              { id: "soundscapes", label: "Soundscapes", icon: Headphones, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveSection(item.id as LibrarySection);
+                    setDrawerOpen(false);
+                  }}
+                  className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all text-center ${
+                    isActive
+                      ? "bg-[#0D4347] border-[#E5B95C] text-[#E5B95C] shadow-md ring-1 ring-[#E5B95C]"
+                      : "bg-[#0D4347]/40 border-[#0D4347] hover:bg-[#0D4347]/80 text-[#F7F5F0]"
+                  }`}
+                >
+                  <div className={`p-3 rounded-full border mb-2 ${item.color}`}>
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <span className="text-xs font-semibold tracking-wide">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* ================= MAIN CONTENT VIEWPORT ================= */}
+      <main className="mx-auto max-w-5xl px-4 py-6">
+        {activeSection === "focus" && (
+          <div className="space-y-8 flex flex-col items-center">
+            {/* Sanctuary Circular Ring & Alembic */}
+            <div className="relative flex flex-col items-center justify-center">
+              {/* Circular Draggable Ring SVG */}
+              <div
+                className="relative select-none touch-none cursor-pointer"
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+              >
+                <svg
+                  ref={ringRef}
+                  width="300"
+                  height="300"
+                  viewBox="0 0 300 300"
+                  className="overflow-visible drop-shadow-2xl"
+                >
+                  <defs>
+                    {/* Ring active gradient */}
+                    <linearGradient id="sanctuaryRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#4BA09F" />
+                      <stop offset="100%" stopColor="#E5B95C" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Inner ring backdrop: Warm paper `#F4F1EA` in light mode / dark slate-teal `#0F353A` in dark */}
+                  <circle
+                    cx="150"
+                    cy="150"
+                    r={ringRadius - 8}
+                    className="fill-[#F4F1EA] dark:fill-[#0F353A] transition-colors shadow-inner"
+                  />
+
+                  {/* Muted teal ring track `#0D4347` */}
+                  <circle
+                    cx="150"
+                    cy="150"
+                    r={ringRadius}
+                    stroke="#0D4347"
+                    strokeWidth="12"
+                    fill="none"
+                  />
+
+                  {/* Active Arc (Teal-to-gold `#4BA09F` / `#E5B95C`) */}
+                  <circle
+                    cx="150"
+                    cy="150"
+                    r={ringRadius}
+                    stroke="url(#sanctuaryRingGrad)"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    fill="none"
+                    strokeDasharray={ringCircumference}
+                    strokeDashoffset={strokeDashoffset}
+                    transform="rotate(-90 150 150)"
+                    className="transition-all duration-300"
+                  />
+
+                  {/* Draggable Knob (only shown when not running) */}
+                  {!timerState.isRunning && (
+                    <g transform={`translate(${handleX}, ${handleY})`}>
+                      <circle
+                        r="14"
+                        fill="#E5B95C"
+                        stroke="#082428"
+                        strokeWidth="3"
+                        className="shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
+                      />
+                      <circle r="4" fill="#082428" />
+                    </g>
+                  )}
+                </svg>
+
+                {/* Apothecary Alembic Distilling Inside Center of the Ring */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <ApothecaryFlask
+                    fillPercent={timerState.isRunning ? (timerState.elapsedSeconds / timerState.targetSeconds) * 100 : goalProgressPercent}
+                    durationMinutes={ringMinutes}
+                    status={timerState.isRunning ? "running" : "completed"}
+                    size={110}
+                    showLabels={false}
+                    showGlow={timerState.isRunning}
+                  />
+
+                  {/* Timer Display Under Alembic */}
+                  <div className="mt-1 text-center">
+                    <p className="font-mono text-2xl font-bold tracking-tight text-[#082428] dark:text-[#F1FBFD]">
+                      {timerState.isRunning
+                        ? formatFocusDuration(timerDisplaySeconds)
+                        : `${ringMinutes}m Focus`}
+                    </p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-[#082428]/70 dark:text-[#F1FBFD]/70 truncate max-w-[130px]">
+                      {timerState.isRunning
+                        ? subjectLabel(timerState.subject)
+                        : `Goal: ${goalProgressPercent}% done`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Presets (15, 25, 45, 60, 90) */}
+              {!timerState.isRunning && (
+                <div className="flex gap-2 mt-4">
+                  {[15, 25, 45, 60, 90].map((m) => (
+                    <Button
+                      key={m}
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setRingMinutes(m);
+                        setTargetMinutes(m);
+                      }}
+                      className={`h-7 px-2.5 text-xs rounded-full border ${
+                        ringMinutes === m
+                          ? "bg-[#E5B95C] text-[#082428] font-bold border-[#E5B95C]"
+                          : "bg-[#0D4347]/50 text-[#F7F5F0] border-[#4BA09F]/20 hover:bg-[#0D4347]"
+                      }`}
+                    >
+                      {m}m
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Active Session Action Controls */}
+            <div className="w-full max-w-md space-y-4">
+              {!timerState.isRunning && !timerState.isPaused ? (
+                /* Idle State: Start Session Button */
+                <Button
+                  onClick={() => setSetupModalOpen(true)}
+                  className="w-full h-12 text-base font-bold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-xl rounded-xl gap-2 transition-transform active:scale-98"
+                >
+                  <Play className="h-5 w-5 fill-current" />
+                  Start {ringMinutes}-Min Focus Session
+                </Button>
+              ) : isWithinGracePeriod ? (
+                /* 10-Second Grace Period: Clean Cancel */
+                <div className="space-y-2 rounded-xl bg-[#0D4347]/60 border border-[#4BA09F]/40 p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 text-xs font-semibold text-[#E5B95C]">
+                    <Sparkles className="h-4 w-4 animate-spin" />
+                    <span>Grace Period Active ({graceSecondsRemaining}s)</span>
+                  </div>
+                  <p className="text-xs text-[#F7F5F0]/80">
+                    Cancel cleanly without cracking your flask or recording an abandonment.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={cancelGracefully}
+                    className="w-full h-9 text-xs border-[#E5B95C] text-[#E5B95C] hover:bg-[#E5B95C]/20"
+                  >
+                    Cancel ({graceSecondsRemaining}s)
+                  </Button>
+                </div>
+              ) : (
+                /* Active / Paused State: Pause & Give Up Only */
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    {timerState.isPaused ? (
+                      <Button
+                        onClick={resumeTimer}
+                        className="flex-1 h-11 text-sm font-semibold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 rounded-xl gap-2"
+                      >
+                        <Play className="h-4 w-4 fill-current" />
+                        Resume Focus ({Math.floor(pauseSecondsLeft / 60)}:{(pauseSecondsLeft % 60).toString().padStart(2, "0")} left)
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={pauseTimer}
+                        className="flex-1 h-11 text-sm font-semibold bg-[#0D4347] text-[#F7F5F0] hover:bg-[#0D4347]/80 border border-[#4BA09F]/30 rounded-xl gap-2"
+                      >
+                        <Pause className="h-4 w-4" /> Pause (5m max)
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        if (window.confirm("Give up now? Your apothecary flask will crack.")) {
+                          void giveUpSession();
+                        }
+                      }}
+                      className="h-11 px-4 text-xs rounded-xl gap-1.5"
+                    >
+                      <AlertTriangle className="h-4 w-4" /> Give Up
+                    </Button>
+                  </div>
+
+                  {timerState.isPaused && (
+                    <p className="text-center text-[11px] text-[#F7F5F0]/70 italic">
+                      Pause is capped at 5 minutes to keep you accountable.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Session Intent / Title Display */}
+              {timerState.isRunning && (
+                <div className="rounded-xl bg-[#0D4347]/40 border border-[#0D4347] p-3 text-center text-xs">
+                  <p className="font-semibold text-[#E5B95C]">
+                    {subjectLabel(timerState.subject)}
+                    {timerState.sessionTitle ? ` • ${timerState.sessionTitle}` : ""}
+                  </p>
+                  {timerState.intentNote && (
+                    <p className="text-[#F7F5F0]/80 italic mt-0.5">"{timerState.intentNote}"</p>
+                  )}
+                </div>
+              )}
+
+              {/* Compact Daily To-Do Section Below Timer */}
+              <div className="rounded-2xl border border-[#0D4347] bg-[#082428]/60 p-4 space-y-3">
+                <div className="flex items-center justify-between border-b border-[#0D4347] pb-2">
+                  <h4 className="font-semibold text-xs text-[#F7F5F0] flex items-center gap-1.5">
+                    <ListTodo className="h-4 w-4 text-[#E5B95C]" /> Today's Study Tasks
+                  </h4>
+                  <span className="text-[10px] text-[#F7F5F0]/60">
+                    {todos.filter((t) => t.completed).length} / {todos.length} done
+                  </span>
+                </div>
+
+                {/* Add task input */}
+                <form onSubmit={handleAddTodo} className="flex gap-2">
+                  <Input
+                    value={newTodoText}
+                    onChange={(e) => setNewTodoText(e.target.value)}
+                    placeholder="Add task (e.g. Revise General Pathology PYQs)..."
+                    className="h-8 text-xs bg-[#0D4347]/40 border-[#0D4347] text-[#F7F5F0] placeholder:text-[#F7F5F0]/40"
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={!newTodoText.trim()}
+                    className="h-8 px-2.5 bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                </form>
+
+                {/* List items */}
+                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                  {todos.length === 0 ? (
+                    <p className="py-3 text-center text-[11px] text-[#F7F5F0]/50 italic">
+                      No tasks yet. Set goals to guide your study sessions.
+                    </p>
+                  ) : (
+                    todos.map((todo) => (
+                      <div
+                        key={todo.id}
+                        className="flex items-center justify-between gap-2 rounded-lg bg-[#0D4347]/30 p-2 text-xs hover:bg-[#0D4347]/50 transition-colors"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                          className="flex items-center gap-2 text-left min-w-0 flex-1"
+                        >
+                          {todo.completed ? (
+                            <CheckCircle2 className="h-4 w-4 text-[#10B981] shrink-0" />
+                          ) : (
+                            <Circle className="h-4 w-4 text-[#F7F5F0]/40 shrink-0" />
+                          )}
+                          <span
+                            className={`truncate ${
+                              todo.completed
+                                ? "line-through text-[#F7F5F0]/50"
+                                : "text-[#F7F5F0]"
+                            }`}
+                          >
+                            {todo.task}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTodo(todo.id)}
+                          className="text-[#F7F5F0]/40 hover:text-red-400 p-1"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </TabsContent>
+        )}
 
-        {/* ================= TAB 2: APOTHECARY RACK ================= */}
-        <TabsContent value="apothecary">
-          <ApothecaryRack sessions={sessions} />
-        </TabsContent>
+        {/* ================= SECTION 2: APOTHECARY RACK ================= */}
+        {activeSection === "apothecary" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">The Apothecary Rack</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Your focus sessions distilled into sealed elixir vials and cracked artifacts.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+            <ApothecaryRack sessions={sessions} />
+          </div>
+        )}
 
-        {/* ================= TAB 3: ANALYTICS & TIMELINE ================= */}
-        <TabsContent value="analytics">
-          <StudyAnalyticsTimeline sessions={sessions} />
-        </TabsContent>
+        {/* ================= SECTION 3: ANALYTICS ================= */}
+        {activeSection === "analytics" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#38BDF8]">Focus Analytics</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  24-hour study timeline (IST) and subject-wise distillation charts.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+            <StudyAnalyticsTimeline sessions={sessions} />
+          </div>
+        )}
 
-        {/* ================= TAB 4: LEADERBOARDS ================= */}
-        <TabsContent value="leaderboards">
-          {user && <LibraryLeaderboards currentUserId={user.id} currentUserProfile={profile} />}
-        </TabsContent>
+        {/* ================= SECTION 4: LEADERBOARDS ================= */}
+        {activeSection === "leaderboards" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#F59E0B]">Study Leaderboards</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Daily and weekly rankings resetting at midnight IST.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+            <LibraryLeaderboards currentUserId={user?.id ?? ""} currentUserProfile={profile} />
+          </div>
+        )}
 
-        {/* ================= TAB 5: STUDY BUDDIES ================= */}
-        <TabsContent value="buddies">
-          {user && <StudyBuddiesTab currentUserId={user.id} profile={profile} />}
-        </TabsContent>
+        {/* ================= SECTION 5: STUDY BUDDIES ================= */}
+        {activeSection === "buddies" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#10B981]">Study Buddies</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Connect with batchmates, track live presence, and send silent cheers.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+            <StudyBuddiesTab currentUserId={user?.id ?? ""} profile={profile} />
+          </div>
+        )}
 
-        {/* ================= TAB 6: STUDY GROUPS ================= */}
-        <TabsContent value="groups">
-          {user && <StudyGroupsTab currentUserId={user.id} />}
-        </TabsContent>
-      </Tabs>
+        {/* ================= SECTION 6: STUDY GROUPS ================= */}
+        {activeSection === "groups" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#A855F7]">Study Groups</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Shared group distillations, live member presence, and ephemeral chat.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+            <StudyGroupsTab currentUserId={user?.id ?? ""} />
+          </div>
+        )}
+
+        {/* ================= SECTION 7: FULL TO-DO LIST ================= */}
+        {activeSection === "todos" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#F43F5E]">Personal Study Tasks</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Daily checklist of Q-bank decks, PYQs, and medical revision topics.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+
+            <div className="rounded-2xl border border-[#0D4347] bg-[#082428] p-5 space-y-4">
+              <form onSubmit={handleAddTodo} className="flex gap-2">
+                <Input
+                  value={newTodoText}
+                  onChange={(e) => setNewTodoText(e.target.value)}
+                  placeholder="What will you conquer today? (e.g. 100 Surgery PYQs)..."
+                  className="h-10 text-xs bg-[#0D4347]/40 border-[#0D4347] text-[#F7F5F0]"
+                />
+                <Button
+                  type="submit"
+                  disabled={!newTodoText.trim()}
+                  className="h-10 px-4 bg-[#E5B95C] text-[#082428] font-semibold hover:bg-[#E5B95C]/90"
+                >
+                  Add Task
+                </Button>
+              </form>
+
+              <div className="divide-y divide-[#0D4347]">
+                {todos.map((todo) => (
+                  <div
+                    key={todo.id}
+                    className="flex items-center justify-between gap-3 py-3 text-xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                      className="flex items-center gap-3 text-left flex-1"
+                    >
+                      {todo.completed ? (
+                        <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-[#F7F5F0]/40 shrink-0" />
+                      )}
+                      <span
+                        className={`text-sm ${
+                          todo.completed
+                            ? "line-through text-[#F7F5F0]/50"
+                            : "text-[#F7F5F0] font-medium"
+                        }`}
+                      >
+                        {todo.task}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTodo(todo.id)}
+                      className="text-[#F7F5F0]/40 hover:text-red-400 p-1.5"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= SECTION 8: SOUNDSCAPES GALLERY ================= */}
+        {activeSection === "soundscapes" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
+              <div>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Looping Soundscapes</h3>
+                <p className="text-xs text-[#F7F5F0]/70">
+                  Continuous, infinite loop audio for immersion while studying.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setActiveSection("focus")}
+                className="h-8 text-xs border-[#4BA09F]/40 text-[#F7F5F0] hover:bg-[#0D4347]"
+              >
+                Back to Timer
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {SOUNDSCAPES.map((sc) => {
+                const isSelected = activeSoundscape === sc.id && soundscapeEnabled;
+                return (
+                  <button
+                    key={sc.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveSoundscape(sc.id);
+                      setSoundscapeEnabled(true);
+                      toast.success(`Playing ${sc.label} (looping)`);
+                    }}
+                    className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all text-center ${
+                      isSelected
+                        ? "bg-[#0D4347] border-[#E5B95C] text-[#E5B95C] ring-2 ring-[#E5B95C] shadow-lg"
+                        : "bg-[#082428] border-[#0D4347] hover:bg-[#0D4347]/50 text-[#F7F5F0]"
+                    }`}
+                  >
+                    <span className="text-4xl mb-3">{getSoundscapeEmoji(sc.id)}</span>
+                    <h4 className="font-semibold text-sm">{sc.label}</h4>
+                    <p className="text-[11px] text-[#F7F5F0]/60 mt-1">{sc.description}</p>
+                    <span className="mt-3 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-[#0D4347]/80 text-[#E5B95C]">
+                      {isSelected ? "Now Playing" : "Tap to Play"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* ================= MODAL: POST-TIME SETUP FLOW ================= */}
+      <Dialog open={setupModalOpen} onOpenChange={setSetupModalOpen}>
+        <DialogContent className="max-w-md bg-[#082428] border border-[#0D4347] text-[#F7F5F0] p-6 shadow-2xl">
+          <DialogHeader className="text-left pb-3 border-b border-[#0D4347]">
+            <DialogTitle className="text-[#E5B95C] font-display text-lg flex items-center gap-2">
+              <FlaskConical className="h-5 w-5" /> Setup {ringMinutes}-Min Focus Session
+            </DialogTitle>
+            <p className="text-xs text-[#F7F5F0]/70">
+              Set your subject and session intent before starting distillation.
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-xs font-semibold text-[#F7F5F0]">Medical Subject (19 Subjects)</Label>
+              <select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#0D4347] bg-[#0D4347]/60 px-3 py-2 text-xs font-medium text-[#F7F5F0] focus:outline-none focus:ring-2 focus:ring-[#E5B95C]"
+              >
+                {SUBJECT_ORDER.map((subj) => (
+                  <option key={subj} value={subj} className="bg-[#082428] text-[#F7F5F0]">
+                    {subjectLabel(subj)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[#F7F5F0]">Session Title (Optional)</Label>
+              <Input
+                value={sessionTitle}
+                onChange={(e) => setSessionTitle(e.target.value)}
+                placeholder="e.g. Neoplasia Revision or 50 PYQs"
+                className="mt-1 h-9 text-xs bg-[#0D4347]/60 border-[#0D4347] text-[#F7F5F0] placeholder:text-[#F7F5F0]/40"
+                maxLength={60}
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[#F7F5F0]">Session Goal Note (Optional)</Label>
+              <Input
+                value={sessionGoal}
+                onChange={(e) => setSessionGoal(e.target.value)}
+                placeholder="e.g. Master staging & Robbins micro images"
+                className="mt-1 h-9 text-xs bg-[#0D4347]/60 border-[#0D4347] text-[#F7F5F0] placeholder:text-[#F7F5F0]/40"
+                maxLength={100}
+              />
+            </div>
+
+            <Button
+              onClick={handleConfirmStart}
+              className="w-full mt-3 h-11 text-sm font-bold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 rounded-xl shadow-lg gap-2"
+            >
+              <Play className="h-4 w-4 fill-current" />
+              Begin Distillation ({ringMinutes}m)
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ================= MODAL: EDIT TODAY'S FOCUS GOAL ================= */}
+      <Dialog open={goalModalOpen} onOpenChange={setGoalModalOpen}>
+        <DialogContent className="max-w-sm bg-[#082428] border border-[#0D4347] text-[#F7F5F0] p-6 shadow-2xl">
+          <DialogHeader className="text-left pb-3 border-b border-[#0D4347]">
+            <DialogTitle className="text-[#E5B95C] font-display text-lg flex items-center gap-2">
+              <Target className="h-5 w-5" /> Today's Focus Target
+            </DialogTitle>
+            <p className="text-xs text-[#F7F5F0]/70">
+              Set your daily focus goal in hours to track progress.
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-xs font-semibold text-[#F7F5F0]">Select Daily Goal (Hours)</Label>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {[2, 4, 6, 8].map((h) => (
+                  <Button
+                    key={h}
+                    type="button"
+                    variant={!customGoalInput && dailyGoalHours === h ? "default" : "outline"}
+                    className={`h-9 text-xs rounded-lg ${
+                      !customGoalInput && dailyGoalHours === h
+                        ? "bg-[#E5B95C] text-[#082428] font-bold"
+                        : "border-[#0D4347] text-[#F7F5F0] hover:bg-[#0D4347]"
+                    }`}
+                    onClick={() => {
+                      setDailyGoalHours(h);
+                      setCustomGoalInput("");
+                    }}
+                  >
+                    {h}h
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs font-semibold text-[#F7F5F0]">Or Enter Custom Target</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  type="number"
+                  step="0.5"
+                  min="0.5"
+                  max="24"
+                  value={customGoalInput}
+                  onChange={(e) => setCustomGoalInput(e.target.value)}
+                  placeholder="e.g. 5.5"
+                  className="h-9 text-xs bg-[#0D4347]/60 border-[#0D4347] text-[#F7F5F0]"
+                />
+                <span className="text-xs text-[#F7F5F0]/70">hours</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleSaveGoal}
+              className="w-full mt-2 bg-[#E5B95C] text-[#082428] font-bold hover:bg-[#E5B95C]/90"
+            >
+              Save Focus Target
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

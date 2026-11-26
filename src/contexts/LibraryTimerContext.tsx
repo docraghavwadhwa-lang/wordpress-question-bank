@@ -8,16 +8,20 @@ export type TimerMode = "stopwatch" | "pomodoro";
 
 export interface LibraryTimerState {
   isRunning: boolean;
+  isPaused: boolean;
   mode: TimerMode;
   subject: string;
   intentNote: string;
+  sessionTitle: string;
   elapsedSeconds: number;
   targetSeconds: number; // For pomodoro
   breakSeconds: number;
   isBreak: boolean;
-  isDeepFocus: boolean;
   sessionId: string | null;
-  startedAtTimestamp: number | null;
+  startedAtTimestamp: number | null; // Wall-clock timestamp when current run segment started
+  sessionStartWallTime: number | null; // Wall-clock timestamp when total session began
+  pausedAtTimestamp: number | null;
+  pauseSecondsElapsed: number; // Capped at 300s (5m)
 }
 
 interface LibraryTimerContextValue {
@@ -26,31 +30,38 @@ interface LibraryTimerContextValue {
     mode: TimerMode;
     subject: string;
     intentNote?: string;
+    sessionTitle?: string;
     targetMinutes?: number;
     breakMinutes?: number;
-    isDeepFocus: boolean;
   }) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
+  cancelGracefully: () => Promise<void>;
   giveUpSession: () => Promise<void>;
   completeSession: () => Promise<void>;
   setSubject: (s: string) => void;
+  setTargetMinutes: (minutes: number) => void;
 }
 
-const STORAGE_KEY = "elixir_library_timer_state_v1";
+const STORAGE_KEY = "elixir_library_timer_state_v2";
+const MAX_PAUSE_SECONDS = 300; // 5 minutes max pause
 
 const defaultState: LibraryTimerState = {
   isRunning: false,
+  isPaused: false,
   mode: "pomodoro",
   subject: SUBJECT_ORDER[0],
   intentNote: "",
+  sessionTitle: "",
   elapsedSeconds: 0,
   targetSeconds: 25 * 60,
   breakSeconds: 5 * 60,
   isBreak: false,
-  isDeepFocus: false,
   sessionId: null,
   startedAtTimestamp: null,
+  sessionStartWallTime: null,
+  pausedAtTimestamp: null,
+  pauseSecondsElapsed: 0,
 };
 
 const LibraryTimerContext = createContext<LibraryTimerContextValue | null>(null);
@@ -62,20 +73,43 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved);
+        const parsed: LibraryTimerState = JSON.parse(saved);
+        const now = Date.now();
+        // If it was running in background, recalculate elapsed from wall clock
         if (parsed.isRunning && parsed.startedAtTimestamp) {
-          const now = Date.now();
           const additionalSec = Math.max(0, Math.floor((now - parsed.startedAtTimestamp) / 1000));
+          const updatedElapsed = parsed.elapsedSeconds + additionalSec;
           return {
             ...parsed,
-            elapsedSeconds: parsed.elapsedSeconds + additionalSec,
+            elapsedSeconds: updatedElapsed,
             startedAtTimestamp: now,
+          };
+        }
+        // If it was paused, calculate how long it was paused
+        if (parsed.isPaused && parsed.pausedAtTimestamp) {
+          const pauseInc = Math.max(0, Math.floor((now - parsed.pausedAtTimestamp) / 1000));
+          const totalPause = parsed.pauseSecondsElapsed + pauseInc;
+          if (totalPause >= MAX_PAUSE_SECONDS) {
+            // Auto resume if pause limit exceeded
+            return {
+              ...parsed,
+              isPaused: false,
+              isRunning: true,
+              pauseSecondsElapsed: 0,
+              startedAtTimestamp: now,
+              pausedAtTimestamp: null,
+            };
+          }
+          return {
+            ...parsed,
+            pauseSecondsElapsed: totalPause,
+            pausedAtTimestamp: now,
           };
         }
         return parsed;
       }
     } catch {
-      /* ignore storage parsing error */
+      /* ignore parse errors */
     }
     return defaultState;
   });
@@ -83,7 +117,7 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // Persist state to localStorage
+  // Persist state to localStorage on every change
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -92,14 +126,16 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  // Main ticking interval
+  // Main ticking timer (updates every 1s and re-syncs with wall clock timestamp)
   useEffect(() => {
     if (!state.isRunning) return;
 
     const interval = window.setInterval(() => {
       setState((prev) => {
-        if (!prev.isRunning) return prev;
-        const nextElapsed = prev.elapsedSeconds + 1;
+        if (!prev.isRunning || !prev.startedAtTimestamp) return prev;
+        const now = Date.now();
+        const deltaSec = Math.max(1, Math.floor((now - prev.startedAtTimestamp) / 1000));
+        const nextElapsed = prev.elapsedSeconds + deltaSec;
 
         // Auto-complete Pomodoro focus period
         if (prev.mode === "pomodoro" && !prev.isBreak && nextElapsed >= prev.targetSeconds) {
@@ -107,14 +143,16 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
           return {
             ...prev,
             isRunning: false,
+            isPaused: false,
             elapsedSeconds: prev.targetSeconds,
+            startedAtTimestamp: null,
           };
         }
 
         return {
           ...prev,
           elapsedSeconds: nextElapsed,
-          startedAtTimestamp: Date.now(),
+          startedAtTimestamp: now,
         };
       });
     }, 1000);
@@ -122,67 +160,52 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [state.isRunning, state.mode, state.isBreak, state.targetSeconds]);
 
-  // Deep Focus visibility listener
+  // Pause limit interval (caps pause at 5 minutes)
   useEffect(() => {
-    if (!state.isRunning || !state.isDeepFocus) return;
+    if (!state.isPaused) return;
 
-    let hiddenTimeout: number | null = null;
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        // Tab hidden: Start 10-second grace countdown
-        hiddenTimeout = window.setTimeout(() => {
-          if (stateRef.current.isRunning && stateRef.current.isDeepFocus) {
-            toast.error("Deep Focus broken! Tab was left for >10s. Your Apothecary vial has cracked.", { duration: 6000 });
-            void handleDeepFocusBroken(stateRef.current);
-          }
-        }, 10000);
-      } else {
-        // Tab restored: Cancel countdown
-        if (hiddenTimeout) {
-          clearTimeout(hiddenTimeout);
-          hiddenTimeout = null;
+    const pauseInterval = window.setInterval(() => {
+      setState((prev) => {
+        if (!prev.isPaused) return prev;
+        const nextPause = prev.pauseSecondsElapsed + 1;
+        if (nextPause >= MAX_PAUSE_SECONDS) {
+          toast.warning("Pause limit (5 minutes) reached. Resuming your study timer!");
+          return {
+            ...prev,
+            isPaused: false,
+            isRunning: true,
+            pauseSecondsElapsed: 0,
+            startedAtTimestamp: Date.now(),
+            pausedAtTimestamp: null,
+          };
         }
-      }
-    };
+        return {
+          ...prev,
+          pauseSecondsElapsed: nextPause,
+        };
+      });
+    }, 1000);
 
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
-      if (hiddenTimeout) clearTimeout(hiddenTimeout);
-    };
-  }, [state.isRunning, state.isDeepFocus]);
+    return () => clearInterval(pauseInterval);
+  }, [state.isPaused]);
 
   async function handleAutoComplete(curr: LibraryTimerState) {
     if (curr.sessionId) {
       try {
-        await completeStudySession(curr.sessionId, curr.elapsedSeconds);
-        toast.success(`Pomodoro completed! Sealed ${curr.subject} vial added to your Apothecary.`);
+        await completeStudySession(curr.sessionId, curr.targetSeconds);
+        toast.success(`Pomodoro completed! Sealed ${subjectLabel(curr.subject)} flask added to your Apothecary.`);
       } catch (err) {
         console.error("Failed to complete session in database:", err);
       }
     }
   }
 
-  async function handleDeepFocusBroken(curr: LibraryTimerState) {
-    if (curr.sessionId) {
-      try {
-        await abandonStudySession(curr.sessionId, curr.elapsedSeconds);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    setState((prev) => ({
-      ...prev,
-      isRunning: false,
-      sessionId: null,
-    }));
-  }
-
   const startTimer: LibraryTimerContextValue["startTimer"] = async (config) => {
     let createdId: string | null = null;
     const targetSec = (config.targetMinutes ?? 25) * 60;
     const breakSec = (config.breakMinutes ?? 5) * 60;
+
+    const now = Date.now();
 
     if (user?.id) {
       try {
@@ -192,7 +215,7 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
           mode: config.mode,
           intentNote: config.intentNote,
           targetSeconds: config.mode === "pomodoro" ? targetSec : undefined,
-          isDeepFocus: config.isDeepFocus,
+          isDeepFocus: false,
         });
       } catch (err) {
         console.error("Could not record session start in DB:", err);
@@ -201,31 +224,67 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
 
     setState({
       isRunning: true,
+      isPaused: false,
       mode: config.mode,
       subject: config.subject,
       intentNote: config.intentNote || "",
+      sessionTitle: config.sessionTitle || "",
       elapsedSeconds: 0,
       targetSeconds: targetSec,
       breakSeconds: breakSec,
       isBreak: false,
-      isDeepFocus: config.isDeepFocus,
       sessionId: createdId,
-      startedAtTimestamp: Date.now(),
+      startedAtTimestamp: now,
+      sessionStartWallTime: now,
+      pausedAtTimestamp: null,
+      pauseSecondsElapsed: 0,
     });
 
     toast.info(`Focus session started: ${subjectLabel(config.subject)}`);
   };
 
   const pauseTimer = () => {
-    setState((prev) => ({ ...prev, isRunning: false }));
+    setState((prev) => ({
+      ...prev,
+      isRunning: false,
+      isPaused: true,
+      pausedAtTimestamp: Date.now(),
+    }));
   };
 
   const resumeTimer = () => {
     setState((prev) => ({
       ...prev,
       isRunning: true,
+      isPaused: false,
       startedAtTimestamp: Date.now(),
+      pausedAtTimestamp: null,
     }));
+  };
+
+  // 10-Second Grace Period Cancel: Does not crack the vial
+  const cancelGracefully = async () => {
+    const curr = stateRef.current;
+    if (curr.sessionId) {
+      try {
+        // Abandon with 0 elapsed so it doesn't count or mark as cracked
+        await abandonStudySession(curr.sessionId, 0);
+      } catch (e) {
+        console.error("Could not cancel session:", e);
+      }
+    }
+    setState((prev) => ({
+      ...prev,
+      isRunning: false,
+      isPaused: false,
+      sessionId: null,
+      elapsedSeconds: 0,
+      sessionStartWallTime: null,
+      startedAtTimestamp: null,
+      pausedAtTimestamp: null,
+      pauseSecondsElapsed: 0,
+    }));
+    toast.info("Session cancelled cleanly (within 10-second grace period).");
   };
 
   const giveUpSession = async () => {
@@ -241,8 +300,13 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       ...prev,
       isRunning: false,
+      isPaused: false,
       sessionId: null,
       elapsedSeconds: 0,
+      sessionStartWallTime: null,
+      startedAtTimestamp: null,
+      pausedAtTimestamp: null,
+      pauseSecondsElapsed: 0,
     }));
   };
 
@@ -259,13 +323,26 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({
       ...prev,
       isRunning: false,
+      isPaused: false,
       sessionId: null,
       elapsedSeconds: 0,
+      sessionStartWallTime: null,
+      startedAtTimestamp: null,
+      pausedAtTimestamp: null,
+      pauseSecondsElapsed: 0,
     }));
   };
 
   const setSubject = (subject: string) => {
     setState((prev) => ({ ...prev, subject }));
+  };
+
+  const setTargetMinutes = (minutes: number) => {
+    const clamped = Math.max(10, Math.min(180, minutes));
+    setState((prev) => ({
+      ...prev,
+      targetSeconds: clamped * 60,
+    }));
   };
 
   return (
@@ -275,9 +352,11 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
         startTimer,
         pauseTimer,
         resumeTimer,
+        cancelGracefully,
         giveUpSession,
         completeSession,
         setSubject,
+        setTargetMinutes,
       }}
     >
       {children}

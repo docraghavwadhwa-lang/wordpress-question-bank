@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchUserBuddies,
@@ -54,13 +54,30 @@ export function StudyBuddiesTab({ currentUserId, profile }: StudyBuddiesTabProps
   const [handle, setHandle] = useState(profile?.handle || "");
   const [mood, setMood] = useState(profile?.todays_mood || "");
   const [dreamSpec, setDreamSpec] = useState(profile?.dream_specialisation || "");
-  const [goalMin, setGoalMin] = useState(profile?.daily_focus_goal_minutes || 240);
+  const [goalHours, setGoalHours] = useState<number>((profile?.daily_focus_goal_minutes || 240) / 60);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [visibility, setVisibility] = useState(profile?.study_hours_visibility || "all_buddies");
 
   const { data: buddies = [], isLoading: buddiesLoading } = useQuery({
     queryKey: ["user_buddies", currentUserId],
     queryFn: () => fetchUserBuddies(currentUserId),
     refetchInterval: 30000,
+  });
+
+  
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 250);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  const { data: liveResults = [], isFetching: liveFetching } = useQuery({
+    queryKey: ["buddy_autocomplete", debouncedQuery],
+    queryFn: () => (debouncedQuery.length >= 2 ? searchBuddies(debouncedQuery) : Promise.resolve([])),
+    enabled: debouncedQuery.length >= 2,
+    staleTime: 20000,
   });
 
   const acceptedBuddies = buddies.filter((b) => b.status === "accepted");
@@ -120,7 +137,7 @@ export function StudyBuddiesTab({ currentUserId, profile }: StudyBuddiesTabProps
         handle: handle.trim().toLowerCase().replace(/^@/, ""),
         todays_mood: mood.trim() || null,
         dream_specialisation: dreamSpec.trim() || null,
-        daily_focus_goal_minutes: Number(goalMin),
+        daily_focus_goal_minutes: Math.max(15, Math.round(Number(goalHours) * 60)),
         study_hours_visibility: visibility,
       });
     },
@@ -203,20 +220,36 @@ export function StudyBuddiesTab({ currentUserId, profile }: StudyBuddiesTabProps
               </div>
 
               <div>
-                <Label className="text-xs font-semibold">Daily Focus Target (Minutes)</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-semibold">Daily Focus Target (Hours)</Label>
+                  <span className="text-xs font-bold text-accent">{goalHours} hrs / day</span>
+                </div>
                 <div className="flex gap-2 mt-1">
-                  {[120, 240, 360, 480].map((mins) => (
+                  {[2, 4, 6, 8].map((h) => (
                     <Button
-                      key={mins}
+                      key={h}
                       type="button"
                       size="sm"
-                      variant={goalMin === mins ? "default" : "outline"}
+                      variant={goalHours === h ? "default" : "outline"}
                       className="h-7 text-xs flex-1"
-                      onClick={() => setGoalMin(mins)}
+                      onClick={() => setGoalHours(h)}
                     >
-                      {mins / 60}h
+                      {h}h
                     </Button>
                   ))}
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <Input
+                    type="number"
+                    step="0.5"
+                    min="0.5"
+                    max="24"
+                    value={goalHours || ""}
+                    onChange={(e) => setGoalHours(parseFloat(e.target.value) || 0)}
+                    placeholder="Custom hours"
+                    className="h-8 text-xs w-28"
+                  />
+                  <span className="text-xs text-muted-foreground">hours per day</span>
                 </div>
               </div>
 
