@@ -17,6 +17,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
 import { Route as ApiPublicCashfreeWebhookRouteImport } from './routes/api/public/cashfree-webhook'
@@ -62,6 +63,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
   '/api/public/cashfree-webhook': typeof ApiPublicCashfreeWebhookRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/admin'
+    | '/library'
     | '/profile'
     | '/stats'
     | '/api/public/cashfree-webhook'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/admin'
+    | '/library'
     | '/profile'
     | '/stats'
     | '/api/public/cashfree-webhook'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/_authenticated/admin'
+    | '/_authenticated/library'
     | '/_authenticated/profile'
     | '/_authenticated/stats'
     | '/api/public/cashfree-webhook'
@@ -251,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/library': {
+      id: '/_authenticated/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof AuthenticatedLibraryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -291,12 +310,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,
 }

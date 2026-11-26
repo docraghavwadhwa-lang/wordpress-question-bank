@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Shield, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader, UserAvatar } from "@/components/qbank/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -51,10 +51,15 @@ function ProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      const patch = {
+      const patch: Partial<Profile> = {
         full_name: form.full_name?.trim().slice(0, 100) || null,
         phone: form.phone?.trim().slice(0, 20) || null,
         avatar_url: form.avatar_url ?? null,
+        handle: form.handle ? form.handle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 30) : null,
+        dream_specialisation: form.dream_specialisation?.trim().slice(0, 80) || null,
+        todays_mood: form.todays_mood?.trim().slice(0, 50) || null,
+        daily_focus_goal_minutes: form.daily_focus_goal_minutes ? Number(form.daily_focus_goal_minutes) : 240,
+        study_hours_visibility: form.study_hours_visibility || "all_buddies",
       };
       await updateProfile(user.id, patch);
       await qc.invalidateQueries({ queryKey: ["profile", user.id] });
@@ -67,7 +72,7 @@ function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20">
       <AppHeader />
       <main className="mx-auto max-w-3xl px-4 py-10">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent">Account</p>
@@ -102,6 +107,82 @@ function ProfilePage() {
             <div className="space-y-1.5"><Label>Year of study</Label><Input value={form.study_year ?? ""} disabled /></div>
             <div className="sm:col-span-2">
               <div className="space-y-1.5"><Label>College</Label><Input value={form.college ?? ""} disabled /><p className="text-xs text-muted-foreground">Year of study and college are locked after setup and can't be changed.</p></div>
+            </div>
+          </div>
+        </section>
+
+        {/* Study Sanctuary Profile & Privacy Section */}
+        <section className="mt-6 rounded-2xl border bg-card p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-4 w-4 text-accent" />
+            <h2 className="text-xl font-display font-semibold text-foreground">Study Sanctuary & Privacy</h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label>Study Handle</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground">@</span>
+                <Input
+                  className="pl-7 font-mono text-xs"
+                  placeholder="e.g. raghav_mbbs"
+                  value={form.handle ?? ""}
+                  onChange={(e) => set("handle", e.target.value)}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">Used for study buddy searches and group chambers.</p>
+            </div>
+
+            <Field
+              label="Dream Specialisation"
+              placeholder="e.g. General Surgery, Radiology, Pediatrics"
+              value={form.dream_specialisation}
+              onChange={(v) => set("dream_specialisation", v)}
+            />
+
+            <Field
+              label="Today's Study Mood"
+              placeholder="e.g. Locked in 🔥, Revising Anatomy"
+              value={form.todays_mood}
+              onChange={(v) => set("todays_mood", v)}
+            />
+
+            <div className="space-y-1.5">
+              <Label>Daily Focus Goal (Hours)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={16}
+                value={form.daily_focus_goal_minutes ? Math.round(form.daily_focus_goal_minutes / 60) : 4}
+                onChange={(e) => set("daily_focus_goal_minutes", Number(e.target.value) * 60)}
+              />
+            </div>
+
+            <div className="sm:col-span-2 space-y-2 pt-2 border-t">
+              <Label className="flex items-center gap-1.5">
+                <Shield className="h-4 w-4 text-primary" /> Study-Hours Visibility
+              </Label>
+              <div className="grid gap-2 sm:grid-cols-3 text-xs">
+                {[
+                  { id: "everyone", label: "Everyone (Public boards)" },
+                  { id: "all_buddies", label: "All Buddies" },
+                  { id: "hidden", label: "Hidden (Private)" },
+                ].map((opt) => (
+                  <label
+                    key={opt.id}
+                    className="flex items-center gap-2 p-2.5 rounded-lg border border-border/50 hover:bg-muted/40 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="study_hours_visibility"
+                      value={opt.id}
+                      checked={(form.study_hours_visibility || "all_buddies") === opt.id}
+                      onChange={() => set("study_hours_visibility", opt.id)}
+                    />
+                    <span className="font-medium text-foreground">{opt.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
         </section>

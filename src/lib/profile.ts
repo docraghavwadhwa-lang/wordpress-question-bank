@@ -1,5 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
+export type StudyHoursVisibility = "everyone" | "all_buddies" | "selected_buddies" | "hidden";
+
 export type Profile = {
   id: string;
   full_name: string | null;
@@ -13,6 +15,12 @@ export type Profile = {
   dob: string | null;
   target_exam: string | null;
   city: string | null;
+  // Study Sanctuary & Library profile fields
+  handle: string | null;
+  dream_specialisation: string | null;
+  todays_mood: string | null;
+  daily_focus_goal_minutes: number;
+  study_hours_visibility: StudyHoursVisibility;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
