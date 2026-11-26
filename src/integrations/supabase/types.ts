@@ -160,6 +160,33 @@ export type Database = {
         }
         Relationships: []
       }
+      buddies: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          requester_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id: string
+          requester_id: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          requester_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       colleges: {
         Row: {
           created_at: string
@@ -365,16 +392,21 @@ export type Database = {
           college: string | null
           college_state: string | null
           created_at: string
+          daily_focus_goal_minutes: number
           dob: string | null
+          dream_specialisation: string | null
           full_name: string | null
+          handle: string | null
           id: string
           last_celebrated_streak: number
           onboarding_completed_at: string | null
           phone: string | null
           streak_goal: number
           streak_target_days: number
+          study_hours_visibility: string
           study_year: string | null
           target_exam: string | null
+          todays_mood: string | null
           updated_at: string
         }
         Insert: {
@@ -384,16 +416,21 @@ export type Database = {
           college?: string | null
           college_state?: string | null
           created_at?: string
+          daily_focus_goal_minutes?: number
           dob?: string | null
+          dream_specialisation?: string | null
           full_name?: string | null
+          handle?: string | null
           id: string
           last_celebrated_streak?: number
           onboarding_completed_at?: string | null
           phone?: string | null
           streak_goal?: number
           streak_target_days?: number
+          study_hours_visibility?: string
           study_year?: string | null
           target_exam?: string | null
+          todays_mood?: string | null
           updated_at?: string
         }
         Update: {
@@ -403,16 +440,21 @@ export type Database = {
           college?: string | null
           college_state?: string | null
           created_at?: string
+          daily_focus_goal_minutes?: number
           dob?: string | null
+          dream_specialisation?: string | null
           full_name?: string | null
+          handle?: string | null
           id?: string
           last_celebrated_streak?: number
           onboarding_completed_at?: string | null
           phone?: string | null
           streak_goal?: number
           streak_target_days?: number
+          study_hours_visibility?: string
           study_year?: string | null
           target_exam?: string | null
+          todays_mood?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -566,6 +608,187 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      study_cheers: {
+        Row: {
+          created_at: string
+          id: string
+          reaction: string
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reaction: string
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reaction?: string
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      study_group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_group_messages: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          daily_goal_minutes: number
+          description: string | null
+          id: string
+          invite_code: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          daily_goal_minutes?: number
+          description?: string | null
+          id?: string
+          invite_code: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          daily_goal_minutes?: number
+          description?: string | null
+          id?: string
+          invite_code?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          ended_at: string | null
+          id: string
+          intent_note: string | null
+          is_deep_focus: boolean
+          mode: string
+          started_at: string
+          status: string
+          subject: string
+          target_seconds: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          intent_note?: string | null
+          is_deep_focus?: boolean
+          mode: string
+          started_at?: string
+          status: string
+          subject: string
+          target_seconds?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          intent_note?: string | null
+          is_deep_focus?: boolean
+          mode?: string
+          started_at?: string
+          status?: string
+          subject?: string
+          target_seconds?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_visibility_allowlist: {
+        Row: {
+          allowed_user_id: string
+          created_at: string
+          owner_id: string
+        }
+        Insert: {
+          allowed_user_id: string
+          created_at?: string
+          owner_id: string
+        }
+        Update: {
+          allowed_user_id?: string
+          created_at?: string
+          owner_id?: string
         }
         Relationships: []
       }
@@ -982,6 +1205,10 @@ export type Database = {
         }
         Returns: string
       }
+      can_view_study_hours: {
+        Args: { _target: string; _viewer: string }
+        Returns: boolean
+      }
       complete_onboarding: {
         Args: {
           _admission_year: number
@@ -994,6 +1221,22 @@ export type Database = {
       }
       device_session_active: { Args: never; Returns: boolean }
       feature_enabled: { Args: { _key: string }; Returns: boolean }
+      get_library_leaderboard: {
+        Args: { _filter: string; _filter_val?: string; _period: string }
+        Returns: {
+          avatar_url: string
+          buddy_status: string
+          college: string
+          dream_specialisation: string
+          full_name: string
+          handle: string
+          rank: number
+          study_year: string
+          todays_mood: string
+          total_seconds: number
+          user_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1101,6 +1344,20 @@ export type Database = {
         }
       }
       revoke_subscription: { Args: { _id: string }; Returns: undefined }
+      search_study_buddies: {
+        Args: { _query: string }
+        Returns: {
+          avatar_url: string
+          buddy_status: string
+          college: string
+          dream_specialisation: string
+          full_name: string
+          handle: string
+          id: string
+          study_year: string
+          todays_mood: string
+        }[]
+      }
       submit_payment_request: {
         Args: {
           _coupon: string
