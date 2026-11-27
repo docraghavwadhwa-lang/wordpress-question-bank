@@ -77,7 +77,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
       <div className="flex min-w-0 items-center gap-3">
       <img src="/icon-512.png" alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-[14px] object-cover" />
       <div className="min-w-0">
-        <h1 className="truncate font-display text-2xl text-primary">Hello, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
+        <h1 className="truncate font-display text-2xl text-primary">Hi, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
       </div>
       </div>
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -119,12 +119,7 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <NotificationBell />
             <ProControl />
-            <Link to="/library" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
-              <BookOpen className="h-4 w-4" /> Sanctuary
-            </Link>
-            <Link to="/stats" className="hidden items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10 sm:flex" activeProps={{ className: "bg-brand-foreground/15" }}>
-              <BarChart3 className="h-4 w-4" /> Progress
-            </Link>
+
             <DropdownMenu>
               <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
                 <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} />

@@ -12,8 +12,10 @@ import {
   toggleStudyTodo,
   deleteStudyTodo,
   saveStudyTodosOrder,
+  formatTodoDateGroupLabel,
   type StudyTodo,
 } from "@/lib/library";
+import { AMBIENCE_TRACKS } from "@/lib/ambient-sound";
 import { StudyTogetherView } from "@/components/library/StudyTogetherView";
 import { formatFocusDuration } from "@/lib/apothecary";
 import { ambientSound, SOUNDSCAPES, type SoundscapePreset } from "@/lib/ambient-sound";
@@ -83,11 +85,10 @@ function getSoundscapeEmoji(preset: SoundscapePreset) {
     case "rain": return "🌧️";
     case "library": return "📚";
     case "cafe": return "☕";
-    case "forest": return "🌲";
     case "lofi": return "🎧";
     case "whitenoise": return "📻";
     case "fireplace": return "🔥";
-    case "wind": return "🍃";
+    case "keyboard": return "⌨️";
     default: return "🎵";
   }
 }
@@ -100,6 +101,18 @@ type LibrarySection = "focus" | "apothecary" | "analytics" | "leaderboards" | "b
 
 function LibraryPage() {
   const { user } = useAuth();
+
+  // Prevent white gap/band at bottom or during overscroll
+  useEffect(() => {
+    const origBodyBg = document.body.style.backgroundColor;
+    const origHtmlBg = document.documentElement.style.backgroundColor;
+    document.body.style.backgroundColor = "#165E63";
+    document.documentElement.style.backgroundColor = "#165E63";
+    return () => {
+      document.body.style.backgroundColor = origBodyBg;
+      document.documentElement.style.backgroundColor = origHtmlBg;
+    };
+  }, []);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const {
@@ -167,6 +180,35 @@ function LibraryPage() {
     }
   }, [todosQuery.data]);
 
+  // Split tasks into Today vs Older dates
+  const todayTodos = useMemo(() => {
+    return todoItems.filter(
+      (t) => formatTodoDateGroupLabel(t.created_at) === "Today"
+    );
+  }, [todoItems]);
+
+  const olderTodos = useMemo(() => {
+    return todoItems.filter(
+      (t) => formatTodoDateGroupLabel(t.created_at) !== "Today"
+    );
+  }, [todoItems]);
+
+  const olderDateGroups = useMemo(() => {
+    const groups: { label: string; items: StudyTodo[] }[] = [];
+    const map = new Map<string, StudyTodo[]>();
+    for (const t of olderTodos) {
+      const lbl = formatTodoDateGroupLabel(t.created_at);
+      if (!map.has(lbl)) {
+        map.set(lbl, []);
+      }
+      map.get(lbl)!.push(t);
+    }
+    map.forEach((items, label) => {
+      groups.push({ label, items });
+    });
+    return groups;
+  }, [olderTodos]);
+
   // Drag and touch reordering
   const dragIndexRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number>(0);
@@ -175,14 +217,19 @@ function LibraryPage() {
   const reorderTodos = useCallback((fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
     setTodoItems((prev) => {
-      if (fromIndex >= prev.length || toIndex >= prev.length) return prev;
-      const copy = [...prev];
-      const [moved] = copy.splice(fromIndex, 1);
-      copy.splice(toIndex, 0, moved);
+      const todayList = prev.filter((t) => formatTodoDateGroupLabel(t.created_at) === "Today");
+      const olderList = prev.filter((t) => formatTodoDateGroupLabel(t.created_at) !== "Today");
+      if (fromIndex >= todayList.length || toIndex >= todayList.length) return prev;
+
+      const copyToday = [...todayList];
+      const [moved] = copyToday.splice(fromIndex, 1);
+      copyToday.splice(toIndex, 0, moved);
+
+      const combined = [...copyToday, ...olderList];
       if (user?.id) {
-        saveStudyTodosOrder(user.id, copy.map((t) => t.id));
+        saveStudyTodosOrder(user.id, combined.map((t) => t.id));
       }
-      return copy;
+      return combined;
     });
   }, [user?.id]);
 
@@ -213,7 +260,7 @@ function LibraryPage() {
     const itemHeight = 44;
     const steps = Math.round(diffY / itemHeight);
     if (steps !== 0) {
-      const targetIdx = Math.max(0, Math.min(todoItems.length - 1, touchItemIndexRef.current + steps));
+      const targetIdx = Math.max(0, Math.min(todayTodos.length - 1, touchItemIndexRef.current + steps));
       if (targetIdx !== touchItemIndexRef.current) {
         reorderTodos(touchItemIndexRef.current, targetIdx);
         touchItemIndexRef.current = targetIdx;
@@ -491,7 +538,7 @@ function LibraryPage() {
   return (
     <div className="min-h-screen bg-[#165E63] dark:bg-[#082428] text-[#F7F5F0] transition-colors selection:bg-[#E5B95C] selection:text-[#082428] pb-24">
       {/* ================= TOP NAVIGATION / SANCTUARY HEADER ================= */}
-      <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5">
+      <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-2 md:py-2">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-3">
           {/* Top-Left: Menu Hamburger (≡), Back, Elixir Logo */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
@@ -668,11 +715,11 @@ function LibraryPage() {
               { id: "apothecary", label: "Apothecary", icon: FlaskConical, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "analytics", label: "Analytics", icon: BarChart2, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
               { id: "leaderboards", label: "Ranks", icon: Trophy, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
-              { id: "buddies", label: "Study Buddies", icon: Users, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "buddies", label: "Homies", icon: Users, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
               { id: "together", label: "Study Together", icon: Users, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "groups", label: "Study Groups", icon: Compass, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
               { id: "todos", label: "To-Do List", icon: ListTodo, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
-              { id: "soundscapes", label: "Soundscapes", icon: Headphones, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "soundscapes", label: "Ambience", icon: Headphones, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
               { id: "share", label: "Share Progress", icon: Share2, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "settings", label: "Settings", icon: Settings, color: "text-[#F4F1EA] bg-[#F4F1EA]/10 border-[#F4F1EA]/30" },
             ].map((item) => {
@@ -718,7 +765,7 @@ function LibraryPage() {
         {activeSection === "focus" && (
           <div className="space-y-8 flex flex-col items-center">
             {/* Sanctuary Circular Ring & Alembic */}
-            <div className="relative flex flex-col items-center justify-center">
+            <div className="relative flex flex-col items-center justify-center pt-6 sm:pt-8">
               {/* Circular Draggable Ring SVG */}
               <div
                 className="relative select-none touch-none cursor-pointer"
@@ -771,7 +818,7 @@ function LibraryPage() {
                     strokeDasharray={ringCircumference}
                     strokeDashoffset={strokeDashoffset}
                     transform="rotate(-90 150 150)"
-                    className="transition-all duration-300"
+                    className={isDragging ? "transition-none" : timerState.isRunning ? "transition-all duration-1000 linear" : "transition-none"}
                   />
 
                   {/* Draggable Knob (only shown when not running) */}
@@ -782,7 +829,7 @@ function LibraryPage() {
                         fill="#E5B95C"
                         stroke="#082428"
                         strokeWidth="3"
-                        className="shadow-lg cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"
+                        className="shadow-lg cursor-grab active:cursor-grabbing"
                       />
                       <circle r="4" fill="#082428" />
                     </g>
@@ -862,7 +909,7 @@ function LibraryPage() {
                     className="w-full h-9 text-xs font-semibold text-[#0D4347] border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] rounded-xl shadow-sm gap-2"
                   >
                     <Users className="h-4 w-4 text-[#0D4347]" />
-                    Study Together (Rooms & College Buddies)
+                    Study Together (Rooms & College Homies)
                   </Button>
                 </div>
               ) : isWithinGracePeriod ? (
@@ -942,10 +989,10 @@ function LibraryPage() {
               <div className="rounded-2xl border border-[#0D4347] bg-[#082428]/60 p-4 space-y-3">
                 <div className="flex items-center justify-between border-b border-[#0D4347] pb-2">
                   <h4 className="font-semibold text-xs text-[#F7F5F0] flex items-center gap-1.5">
-                    <ListTodo className="h-4 w-4 text-[#E5B95C]" /> Today's Study Tasks
+                    <ListTodo className="h-4 w-4 text-[#E5B95C]" /> Today's To Do List
                   </h4>
                   <span className="text-[10px] text-[#F7F5F0]/60">
-                    {todos.filter((t) => t.completed).length} / {todos.length} done
+                    {todayTodos.filter((t) => t.completed).length} / {todayTodos.length} done today
                   </span>
                 </div>
 
@@ -967,14 +1014,14 @@ function LibraryPage() {
                   </Button>
                 </form>
 
-                {/* List items */}
-                <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-                  {todos.length === 0 ? (
+                {/* List items: today only */}
+                <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                  {todayTodos.length === 0 ? (
                     <p className="py-3 text-center text-[11px] text-[#F7F5F0]/50">
-                      No tasks yet. Set goals to guide your study sessions.
+                      No tasks for today. Add one above to direct your focus.
                     </p>
                   ) : (
-                    todos.map((todo) => (
+                    todayTodos.map((todo) => (
                       <div
                         key={todo.id}
                         className="flex items-center justify-between gap-2 rounded-lg bg-[#0D4347]/30 p-2 text-xs hover:bg-[#0D4347]/50 transition-colors"
@@ -1008,6 +1055,48 @@ function LibraryPage() {
                         </button>
                       </div>
                     ))
+                  )}
+
+                  {/* Previous days grouped below */}
+                  {olderDateGroups.length > 0 && (
+                    <div className="pt-2 mt-2 border-t border-[#0D4347]/60 space-y-2">
+                      <p className="text-[10px] uppercase tracking-wider font-semibold text-[#E5B95C]">
+                        Previous Tasks
+                      </p>
+                      {olderDateGroups.map((grp) => (
+                        <div key={grp.label} className="space-y-1">
+                          <p className="text-[10px] text-[#F7F5F0]/50 font-mono">📅 {grp.label}</p>
+                          {grp.items.map((todo) => (
+                            <div
+                              key={todo.id}
+                              className="flex items-center justify-between gap-2 rounded-lg bg-[#0D4347]/20 p-1.5 text-xs text-[#F7F5F0]/70"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                                className="flex items-center gap-2 text-left min-w-0 flex-1"
+                              >
+                                {todo.completed ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981] shrink-0" />
+                                ) : (
+                                  <Circle className="h-3.5 w-3.5 text-[#F7F5F0]/40 shrink-0" />
+                                )}
+                                <span className={`truncate text-[11px] ${todo.completed ? "line-through text-[#F7F5F0]/40" : ""}`}>
+                                  {todo.task}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTodo(todo.id)}
+                                className="text-[#F7F5F0]/40 hover:text-red-400 p-0.5"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -1177,61 +1266,117 @@ function LibraryPage() {
                 </Button>
               </form>
 
-              <div className="divide-y divide-[#0D4347]">
-                {todoItems.length === 0 ? (
-                  <p className="py-6 text-center text-xs text-[#F7F5F0]/50">
-                    No tasks yet. Set goals to guide your study sessions.
-                  </p>
-                ) : (
-                  todoItems.map((todo, idx) => (
-                    <div
-                      key={todo.id}
-                      draggable
-                      onDragStart={() => handleDragStart(idx)}
-                      onDragOver={(e) => handleDragOver(idx, e)}
-                      onDragEnd={handleDragEnd}
-                      className="flex items-center justify-between gap-3 py-3 text-xs group select-none"
-                    >
+              <div className="space-y-4">
+                {/* Main list: Today only */}
+                <div className="divide-y divide-[#0D4347]">
+                  {todayTodos.length === 0 ? (
+                    <p className="py-6 text-center text-xs text-[#F7F5F0]/50">
+                      No tasks for today. Add what you want to achieve today above!
+                    </p>
+                  ) : (
+                    todayTodos.map((todo, idx) => (
                       <div
-                        className="touch-none cursor-grab active:cursor-grabbing text-[#F7F5F0]/40 group-hover:text-[#E5B95C] p-1"
-                        onTouchStart={(e) => handleTouchStart(idx, e)}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        title="Drag to reorder"
+                        key={todo.id}
+                        draggable
+                        onDragStart={() => handleDragStart(idx)}
+                        onDragOver={(e) => handleDragOver(idx, e)}
+                        onDragEnd={handleDragEnd}
+                        className="flex items-center justify-between gap-3 py-3 text-xs group select-none"
                       >
-                        <GripVertical className="h-4 w-4" />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleToggleTodo(todo.id, !todo.completed)}
-                        className="flex items-center gap-3 text-left flex-1 min-w-0"
-                      >
-                        {todo.completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-[#F7F5F0]/40 shrink-0" />
-                        )}
-                        <span
-                          className={`text-sm truncate ${
-                            todo.completed
-                              ? "line-through text-[#F7F5F0]/50"
-                              : "text-[#F7F5F0] font-medium"
-                          }`}
+                        <div
+                          className="touch-none cursor-grab active:cursor-grabbing text-[#F7F5F0]/40 group-hover:text-[#E5B95C] p-1"
+                          onTouchStart={(e) => handleTouchStart(idx, e)}
+                          onTouchMove={handleTouchMove}
+                          onTouchEnd={handleTouchEnd}
+                          title="Hold and drag to reorder"
                         >
-                          {todo.task}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTodo(todo.id)}
-                        className="text-[#F7F5F0]/40 hover:text-red-400 p-1.5"
-                        title="Delete task"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))
+                          <GripVertical className="h-4 w-4" />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                          className="flex items-center gap-3 text-left flex-1 min-w-0"
+                        >
+                          {todo.completed ? (
+                            <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
+                          ) : (
+                            <Circle className="h-5 w-5 text-[#F7F5F0]/40 shrink-0" />
+                          )}
+                          <span
+                            className={`text-sm truncate ${
+                              todo.completed
+                                ? "line-through text-[#F7F5F0]/50"
+                                : "text-[#F7F5F0] font-medium"
+                            }`}
+                          >
+                            {todo.task}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTodo(todo.id)}
+                          className="text-[#F7F5F0]/40 hover:text-red-400 p-1.5"
+                          title="Delete task"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Older dates grouped below */}
+                {olderDateGroups.length > 0 && (
+                  <div className="pt-5 border-t border-[#0D4347] space-y-4">
+                    <h4 className="font-display font-semibold text-xs text-[#E5B95C] uppercase tracking-wider">
+                      Previous Tasks
+                    </h4>
+                    {olderDateGroups.map((grp) => (
+                      <div key={grp.label} className="space-y-2 rounded-xl bg-[#0D4347]/20 border border-[#0D4347]/40 p-3">
+                        <p className="text-[11px] font-mono font-medium text-[#F7F5F0]/70">
+                          📅 {grp.label}
+                        </p>
+                        <div className="divide-y divide-[#0D4347]/40">
+                          {grp.items.map((todo) => (
+                            <div
+                              key={todo.id}
+                              className="flex items-center justify-between gap-3 py-2 text-xs select-none"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                                className="flex items-center gap-3 text-left flex-1 min-w-0"
+                              >
+                                {todo.completed ? (
+                                  <CheckCircle2 className="h-4 w-4 text-[#10B981] shrink-0" />
+                                ) : (
+                                  <Circle className="h-4 w-4 text-[#F7F5F0]/40 shrink-0" />
+                                )}
+                                <span
+                                  className={`text-xs truncate ${
+                                    todo.completed
+                                      ? "line-through text-[#F7F5F0]/50"
+                                      : "text-[#F7F5F0]/90"
+                                  }`}
+                                >
+                                  {todo.task}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteTodo(todo.id)}
+                                className="text-[#F7F5F0]/40 hover:text-red-400 p-1"
+                                title="Delete task"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
@@ -1243,7 +1388,7 @@ function LibraryPage() {
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Looping Soundscapes</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Looping Ambience</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
                   Continuous, infinite loop audio for immersion while studying.
                 </p>

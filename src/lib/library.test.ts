@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getFlaskTierForDuration, formatFocusDuration, APOTHECARY_TIERS } from "@/lib/apothecary";
 import { featureAvailable, FEATURE_KEYS } from "@/lib/features";
-import { SOUNDSCAPES } from "@/lib/ambient-sound";
+import { AMBIENCE_TRACKS, SOUNDSCAPES } from "@/lib/ambient-sound";
 
 describe("Apothecary Flask Distillation", () => {
   it("maps durations under 30 minutes to Aspirant's Vial", () => {
@@ -44,7 +44,7 @@ describe("Apothecary Flask Distillation", () => {
   });
 });
 
-describe("Library Feature Flag & Ambient Soundscapes", () => {
+describe("Library Feature Flag & Ambience Tracks", () => {
   it("includes 'library' in FEATURE_KEYS list", () => {
     expect(FEATURE_KEYS).toContain("library");
   });
@@ -59,30 +59,29 @@ describe("Library Feature Flag & Ambient Soundscapes", () => {
     expect(featureAvailable([{ key: "library", enabled: false }], "library", true)).toBe(true);
   });
 
-  it("provides 8 seamless loopable soundscapes matching custom audio assets", () => {
-    expect(SOUNDSCAPES).toHaveLength(8);
-    const ids = SOUNDSCAPES.map((s) => s.id);
+  it("provides 7 seamless loopable ambience tracks matching custom audio assets", () => {
+    expect(AMBIENCE_TRACKS).toHaveLength(7);
+    expect(SOUNDSCAPES).toHaveLength(7);
+    const ids = AMBIENCE_TRACKS.map((s) => s.id);
     expect(ids).toEqual([
       "rain",
       "library",
       "cafe",
-      "forest",
       "lofi",
       "whitenoise",
       "fireplace",
-      "wind",
+      "keyboard",
     ]);
 
-    const slugs = SOUNDSCAPES.map((s) => s.slug);
-    expect(slugs).toEqual([
-      "monsoon-rain",
-      "quiet-library",
-      "cozy-cafe",
-      "mountain-forest",
-      "lofi",
-      "white-noise",
-      "fireplace-crackling",
-      "wind",
+    const filenames = AMBIENCE_TRACKS.map((s) => s.filename);
+    expect(filenames).toEqual([
+      "/sounds/rain%20loop.mp3",
+      "/sounds/library%20sounds.mp3",
+      "/sounds/km007-cafe-ambience-9263.mp3",
+      "/sounds/lofi%20loop.mp3",
+      "/sounds/blendertimer-white-noise-8117.mp3",
+      "/sounds/king_of_the_christmas-fireplace-loop-original-noise-178209.mp3",
+      "/sounds/Typing%20On%20Keyboard.mp3",
     ]);
   });
 });

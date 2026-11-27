@@ -1,6 +1,16 @@
-import { useState, useDeferredValue } from "react";
+import { useState, useDeferredValue, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Megaphone, Send, User, Search, RefreshCw, AlertCircle } from "lucide-react";
+import {
+  Megaphone,
+  Send,
+  User,
+  Search,
+  RefreshCw,
+  Clock,
+  Sparkles,
+  Users,
+  Settings,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +26,9 @@ import { toast } from "sonner";
 import {
   adminSendNotification,
   fetchAdminDispatchedNotifications,
+  getHomieRecommendationIntervalDays,
+  setHomieRecommendationIntervalDays,
+  fetchUsersExpiringWithinThreeDays,
 } from "@/lib/notifications";
 import { consoleUsers } from "@/lib/admin";
 
@@ -26,6 +39,26 @@ export function AdminNotifications({ onDetail }: { onDetail?: (id: string) => vo
   const [message, setMessage] = useState("");
   const [type, setType] = useState<"announcement" | "direct" | "alert">("announcement");
   const [link, setLink] = useState("");
+
+  // Homie recommendation interval setting (in days, default 2)
+  const [intervalDays, setIntervalDays] = useState<number>(2);
+  const [intervalSaving, setIntervalSaving] = useState(false);
+
+  useEffect(() => {
+    void getHomieRecommendationIntervalDays().then((days) => setIntervalDays(days));
+  }, []);
+
+  const handleSaveInterval = async () => {
+    setIntervalSaving(true);
+    try {
+      await setHomieRecommendationIntervalDays(intervalDays);
+      toast.success(`Homie recommendation notification interval set to every ${intervalDays} days`);
+    } catch {
+      toast.error("Failed to update notification interval");
+    } finally {
+      setIntervalSaving(false);
+    }
+  };
 
   // Direct student search
   const [studentSearch, setStudentSearch] = useState("");
@@ -38,11 +71,37 @@ export function AdminNotifications({ onDetail }: { onDetail?: (id: string) => vo
     enabled: mode === "direct" && deferredStudentSearch.length >= 2,
   });
 
+  const expiringUsersQuery = useQuery({
+    queryKey: ["admin", "expiring_trials"],
+    queryFn: fetchUsersExpiringWithinThreeDays,
+  });
+
   const historyQuery = useQuery({
     queryKey: ["admin_notifications_history"],
     queryFn: fetchAdminDispatchedNotifications,
     refetchInterval: 15000,
   });
+
+  // Presets
+  const handleApplyTrialEndingPreset = () => {
+    setTitle("⏳ Your Elixir Trial is Ending Soon");
+    setMessage(
+      "Don't break your streak! Your trial is almost over—get in touch with our team today to keep your Q-bank and Sanctuary access uninterrupted 🚀"
+    );
+    setType("alert");
+    setLink("/plans");
+    toast.info("Applied 'Trial Ending Reminder' preset");
+  };
+
+  const handleApplyBatchmatesPreset = () => {
+    setTitle("🎓 Your Batchmates Are Locked In!");
+    setMessage(
+      "Students from your college are studying in Elixir Sanctuary right now. Tap to add your Homies and crush your daily goals together 🔥"
+    );
+    setType("direct");
+    setLink("/library?tab=buddies");
+    toast.info("Applied 'Batchmates Locked In' preset");
+  };
 
   const sendMutation = useMutation({
     mutationFn: async () => {
@@ -81,15 +140,80 @@ export function AdminNotifications({ onDetail }: { onDetail?: (id: string) => vo
       <div>
         <h2 className="text-2xl text-primary font-display">Notifications & Broadcasts</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Send announcements to all students or target individual doctors directly with custom alerts and links.
+          Send announcements to all students or target individual doctors directly with custom alerts, presets, and links.
         </p>
+      </div>
+
+      {/* Admin Setting: Same-College Recommendation Notification Interval */}
+      <div className="rounded-xl border bg-card p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Settings className="h-4 w-4 text-primary" />
+            <h4 className="font-semibold text-sm text-foreground">
+              College Homies Recommendation Frequency
+            </h4>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            How often (in days) the app checks and notifies students about unadded batchmates from their medical college.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Every</span>
+            <Input
+              type="number"
+              min={1}
+              max={30}
+              value={intervalDays}
+              onChange={(e) => setIntervalDays(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              className="h-8 w-16 text-center text-xs"
+            />
+            <span className="text-xs text-muted-foreground">days</span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSaveInterval}
+            disabled={intervalSaving}
+            className="h-8 text-xs"
+          >
+            {intervalSaving ? "Saving..." : "Save Interval"}
+          </Button>
+        </div>
       </div>
 
       {/* Composer Card */}
       <div className="rounded-xl border bg-card p-6 shadow-sm space-y-5">
-        <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
-          <Megaphone className="h-4 w-4 text-accent" /> Dispatch New Notification
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-accent" /> Dispatch New Notification
+          </h3>
+
+          {/* Quick-Fill Presets */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
+              <Sparkles className="h-3 w-3 text-[#E5B95C]" /> Quick Presets:
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleApplyTrialEndingPreset}
+              className="h-7 text-xs bg-muted/40 hover:bg-muted"
+            >
+              <Clock className="mr-1 h-3 w-3 text-amber-500" /> Trial Ending Reminder
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleApplyBatchmatesPreset}
+              className="h-7 text-xs bg-muted/40 hover:bg-muted"
+            >
+              <Users className="mr-1 h-3 w-3 text-teal-600" /> Batchmates Locked In
+            </Button>
+          </div>
+        </div>
 
         {/* Mode Selector */}
         <div className="flex gap-2">
@@ -119,8 +243,16 @@ export function AdminNotifications({ onDetail }: { onDetail?: (id: string) => vo
 
         {/* Direct student picker */}
         {mode === "direct" && (
-          <div className="space-y-2 rounded-lg border bg-muted/30 p-4">
-            <Label className="text-xs font-semibold">Select Target Student</Label>
+          <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold">Select Target Student</Label>
+              {expiringUsersQuery.data && expiringUsersQuery.data.length > 0 && (
+                <span className="text-[11px] text-amber-600 font-medium">
+                  {expiringUsersQuery.data.length} student(s) expiring within 3 days
+                </span>
+              )}
+            </div>
+
             {selectedStudent ? (
               <div className="flex items-center justify-between rounded-md border bg-background p-2.5 text-xs">
                 <div>
@@ -147,6 +279,40 @@ export function AdminNotifications({ onDetail }: { onDetail?: (id: string) => vo
                     className="pl-9 h-9 text-xs"
                   />
                 </div>
+
+                {/* Quick picker for expiring trial users */}
+                {expiringUsersQuery.data && expiringUsersQuery.data.length > 0 && !studentSearch && (
+                  <div className="space-y-1 pt-1">
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+                      Trials Expiring Soon (Within 3 Days)
+                    </p>
+                    <div className="max-h-32 overflow-y-auto rounded-md border bg-background divide-y">
+                      {expiringUsersQuery.data.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          className="w-full text-left p-2 hover:bg-secondary flex items-center justify-between text-xs"
+                          onClick={() => {
+                            setSelectedStudent({
+                              id: u.id,
+                              name: u.name,
+                              email: u.email,
+                            });
+                          }}
+                        >
+                          <div>
+                            <p className="font-semibold text-foreground">{u.name}</p>
+                            <p className="text-muted-foreground text-[11px]">{u.email}</p>
+                          </div>
+                          <span className="text-[10px] text-amber-600 font-medium">
+                            Expires {new Date(u.ends_at).toLocaleDateString("en-IN")}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {studentsQuery.data && studentsQuery.data.length > 0 && (
                   <div className="max-h-40 overflow-y-auto rounded-md border bg-background divide-y">
                     {studentsQuery.data.slice(0, 5).map((s) => (

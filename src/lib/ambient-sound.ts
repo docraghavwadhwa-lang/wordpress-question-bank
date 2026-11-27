@@ -1,6 +1,6 @@
 /**
- * Ambient Soundscapes Engine for Elixir Sanctuary.
- * Supports 8 seamless loopable audio tracks with immediate user-gesture unlocking
+ * Ambient Audio Engine for Elixir Sanctuary ("Ambience").
+ * Supports 7 seamless loopable audio tracks with immediate user-gesture unlocking
  * and automatic fallback to Web Audio procedural synthesis.
  */
 
@@ -8,30 +8,83 @@ export type SoundscapePreset =
   | "rain"
   | "library"
   | "cafe"
-  | "forest"
   | "lofi"
   | "whitenoise"
   | "fireplace"
-  | "wind";
+  | "keyboard";
 
-export interface SoundscapeInfo {
+export interface AmbienceTrackInfo {
   id: SoundscapePreset;
   slug: string;
   label: string;
+  filename: string;
   description: string;
   iconName: string;
 }
 
-export const SOUNDSCAPES: SoundscapeInfo[] = [
-  { id: "rain", slug: "monsoon-rain", label: "Monsoon Rain", description: "Gentle rain and patter on a windowpane", iconName: "CloudRain" },
-  { id: "library", slug: "quiet-library", label: "Quiet Library", description: "Soft acoustic room tone and calm stillness", iconName: "BookOpen" },
-  { id: "cafe", slug: "cozy-cafe", label: "Cozy Cafe", description: "Warm background ambience and coffeehouse warmth", iconName: "Coffee" },
-  { id: "forest", slug: "mountain-forest", label: "Mountain Forest", description: "Soft breeze through leaves and gentle chirps", iconName: "Trees" },
-  { id: "lofi", slug: "lofi", label: "Lofi", description: "Calm study beats and gentle mellow melodies", iconName: "Music" },
-  { id: "whitenoise", slug: "white-noise", label: "White Noise", description: "Smooth static frequency for deep concentration", iconName: "Radio" },
-  { id: "fireplace", slug: "fireplace-crackling", label: "Fireplace Crackling", description: "Warm hearth embers and gentle wooden sparks", iconName: "Flame" },
-  { id: "wind", slug: "wind", label: "Wind", description: "Calm soothing breeze across open mountain peaks", iconName: "Wind" },
+export type SoundscapeInfo = AmbienceTrackInfo;
+
+export const AMBIENCE_TRACKS: AmbienceTrackInfo[] = [
+  {
+    id: "rain",
+    slug: "rain-loop",
+    label: "Monsoon Rain",
+    filename: "/sounds/rain%20loop.mp3",
+    description: "Gentle tropical rain and soothing patter on a windowpane",
+    iconName: "CloudRain",
+  },
+  {
+    id: "library",
+    slug: "library-sounds",
+    label: "Quiet Library",
+    filename: "/sounds/library%20sounds.mp3",
+    description: "Soft acoustic stillness and peaceful reading room tone",
+    iconName: "BookOpen",
+  },
+  {
+    id: "cafe",
+    slug: "cafe-ambience",
+    label: "Cozy Cafe",
+    filename: "/sounds/km007-cafe-ambience-9263.mp3",
+    description: "Warm background murmurs and coffeehouse warmth",
+    iconName: "Coffee",
+  },
+  {
+    id: "lofi",
+    slug: "lofi-loop",
+    label: "Lofi",
+    filename: "/sounds/lofi%20loop.mp3",
+    description: "Calm study beats and gentle mellow melodies",
+    iconName: "Music",
+  },
+  {
+    id: "whitenoise",
+    slug: "white-noise",
+    label: "White Noise",
+    filename: "/sounds/blendertimer-white-noise-8117.mp3",
+    description: "Smooth static frequencies for deep concentration",
+    iconName: "Radio",
+  },
+  {
+    id: "fireplace",
+    slug: "fireplace-loop",
+    label: "Fireplace Crackling",
+    filename: "/sounds/king_of_the_christmas-fireplace-loop-original-noise-178209.mp3",
+    description: "Warm hearth embers and gentle wooden sparks",
+    iconName: "Flame",
+  },
+  {
+    id: "keyboard",
+    slug: "keyboard-typing",
+    label: "Typing on Keyboard",
+    filename: "/sounds/Typing%20On%20Keyboard.mp3",
+    description: "Rhythmic keystrokes and focus-inducing mechanical clicks",
+    iconName: "Keyboard",
+  },
 ];
+
+// Backward-compatibility alias
+export const SOUNDSCAPES = AMBIENCE_TRACKS;
 
 class AmbientSoundEngine {
   private ctx: AudioContext | null = null;
@@ -190,14 +243,14 @@ class AmbientSoundEngine {
     this.isPlaying = true;
     this.notify();
 
-    const info = SOUNDSCAPES.find((s) => s.id === preset);
-    const audioPath = info ? `/sounds/${info.slug}.mp3` : null;
+    const info = AMBIENCE_TRACKS.find((s) => s.id === preset);
+    const audioPath = info ? info.filename : null;
 
     if (audioPath && typeof window !== "undefined" && typeof Audio !== "undefined") {
       try {
         const audio = new Audio();
         audio.src = audioPath;
-        audio.loop = true; // Seamless continuous infinite loop
+        audio.loop = true; // Mandatory seamless continuous infinite loop
         audio.volume = this.volume;
         audio.preload = "auto";
 
@@ -246,16 +299,14 @@ class AmbientSoundEngine {
         this.setupLibrary(ctx, this.masterGain);
       } else if (preset === "cafe") {
         this.setupCafe(ctx, this.masterGain);
-      } else if (preset === "forest") {
-        this.setupForest(ctx, this.masterGain);
       } else if (preset === "whitenoise") {
         this.setupWhiteNoise(ctx, this.masterGain);
-      } else if (preset === "wind") {
-        this.setupWind(ctx, this.masterGain);
       } else if (preset === "fireplace") {
         this.setupFireplace(ctx, this.masterGain);
       } else if (preset === "lofi") {
         this.setupLofi(ctx, this.masterGain);
+      } else if (preset === "keyboard") {
+        this.setupKeyboard(ctx, this.masterGain);
       }
     } catch {
       /* ignore audio context failure */
@@ -326,41 +377,6 @@ class AmbientSoundEngine {
     this.activeNodes.push({ stop: () => src.stop() });
   }
 
-  private setupForest(ctx: AudioContext, dest: GainNode) {
-    const pink = this.createPinkNoiseBuffer(ctx, 5);
-    const src = ctx.createBufferSource();
-    src.buffer = pink;
-    src.loop = true;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(600, ctx.currentTime);
-
-    const lfo = ctx.createOscillator();
-    lfo.frequency.setValueAtTime(0.15, ctx.currentTime);
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.setValueAtTime(0.18, ctx.currentTime);
-
-    const baseGain = ctx.createGain();
-    baseGain.gain.setValueAtTime(0.35, ctx.currentTime);
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(baseGain.gain);
-
-    src.connect(filter);
-    filter.connect(baseGain);
-    baseGain.connect(dest);
-
-    src.start();
-    lfo.start();
-    this.activeNodes.push({
-      stop: () => {
-        src.stop();
-        lfo.stop();
-      },
-    });
-  }
-
   private setupWhiteNoise(ctx: AudioContext, dest: GainNode) {
     const white = this.createWhiteNoiseBuffer(ctx, 4);
     const src = ctx.createBufferSource();
@@ -375,42 +391,6 @@ class AmbientSoundEngine {
 
     src.start();
     this.activeNodes.push({ stop: () => src.stop() });
-  }
-
-  private setupWind(ctx: AudioContext, dest: GainNode) {
-    const pink = this.createPinkNoiseBuffer(ctx, 6);
-    const src = ctx.createBufferSource();
-    src.buffer = pink;
-    src.loop = true;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.setValueAtTime(300, ctx.currentTime);
-    filter.Q.setValueAtTime(2.0, ctx.currentTime);
-
-    const lfo = ctx.createOscillator();
-    lfo.frequency.setValueAtTime(0.1, ctx.currentTime);
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.setValueAtTime(120, ctx.currentTime);
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(dest);
-
-    src.start();
-    lfo.start();
-    this.activeNodes.push({
-      stop: () => {
-        src.stop();
-        lfo.stop();
-      },
-    });
   }
 
   private setupFireplace(ctx: AudioContext, dest: GainNode) {
@@ -446,6 +426,39 @@ class AmbientSoundEngine {
 
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0.35, ctx.currentTime);
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+
+    src.start();
+    this.activeNodes.push({ stop: () => src.stop() });
+  }
+
+  private setupKeyboard(ctx: AudioContext, dest: GainNode) {
+    const bufferSize = ctx.sampleRate * 3;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    // Procedural mechanical key clatter
+    for (let i = 0; i < bufferSize; i++) {
+      if (Math.random() < 0.0006) {
+        const clickLen = Math.floor(Math.random() * 40 + 20);
+        for (let j = 0; j < clickLen && i + j < bufferSize; j++) {
+          data[i + j] = (Math.random() * 2 - 1) * Math.exp(-j / 8) * 0.45;
+        }
+      }
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(2200, ctx.currentTime);
+    filter.Q.setValueAtTime(2.5, ctx.currentTime);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.45, ctx.currentTime);
 
     src.connect(filter);
     filter.connect(gain);

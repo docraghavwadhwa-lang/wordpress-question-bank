@@ -134,11 +134,11 @@ export function StudyTogetherView({
     },
     onSuccess: (targetUserId) => {
       setPendingRequests((prev) => new Set([...prev, targetUserId]));
-      toast.success("Buddy request sent!");
+      toast.success("Homie request sent!");
       void qc.invalidateQueries({ queryKey: ["study_buddies"] });
     },
     onError: (err: any) => {
-      toast.error(err.message || "Failed to send buddy request");
+      toast.error(err.message || "Failed to send homie request");
     },
   });
 
@@ -266,7 +266,7 @@ export function StudyTogetherView({
               </div>
               <h3 className="mt-3 font-display font-bold text-base text-[#F7F5F0]">Join a Room with Code</h3>
               <p className="text-xs text-[#F7F5F0]/65 mt-1 leading-relaxed">
-                Enter an invite code provided by a friend or study buddy to join their room.
+                Enter an invite code provided by a friend or homie to join their room.
               </p>
             </div>
           </DialogTrigger>
@@ -337,7 +337,7 @@ export function StudyTogetherView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0D4347] pb-3">
           <div>
             <h3 className="font-display font-bold text-base text-[#F7F5F0] flex items-center gap-2">
-              <School className="h-4.5 w-4.5 text-[#E5B95C]" /> Suggested Buddies from Your College
+              <School className="h-4.5 w-4.5 text-[#E5B95C]" /> Suggested Homies from Your College
             </h3>
             <p className="text-xs text-[#F7F5F0]/65 mt-0.5">
               {userCollege ? (
@@ -436,7 +436,7 @@ export function StudyTogetherView({
                         onClick={() => sendBuddyMutation.mutate(student.user_id)}
                         className="h-7 px-2.5 text-xs font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
                       >
-                        <UserPlus className="h-3 w-3 mr-1" /> Add Buddy
+                        <UserPlus className="h-3 w-3 mr-1" /> Add Homie
                       </Button>
                     )}
                   </div>

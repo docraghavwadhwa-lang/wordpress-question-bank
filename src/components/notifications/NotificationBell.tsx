@@ -6,6 +6,8 @@ import {
   fetchUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  checkPeriodicSameCollegeNotification,
+  checkTrialEndingNotification,
   type NotificationItem,
 } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,14 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
     queryFn: () => (user ? fetchUserNotifications(user.id) : Promise.resolve([])),
     enabled: !!user,
     refetchInterval: 30000,
+  });
+
+  // Automated background notifications (Homie same-college & Trial ending)
+  useState(() => {
+    if (user?.id) {
+      void checkPeriodicSameCollegeNotification(user.id);
+      void checkTrialEndingNotification(user.id);
+    }
   });
 
   const unreadList = notifications.filter((n) => !n.is_read);

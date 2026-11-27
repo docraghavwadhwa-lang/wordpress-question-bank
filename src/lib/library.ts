@@ -192,7 +192,7 @@ export async function sendBuddyRequest(recipientId: string) {
     throw new Error("Target user ID is required to send buddy request");
   }
 
-  // Exclusively route through audited SECURITY DEFINER RPC: validates device_session_active, prevents self-add, and handles duplicates gracefully
+  // Audited SECURITY DEFINER RPC: validates device_session_active, prevents self-add, and handles duplicates gracefully
   const { data, error } = await (supabase as any).rpc("send_buddy_request", {
     target_user_id: targetUserId,
   } as any);
@@ -200,6 +200,33 @@ export async function sendBuddyRequest(recipientId: string) {
   if (error) {
     throw new Error(error.message || "Failed to send buddy request");
   }
+
+  // Ensure notification is posted to recipient Notification Bell
+  try {
+    const userRes = await supabase.auth.getUser();
+    const myUid = userRes.data.user?.id;
+    if (myUid) {
+      const { data: myProfile } = await db
+        .from("profiles")
+        .select("full_name, handle")
+        .eq("id", myUid)
+        .maybeSingle();
+
+      const senderName = myProfile?.full_name || (myProfile?.handle ? `@${myProfile.handle}` : "A doctor");
+
+      await db.from("notifications").insert({
+        created_by: myUid,
+        recipient_id: targetUserId,
+        title: "🤝 New Homie Request!",
+        message: `✨ ${senderName} wants to lock in and study together! Tap to accept and keep each other accountable 🎯`,
+        type: "direct",
+        link: "/library?tab=buddies",
+      });
+    }
+  } catch {
+    /* non-blocking notification fallback */
+  }
+
   return data;
 }
 
@@ -212,8 +239,14 @@ export async function respondBuddyRequest(requestId: string, status: "accepted" 
 }
 
 export async function removeBuddy(buddyId: string) {
-  const { error } = await db.from("buddies").delete().eq("id", buddyId);
-  if (error) throw error;
+  const { error: rpcErr } = await (supabase as any).rpc("remove_buddy", {
+    buddy_id: buddyId,
+  } as any);
+
+  if (rpcErr) {
+    const { error } = await db.from("buddies").delete().eq("id", buddyId);
+    if (error) throw error;
+  }
 }
 
 export async function searchBuddies(query: string): Promise<LeaderboardEntry[]> {
@@ -228,15 +261,31 @@ export async function searchBuddies(query: string): Promise<LeaderboardEntry[]> 
 
 export async function fetchSameCollegeStudents(currentUserId: string, college: string): Promise<LeaderboardEntry[]> {
   if (!college || !college.trim()) return [];
+
+  // Exclude existing/pending homies and self
+  const { data: existingBuddies } = await db
+    .from("buddies")
+    .select("requester_id, recipient_id")
+    .or(`requester_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`);
+
+  const excludedIds = new Set<string>();
+  excludedIds.add(currentUserId);
+  (existingBuddies || []).forEach((b: { requester_id: string; recipient_id: string }) => {
+    excludedIds.add(b.requester_id);
+    excludedIds.add(b.recipient_id);
+  });
+
   const { data, error } = await db
     .from("profiles")
     .select("id, full_name, handle, college, study_year, avatar_url, dream_specialisation, todays_mood")
-    .eq("college", college.trim())
+    .ilike("college", college.trim())
     .neq("id", currentUserId)
-    .limit(12);
+    .limit(30);
 
   if (error) return [];
-  return (data ?? []).map((u: any) => ({
+  const filtered = (data ?? []).filter((u: any) => !excludedIds.has(u.id));
+
+  return filtered.map((u: any) => ({
     user_id: u.id,
     id: u.id,
     full_name: u.full_name,
@@ -590,5 +639,42 @@ export async function deleteStudyTodo(todoId: string) {
     } catch {
       /* ignore */
     }
+  }
+}
+
+
+export function formatTodoDateGroupLabel(isoDate: string): string {
+  try {
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return "Today";
+
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    const itemDateStr = formatter.format(d);
+    const todayDateStr = formatter.format(new Date());
+
+    if (itemDateStr === todayDateStr) {
+      return "Today";
+    }
+
+    const yest = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const yestDateStr = formatter.format(yest);
+    if (itemDateStr === yestDateStr) {
+      return "Yesterday";
+    }
+
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "Today";
   }
 }
