@@ -130,11 +130,11 @@ export function StudyProfileSettingsDialog({
                   key={h}
                   type="button"
                   size="sm"
-                  variant={goalHours === h ? "default" : "outline"}
-                  className={`h-7 text-xs flex-1 ${
+                  variant="ghost"
+                  className={`h-7 text-xs flex-1 font-semibold transition-colors ${
                     goalHours === h
-                      ? "bg-[#E5B95C] text-[#082428] font-bold"
-                      : "border-[#0D4347] text-[#F7F5F0] hover:bg-[#0D4347]"
+                      ? "bg-[#E5B95C] text-[#082428] font-bold shadow-sm"
+                      : "bg-[#0D4347] text-[#F4F1EA] border border-[#4BA09F]/30 hover:bg-[#165E63]"
                   }`}
                   onClick={() => setGoalHours(h)}
                 >

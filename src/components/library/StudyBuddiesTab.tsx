@@ -184,7 +184,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                 ) : (
                   <div className="divide-y divide-slate-100">
                     {liveResults.map((user) => {
-                      const isSelf = user.user_id === currentUserId;
+                      const isSelf = ((user as any).user_id || (user as any).id) === currentUserId;
                       const isBuddy = isAlreadyBuddy(user.user_id);
                       const isPending = isRequestPending(user.user_id);
 
@@ -219,9 +219,9 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                               ) : (
                                 <Button
                                   size="sm"
-                                  className="h-7 px-2.5 text-xs font-semibold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-sm"
+                                  className="h-7 px-2.5 text-xs font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
                                   disabled={sendRequestMutation.isPending}
-                                  onClick={() => sendRequestMutation.mutate(user.user_id)}
+                                  onClick={() => sendRequestMutation.mutate((user as any).user_id || (user as any).id)}
                                 >
                                   <UserPlus className="h-3 w-3 mr-1" /> Add Buddy
                                 </Button>
@@ -257,7 +257,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
           </div>
           <div className="divide-y divide-border/40">
             {searchResults.map((user) => {
-              const isSelf = user.user_id === currentUserId;
+              const isSelf = ((user as any).user_id || (user as any).id) === currentUserId;
               const isBuddy = isAlreadyBuddy(user.user_id);
               const isPending = isRequestPending(user.user_id);
 
@@ -286,9 +286,9 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="h-7 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5]"
+                          className="h-7 text-xs font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
                           disabled={sendRequestMutation.isPending}
-                          onClick={() => sendRequestMutation.mutate(user.user_id)}
+                          onClick={() => sendRequestMutation.mutate((user as any).user_id || (user as any).id)}
                         >
                           <UserPlus className="h-3.5 w-3.5 mr-1" /> Add Buddy
                         </Button>
@@ -373,8 +373,8 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
       {/* Active Buddies Grid */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h4 className="font-display font-semibold text-xs text-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <UserCheck className="h-3.5 w-3.5 text-primary" /> Active Study Buddies ({activeBuddies.length})
+          <h4 className="font-display font-semibold text-xs text-[#F4F1EA]/90 uppercase tracking-wider flex items-center gap-1.5">
+            <UserCheck className="h-3.5 w-3.5 text-[#E5B95C]" /> Active Study Buddies ({activeBuddies.length})
           </h4>
         </div>
 

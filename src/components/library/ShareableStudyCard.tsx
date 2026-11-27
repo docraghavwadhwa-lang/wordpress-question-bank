@@ -85,20 +85,33 @@ export function ShareableStudyCardModal({
       ctx.strokeRect(80, 80, width - 160, height - 160);
 
       // 4. Header: Elixir Logo & Brand Badge
-      // Try loading the logo image cleanly
+      // Draw crisp pure white logo directly onto teal background (no white box)
       const logoImg = new Image();
-      logoImg.src = "/elixir-header-logo-v3.png";
+      logoImg.crossOrigin = "anonymous";
+      logoImg.src = "/elixir-header-latest.webp";
       await new Promise<void>((resolve) => {
         logoImg.onload = () => resolve();
         logoImg.onerror = () => resolve();
       });
 
       if (logoImg.naturalWidth) {
-        const logoW = 280;
+        const logoW = 320;
         const logoH = (logoW / logoImg.naturalWidth) * logoImg.naturalHeight;
-        ctx.drawImage(logoImg, width / 2 - logoW / 2, 160, logoW, logoH);
+        const tCanvas = document.createElement("canvas");
+        tCanvas.width = logoImg.naturalWidth;
+        tCanvas.height = logoImg.naturalHeight;
+        const tCtx = tCanvas.getContext("2d");
+        if (tCtx) {
+          tCtx.drawImage(logoImg, 0, 0);
+          tCtx.globalCompositeOperation = "source-in";
+          tCtx.fillStyle = "#FFFFFF";
+          tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+          ctx.drawImage(tCanvas, width / 2 - logoW / 2, 160, logoW, logoH);
+        } else {
+          ctx.drawImage(logoImg, width / 2 - logoW / 2, 160, logoW, logoH);
+        }
       } else {
-        ctx.fillStyle = "#F4F1EA";
+        ctx.fillStyle = "#FFFFFF";
         ctx.font = "700 60px 'Newsreader', Georgia, serif";
         ctx.textAlign = "center";
         ctx.fillText("ELIXIR", width / 2, 210);
@@ -178,15 +191,50 @@ export function ShareableStudyCardModal({
         "#F7F5F0"
       );
 
-      // 7. Medical Quote in Normal (Non-Italic) Style
+      // 7. Medical Quote in Normal (Non-Italic) Style with strict boundary wrapping
       ctx.fillStyle = "#F4F1EA";
       ctx.font = "500 32px 'Newsreader', Georgia, serif"; // Strictly non-italic
       ctx.textAlign = "center";
-      ctx.fillText('"Medicine is an art whose practice is guided by science."', width / 2, 1540);
+
+      function wrapCanvasText(
+        context: CanvasRenderingContext2D,
+        text: string,
+        x: number,
+        y: number,
+        maxWidth: number,
+        lineHeight: number
+      ) {
+        const words = text.split(" ");
+        let line = "";
+        let currentY = y;
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + " ";
+          const metrics = context.measureText(testLine);
+          if (metrics.width > maxWidth && n > 0) {
+            context.fillText(line.trim(), x, currentY);
+            line = words[n] + " ";
+            currentY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        context.fillText(line.trim(), x, currentY);
+        return currentY;
+      }
+
+      const quoteMaxW = width - 260; // 820px max inside 1080px canvas (130px padding on each side)
+      const quoteEndY = wrapCanvasText(
+        ctx,
+        '"Medicine is an art whose practice is guided by science."',
+        width / 2,
+        1530,
+        quoteMaxW,
+        46
+      );
 
       ctx.font = "24px 'Hanken Grotesk', sans-serif";
-      ctx.fillStyle = "rgba(244, 241, 234, 0.7)";
-      ctx.fillText("— Sir William Osler", width / 2, 1590);
+      ctx.fillStyle = "rgba(244, 241, 234, 0.75)";
+      ctx.fillText("— Sir William Osler", width / 2, quoteEndY + 45);
 
       // 8. Footer Link
       ctx.fillStyle = "#E5B95C";
@@ -350,10 +398,12 @@ export function ShareableStudyCardModal({
             </div>
           </div>
 
-          <p className="mt-5 font-display text-xs text-[#F7F5F0]/80">
-            "Medicine is an art whose practice is guided by science."
-          </p>
-          <p className="text-[10px] text-[#F7F5F0]/50 mt-0.5">— Sir William Osler</p>
+          <div className="mt-5 max-w-[280px] sm:max-w-xs mx-auto text-center">
+            <p className="font-display text-xs text-[#F7F5F0]/85 leading-relaxed break-words">
+              "Medicine is an art whose practice is guided by science."
+            </p>
+            <p className="text-[10px] text-[#F7F5F0]/60 mt-1">— Sir William Osler</p>
+          </div>
         </div>
 
         {/* Hidden canvas for high-resolution 1080x1920 PNG export */}

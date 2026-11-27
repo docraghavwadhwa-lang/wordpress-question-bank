@@ -187,9 +187,14 @@ export async function fetchUserBuddies(userId: string): Promise<Buddy[]> {
 }
 
 export async function sendBuddyRequest(recipientId: string) {
+  const targetUserId = (recipientId || "").trim();
+  if (!targetUserId) {
+    throw new Error("Target user ID is required to send buddy request");
+  }
+
   // Exclusively route through audited SECURITY DEFINER RPC: validates device_session_active, prevents self-add, and handles duplicates gracefully
   const { data, error } = await (supabase as any).rpc("send_buddy_request", {
-    target_user_id: recipientId,
+    target_user_id: targetUserId,
   } as any);
 
   if (error) {
@@ -214,7 +219,37 @@ export async function removeBuddy(buddyId: string) {
 export async function searchBuddies(query: string): Promise<LeaderboardEntry[]> {
   const { data, error } = await db.rpc("search_study_buddies", { _query: query });
   if (error) throw error;
-  return (data ?? []) as LeaderboardEntry[];
+  return ((data ?? []) as any[]).map((u) => ({
+    ...u,
+    id: u.id || u.user_id,
+    user_id: u.user_id || u.id,
+  })) as LeaderboardEntry[];
+}
+
+export async function fetchSameCollegeStudents(currentUserId: string, college: string): Promise<LeaderboardEntry[]> {
+  if (!college || !college.trim()) return [];
+  const { data, error } = await db
+    .from("profiles")
+    .select("id, full_name, handle, college, study_year, avatar_url, dream_specialisation, todays_mood")
+    .eq("college", college.trim())
+    .neq("id", currentUserId)
+    .limit(12);
+
+  if (error) return [];
+  return (data ?? []).map((u: any) => ({
+    user_id: u.id,
+    id: u.id,
+    full_name: u.full_name,
+    handle: u.handle,
+    college: u.college,
+    study_year: u.study_year,
+    avatar_url: u.avatar_url,
+    dream_specialisation: u.dream_specialisation,
+    todays_mood: u.todays_mood,
+    total_seconds: 0,
+    rank: 0,
+    buddy_status: "none",
+  })) as LeaderboardEntry[];
 }
 
 export async function fetchLeaderboard(
@@ -406,7 +441,29 @@ export interface StudyTodo {
 
 const LOCAL_TODOS_KEY = "elixir_study_todos_v1";
 
+const TODOS_ORDER_KEY = "elixir_study_todos_order_v1";
+
+export function saveStudyTodosOrder(userId: string, orderedIds: string[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(`${TODOS_ORDER_KEY}_${userId}`, JSON.stringify(orderedIds));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getStudyTodosOrder(userId: string): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(`${TODOS_ORDER_KEY}_${userId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchStudyTodos(userId: string): Promise<StudyTodo[]> {
+  let list: StudyTodo[] = [];
   try {
     const { data, error } = await db
       .from("study_todos")
@@ -415,24 +472,36 @@ export async function fetchStudyTodos(userId: string): Promise<StudyTodo[]> {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
+      list = data as StudyTodo[];
       if (typeof window !== "undefined") {
         localStorage.setItem(LOCAL_TODOS_KEY, JSON.stringify(data));
       }
-      return data as StudyTodo[];
     }
   } catch (e) {
     console.error("fetchStudyTodos network error:", e);
   }
 
-  if (typeof window !== "undefined") {
+  if (list.length === 0 && typeof window !== "undefined") {
     try {
       const local = localStorage.getItem(LOCAL_TODOS_KEY);
-      if (local) return JSON.parse(local);
+      if (local) list = JSON.parse(local);
     } catch {
       /* ignore */
     }
   }
-  return [];
+
+  // Apply saved reordering if available
+  const order = getStudyTodosOrder(userId);
+  if (order.length > 0 && list.length > 0) {
+    const orderMap = new Map(order.map((id, idx) => [id, idx]));
+    list.sort((a, b) => {
+      const idxA = orderMap.has(a.id) ? orderMap.get(a.id)! : 9999;
+      const idxB = orderMap.has(b.id) ? orderMap.get(b.id)! : 9999;
+      return idxA - idxB;
+    });
+  }
+
+  return list;
 }
 
 export async function addStudyTodo(userId: string, task: string): Promise<StudyTodo> {

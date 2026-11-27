@@ -11,8 +11,10 @@ import {
   addStudyTodo,
   toggleStudyTodo,
   deleteStudyTodo,
+  saveStudyTodosOrder,
   type StudyTodo,
 } from "@/lib/library";
+import { StudyTogetherView } from "@/components/library/StudyTogetherView";
 import { formatFocusDuration } from "@/lib/apothecary";
 import { ambientSound, SOUNDSCAPES, type SoundscapePreset } from "@/lib/ambient-sound";
 import { ApothecaryFlask } from "@/components/library/ApothecaryFlask";
@@ -71,6 +73,7 @@ import {
   Plus,
   Volume2,
   ListTodo,
+  GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -93,7 +96,7 @@ export const Route = createFileRoute("/_authenticated/library")({
   component: LibraryPage,
 });
 
-type LibrarySection = "focus" | "apothecary" | "analytics" | "leaderboards" | "buddies" | "groups" | "todos" | "soundscapes";
+type LibrarySection = "focus" | "apothecary" | "analytics" | "leaderboards" | "buddies" | "groups" | "todos" | "soundscapes" | "together";
 
 function LibraryPage() {
   const { user } = useAuth();
@@ -156,6 +159,72 @@ function LibraryPage() {
   const profile = profileQuery.data ?? null;
   const sessions = sessionsQuery.data ?? [];
   const todos = todosQuery.data ?? [];
+  const [todoItems, setTodoItems] = useState<StudyTodo[]>([]);
+
+  useEffect(() => {
+    if (todosQuery.data) {
+      setTodoItems(todosQuery.data);
+    }
+  }, [todosQuery.data]);
+
+  // Drag and touch reordering
+  const dragIndexRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number>(0);
+  const touchItemIndexRef = useRef<number | null>(null);
+
+  const reorderTodos = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+    setTodoItems((prev) => {
+      if (fromIndex >= prev.length || toIndex >= prev.length) return prev;
+      const copy = [...prev];
+      const [moved] = copy.splice(fromIndex, 1);
+      copy.splice(toIndex, 0, moved);
+      if (user?.id) {
+        saveStudyTodosOrder(user.id, copy.map((t) => t.id));
+      }
+      return copy;
+    });
+  }, [user?.id]);
+
+  const handleDragStart = (idx: number) => {
+    dragIndexRef.current = idx;
+  };
+
+  const handleDragOver = (idx: number, e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragIndexRef.current === null || dragIndexRef.current === idx) return;
+    reorderTodos(dragIndexRef.current, idx);
+    dragIndexRef.current = idx;
+  };
+
+  const handleDragEnd = () => {
+    dragIndexRef.current = null;
+  };
+
+  const handleTouchStart = (idx: number, e: React.TouchEvent) => {
+    touchItemIndexRef.current = idx;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchItemIndexRef.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const diffY = currentY - touchStartYRef.current;
+    const itemHeight = 44;
+    const steps = Math.round(diffY / itemHeight);
+    if (steps !== 0) {
+      const targetIdx = Math.max(0, Math.min(todoItems.length - 1, touchItemIndexRef.current + steps));
+      if (targetIdx !== touchItemIndexRef.current) {
+        reorderTodos(touchItemIndexRef.current, targetIdx);
+        touchItemIndexRef.current = targetIdx;
+        touchStartYRef.current = currentY;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchItemIndexRef.current = null;
+  };
 
   // Goal & Audio state
   const [dailyGoalHours, setDailyGoalHours] = useState<number>(4);
@@ -321,18 +390,30 @@ function LibraryPage() {
     [timerState.isRunning, setTargetMinutes]
   );
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (timerState.isRunning) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
     setIsDragging(true);
     updateRingFromAngle(e.clientX, e.clientY);
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging || timerState.isRunning) return;
     updateRingFromAngle(e.clientX, e.clientY);
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    try {
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      /* ignore */
+    }
     setIsDragging(false);
   };
 
@@ -410,8 +491,8 @@ function LibraryPage() {
   return (
     <div className="min-h-screen bg-[#165E63] dark:bg-[#082428] text-[#F7F5F0] transition-colors selection:bg-[#E5B95C] selection:text-[#082428] pb-24">
       {/* ================= TOP NAVIGATION / SANCTUARY HEADER ================= */}
-      <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+      <header className="sticky top-0 z-30 border-b border-[#0D4347]/80 bg-[#165E63]/95 dark:bg-[#082428]/95 backdrop-blur-md px-4 pt-[max(0.6rem,env(safe-area-inset-top))] pb-2.5">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-3">
           {/* Top-Left: Menu Hamburger (≡), Back, Elixir Logo */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* 3-Line Hamburger Menu */}
@@ -436,8 +517,16 @@ function LibraryPage() {
               <span className="hidden sm:inline">Back</span>
             </Button>
 
-            {/* Sanctuary Branding & Logo */}
-            <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-[#0D4347]">
+            {/* Sanctuary Branding & Logo (Clickable back to Focus Timer) */}
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSection("focus");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-[#0D4347] hover:opacity-90 transition-opacity text-left cursor-pointer focus:outline-none"
+              title="Return to Focus Timer"
+            >
               <img
                 src="/elixir-header-latest.webp"
                 alt="Elixir"
@@ -446,7 +535,7 @@ function LibraryPage() {
               <span className="text-xs font-display font-medium text-[#E5B95C] tracking-wide">
                 Sanctuary
               </span>
-            </div>
+            </button>
           </div>
 
           {/* Top-Right: Today's Goal Pill + Ambient Sound Controls */}
@@ -580,6 +669,7 @@ function LibraryPage() {
               { id: "analytics", label: "Analytics", icon: BarChart2, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
               { id: "leaderboards", label: "Ranks", icon: Trophy, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "buddies", label: "Study Buddies", icon: Users, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
+              { id: "together", label: "Study Together", icon: Users, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "groups", label: "Study Groups", icon: Compass, color: "text-[#38BDF8] bg-[#38BDF8]/10 border-[#38BDF8]/30" },
               { id: "todos", label: "To-Do List", icon: ListTodo, color: "text-[#E5B95C] bg-[#E5B95C]/10 border-[#E5B95C]/30" },
               { id: "soundscapes", label: "Soundscapes", icon: Headphones, color: "text-[#4BA09F] bg-[#4BA09F]/10 border-[#4BA09F]/30" },
@@ -726,10 +816,10 @@ function LibraryPage() {
                 </div>
               </div>
 
-              {/* Quick Presets (15, 25, 45, 60, 90) */}
+              {/* Quick Presets (15, 25, 45, 60, 90, 120, 180) */}
               {!timerState.isRunning && (
-                <div className="flex gap-2 mt-4">
-                  {[15, 25, 45, 60, 90].map((m) => (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 mt-4 max-w-sm">
+                  {[15, 25, 45, 60, 90, 120, 180].map((m) => (
                     <Button
                       key={m}
                       size="sm"
@@ -738,9 +828,9 @@ function LibraryPage() {
                         setRingMinutes(m);
                         setTargetMinutes(m);
                       }}
-                      className={`h-7 px-2.5 text-xs rounded-full border ${
+                      className={`h-7 px-2.5 text-xs rounded-full border transition-all ${
                         ringMinutes === m
-                          ? "bg-[#E5B95C] text-[#082428] font-bold border-[#E5B95C]"
+                          ? "bg-[#E5B95C] text-[#082428] font-bold border-[#E5B95C] shadow-sm"
                           : "bg-[#0D4347]/50 text-[#F7F5F0] border-[#4BA09F]/20 hover:bg-[#0D4347]"
                       }`}
                     >
@@ -754,14 +844,27 @@ function LibraryPage() {
             {/* Active Session Action Controls */}
             <div className="w-full max-w-md space-y-4">
               {!timerState.isRunning && !timerState.isPaused ? (
-                /* Idle State: Start Session Button */
-                <Button
-                  onClick={() => setSetupModalOpen(true)}
-                  className="w-full h-12 text-base font-bold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-xl rounded-xl gap-2 transition-transform active:scale-98"
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Start {ringMinutes}-Min Focus Session
-                </Button>
+                /* Idle State: Start Session Button + Study Together */
+                <div className="space-y-2.5">
+                  <Button
+                    onClick={() => setSetupModalOpen(true)}
+                    className="w-full h-12 text-base font-bold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-xl rounded-xl gap-2 transition-transform active:scale-98"
+                  >
+                    <Play className="h-5 w-5 fill-current" />
+                    Start {ringMinutes}-Min Focus Session
+                  </Button>
+
+                  {/* Compact Study Together Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setActiveSection("together")}
+                    className="w-full h-9 text-xs font-semibold text-[#0D4347] border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] rounded-xl shadow-sm gap-2"
+                  >
+                    <Users className="h-4 w-4 text-[#0D4347]" />
+                    Study Together (Rooms & College Buddies)
+                  </Button>
+                </div>
               ) : isWithinGracePeriod ? (
                 /* 10-Second Grace Period: Clean Cancel */
                 <div className="space-y-2 rounded-xl bg-[#0D4347]/60 border border-[#4BA09F]/40 p-4 text-center">
@@ -1027,21 +1130,31 @@ function LibraryPage() {
           </div>
         )}
 
+        {/* ================= SECTION: STUDY TOGETHER ================= */}
+        {activeSection === "together" && user && (
+          <StudyTogetherView
+            currentUserId={user.id}
+            userCollege={profile?.college}
+            onBackToTimer={() => setActiveSection("focus")}
+            onOpenSettings={() => setSettingsModalOpen(true)}
+          />
+        )}
+
         {/* ================= SECTION 7: FULL TO-DO LIST ================= */}
         {activeSection === "todos" && (
           <div className="space-y-6">
             <div className="flex items-center justify-between border-b border-[#0D4347] pb-3">
               <div>
-                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Personal Study Tasks</h3>
+                <h3 className="font-display font-bold text-xl text-[#E5B95C]">Today's To Do List</h3>
                 <p className="text-xs text-[#F7F5F0]/70">
-                  Daily checklist of Q-bank decks, PYQs, and medical revision topics.
+                  Drag and drop to rearrange your daily tasks in any order.
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setActiveSection("focus")}
-                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/20 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
+                className="h-8 text-xs font-semibold text-[#0D4347] border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
               >
                 Back to Timer
               </Button>
@@ -1065,40 +1178,61 @@ function LibraryPage() {
               </form>
 
               <div className="divide-y divide-[#0D4347]">
-                {todos.map((todo) => (
-                  <div
-                    key={todo.id}
-                    className="flex items-center justify-between gap-3 py-3 text-xs"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => handleToggleTodo(todo.id, !todo.completed)}
-                      className="flex items-center gap-3 text-left flex-1"
+                {todoItems.length === 0 ? (
+                  <p className="py-6 text-center text-xs text-[#F7F5F0]/50">
+                    No tasks yet. Set goals to guide your study sessions.
+                  </p>
+                ) : (
+                  todoItems.map((todo, idx) => (
+                    <div
+                      key={todo.id}
+                      draggable
+                      onDragStart={() => handleDragStart(idx)}
+                      onDragOver={(e) => handleDragOver(idx, e)}
+                      onDragEnd={handleDragEnd}
+                      className="flex items-center justify-between gap-3 py-3 text-xs group select-none"
                     >
-                      {todo.completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
-                      ) : (
-                        <Circle className="h-5 w-5 text-[#F7F5F0]/40 shrink-0" />
-                      )}
-                      <span
-                        className={`text-sm ${
-                          todo.completed
-                            ? "line-through text-[#F7F5F0]/50"
-                            : "text-[#F7F5F0] font-medium"
-                        }`}
+                      <div
+                        className="touch-none cursor-grab active:cursor-grabbing text-[#F7F5F0]/40 group-hover:text-[#E5B95C] p-1"
+                        onTouchStart={(e) => handleTouchStart(idx, e)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        title="Drag to reorder"
                       >
-                        {todo.task}
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteTodo(todo.id)}
-                      className="text-[#F7F5F0]/40 hover:text-red-400 p-1.5"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+                        <GripVertical className="h-4 w-4" />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleToggleTodo(todo.id, !todo.completed)}
+                        className="flex items-center gap-3 text-left flex-1 min-w-0"
+                      >
+                        {todo.completed ? (
+                          <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-[#F7F5F0]/40 shrink-0" />
+                        )}
+                        <span
+                          className={`text-sm truncate ${
+                            todo.completed
+                              ? "line-through text-[#F7F5F0]/50"
+                              : "text-[#F7F5F0] font-medium"
+                          }`}
+                        >
+                          {todo.task}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTodo(todo.id)}
+                        className="text-[#F7F5F0]/40 hover:text-red-400 p-1.5"
+                        title="Delete task"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -1261,11 +1395,11 @@ function LibraryPage() {
                   <Button
                     key={h}
                     type="button"
-                    variant={!customGoalInput && dailyGoalHours === h ? "default" : "outline"}
-                    className={`h-9 text-xs rounded-lg ${
+                    variant="ghost"
+                    className={`h-9 text-xs rounded-lg font-semibold transition-colors ${
                       !customGoalInput && dailyGoalHours === h
-                        ? "bg-[#E5B95C] text-[#082428] font-bold"
-                        : "border-[#0D4347] text-[#F7F5F0] hover:bg-[#0D4347]"
+                        ? "bg-[#E5B95C] text-[#082428] font-bold shadow-sm"
+                        : "bg-[#0D4347] text-[#F4F1EA] border border-[#4BA09F]/40 hover:bg-[#165E63]"
                     }`}
                     onClick={() => {
                       setDailyGoalHours(h);
