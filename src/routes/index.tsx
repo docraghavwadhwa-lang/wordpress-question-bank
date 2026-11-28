@@ -193,10 +193,7 @@ function Index() {
     } catch (error) { toast.error(offlineErrorMessage(error, "Couldn't open this review. Please try again.")); }
     finally { setLoading(false); }
   }
-
-  if (!ready) return <OpeningScreen />;
-  if (isApp && user && decks.isPending) return <OpeningScreen />;
-  if (!user) return <Landing />;
+  
   const { openOverlay } = useLibraryTimer();
   const [todoSheetOpen, setTodoSheetOpen] = useState(false);
 
@@ -223,6 +220,9 @@ function Index() {
     queryFn: () => (user ? fetchUserBuddies(user.id) : Promise.resolve([])),
     enabled: !!user,
   });
+if (!ready) return <OpeningScreen />;
+  if (isApp && user && decks.isPending) return <OpeningScreen />;
+  if (!user) return <Landing />;
 
   const focusHrs = ((dailyFocus.data ?? 0) / 3600).toFixed(1);
   const goalHrs = homeProfile.data?.daily_focus_goal_minutes
