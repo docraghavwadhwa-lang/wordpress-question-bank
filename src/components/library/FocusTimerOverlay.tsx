@@ -6,6 +6,7 @@ import { ApothecaryFlask } from "./ApothecaryFlask";
 import { ApothecaryRack } from "./ApothecaryRack";
 import { ShareableStudyCard } from "./ShareableStudyCard";
 import { AmbiencePopover } from "@/components/ambience/AmbiencePopover";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -162,19 +163,23 @@ export function FocusTimerOverlay() {
     ? Math.round(timerState.targetSeconds / 60)
     : ringMinutes;
 
-  // Arc calculation
+  // Arc and unified knob calculation:
+  // Both arc and knob start at 12 o'clock and sweep clockwise.
+  // With the SVG's -rotate-90 transform, 0 rad in SVG coordinates maps to 12 o'clock on screen.
   const ringRadius = 120;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const strokeFrac = timerState.isRunning
     ? isPomodoro
-      ? Math.min(1, timerState.elapsedSeconds / Math.max(1, timerState.targetSeconds))
-      : Math.min(1, (timerState.elapsedSeconds % 3600) / 3600)
-    : (ringMinutes - 15) / (180 - 15);
+      ? Math.min(1, Math.max(0, timerState.elapsedSeconds / Math.max(1, timerState.targetSeconds)))
+      : Math.min(1, Math.max(0, (timerState.elapsedSeconds % 3600) / 3600))
+    : Math.min(1, Math.max(0, (ringMinutes - 15) / (180 - 15)));
 
   const strokeDashoffset = ringCircumference * (1 - strokeFrac);
 
-  // Thumb knob coordinates
-  const thumbAngleRad = strokeFrac * 2 * Math.PI - Math.PI / 2;
+  // Thumb knob coordinates in SVG local space:
+  // 0 rad is at (cx + r, cy) = (260, 140) which points to 12 o'clock due to SVG -rotate-90.
+  // At angle = strokeFrac * 2 * Math.PI, the knob sits locked directly on the leading tip of the arc.
+  const thumbAngleRad = strokeFrac * 2 * Math.PI;
   const thumbX = 140 + ringRadius * Math.cos(thumbAngleRad);
   const thumbY = 140 + ringRadius * Math.sin(thumbAngleRad);
 
@@ -205,16 +210,18 @@ export function FocusTimerOverlay() {
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-[#0D4347] text-[#E5B95C] border border-[#0D4347]/60">
-              ⏱ {todayFocusHours}h logged today
+              ⏱ {todayFocusHours}h
             </span>
             <AmbiencePopover compact />
+            <NotificationBell compact />
             <Button
               variant="outline"
-              size="sm"
+              size="icon"
+              aria-label="Share study session"
               onClick={() => setShareCardOpen(true)}
-              className="h-8 text-xs font-semibold text-[#082428] bg-[#E5B95C] hover:bg-[#E5B95C]/90 border-none gap-1"
+              className="h-8 w-8 text-[#082428] bg-[#E5B95C] hover:bg-[#E5B95C]/90 border-none shrink-0"
             >
-              <Share2 className="h-3.5 w-3.5" /> Share
+              <Share2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -297,18 +304,16 @@ export function FocusTimerOverlay() {
                 strokeDashoffset={strokeDashoffset}
               />
 
-              {/* Draggable thumb knob (visible when not running) */}
-              {!timerState.isRunning && (
-                <circle
-                  cx={thumbX}
-                  cy={thumbY}
-                  r={12}
-                  fill="#E5B95C"
-                  stroke="#082428"
-                  strokeWidth={3}
-                  className="cursor-grab active:cursor-grabbing shadow-lg"
-                />
-              )}
+              {/* Thumb knob locked on the leading tip of the yellow arc */}
+              <circle
+                cx={thumbX}
+                cy={thumbY}
+                r={12}
+                fill="#E5B95C"
+                stroke="#082428"
+                strokeWidth={3}
+                className={timerState.isRunning ? "shadow-lg pointer-events-none" : "cursor-grab active:cursor-grabbing shadow-lg"}
+              />
             </svg>
 
             {/* Inner Alembic Flask & Time Display */}

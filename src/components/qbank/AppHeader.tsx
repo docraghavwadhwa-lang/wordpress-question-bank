@@ -90,6 +90,8 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
           {/* Right Action Icons: Headphones, Bell, Crown, Avatar */}
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            <AmbiencePopover compact />
+
             {!isApp && !user && (
               <Link to="/app" aria-label="Get the app" className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-foreground hover:bg-brand-foreground/10">
                 <Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Get the app</span>
@@ -98,7 +100,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
             {user ? (
               <>
-                <AmbiencePopover compact />
                 <NotificationBell compact />
                 <ProControl compact />
 

@@ -57,26 +57,28 @@ export function AmbiencePopover({ compact }: { compact?: boolean }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label="Study Ambience & Background Sounds"
-          title="Study Ambience"
+        <Button
+          variant={compact ? "outline" : "secondary"}
+          size="icon"
+          aria-label={isPlaying ? "Study Ambience Playing" : "Study Ambience & Background Sounds"}
+          title={isPlaying ? "Playing Ambience (tap to adjust)" : "Study Ambience"}
           className={cn(
-            "relative flex items-center justify-center rounded-full transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer",
-            compact ? "h-9 w-9" : "h-9 w-9 sm:h-10 sm:w-10",
+            "relative h-9 w-9 shrink-0 cursor-pointer shadow-xs transition-colors",
             isPlaying
-              ? "bg-[#E5B95C]/20 text-[#E5B95C] ring-2 ring-[#E5B95C]/70 shadow-sm animate-pulse"
-              : "text-brand-foreground hover:bg-brand-foreground/15"
+              ? "bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 border-[#E5B95C] shadow-sm animate-pulse"
+              : "text-foreground dark:text-foreground border border-input/80 bg-background hover:bg-accent hover:text-accent-foreground"
           )}
         >
-          <Headphones className={compact ? "h-4 w-4" : "h-5 w-5"} />
+          <Headphones
+            className={cn("h-4 w-4", isPlaying ? "text-[#082428]" : "text-foreground dark:text-foreground")}
+          />
           {isPlaying && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E5B95C] opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E5B95C]" />
             </span>
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent
@@ -98,7 +100,7 @@ export function AmbiencePopover({ compact }: { compact?: boolean }) {
               variant="ghost"
               onClick={handleToggle}
               className={cn(
-                "h-7 px-2.5 text-xs font-semibold rounded-full gap-1.5 transition-colors",
+                "h-7 px-2.5 text-xs font-semibold rounded-full gap-1.5 transition-colors cursor-pointer",
                 isPlaying
                   ? "bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90"
                   : "bg-[#0D4347] text-[#F7F5F0] hover:bg-[#0D4347]/80"
@@ -143,12 +145,12 @@ export function AmbiencePopover({ compact }: { compact?: boolean }) {
             </span>
           </div>
 
-          {/* 6 Ambience Tracks */}
+          {/* 7 Ambience Tracks */}
           <div className="space-y-1.5">
             <p className="text-[10px] uppercase font-bold tracking-wider text-[#E5B95C]/80">
-              6 Focus Soundscapes
+              7 Focus Soundscapes
             </p>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-0.5">
               {AMBIENCE_TRACKS.map((track) => {
                 const active = isPlaying && currentPreset === track.id;
                 return (

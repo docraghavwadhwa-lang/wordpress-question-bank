@@ -88,10 +88,10 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
         <Button
           variant={compact ? "outline" : "secondary"}
           size="icon"
-          className="relative h-9 w-9 shrink-0"
+          className="relative h-9 w-9 shrink-0 text-foreground dark:text-foreground border border-input/80 bg-background hover:bg-accent hover:text-accent-foreground shadow-xs"
           aria-label={unreadCount ? `${unreadCount} unread notifications` : "Notifications"}
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4 text-foreground dark:text-foreground" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground shadow-sm animate-in zoom-in">
               {unreadCount > 9 ? "9+" : unreadCount}

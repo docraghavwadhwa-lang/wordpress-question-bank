@@ -99,7 +99,7 @@ function Index() {
   const [isApp, setIsApp] = useState(false);
   // Keep every hook together, before any loading or signed-out return.
   // Reset Fast Refresh state above so older mounted hook layouts cannot survive an edit.
-  const { openOverlay } = useLibraryTimer();
+  const { openOverlay, isUserOnline } = useLibraryTimer();
   const [todoSheetOpen, setTodoSheetOpen] = useState(false);
   const homeProfile = useQuery({
     queryKey: ["home_profile", user?.id],
@@ -234,7 +234,10 @@ function Index() {
     return d === todayStr && !t.completed;
   }).length;
 
-  const liveHomies = (homiesQuery.data ?? []).filter((b: any) => b.is_studying).length;
+  const liveHomies = (homiesQuery.data ?? []).filter((b: any) => {
+    const uid = b.other_user?.id || (b.requester_id === user?.id ? b.recipient_id : b.requester_id);
+    return b.is_studying || (uid && isUserOnline(uid));
+  }).length;
   const firstName = ((homeProfile.data?.full_name || user?.user_metadata?.["full_name"] || "Doctor") as string).split(" ")[0];
 
   const tier = tierFor(streak.goal);
@@ -305,13 +308,13 @@ function Index() {
               </h1>
 
               <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-                {/* Pill 1: Focus Timer */}
+                {/* Pill 1: Focus Timer (High-contrast in Light and Dark mode) */}
                 <button
                   type="button"
                   onClick={openOverlay}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#0D4347]/30 text-[#E5B95C] border border-[#0D4347] hover:border-[#E5B95C]/60 hover:bg-[#0D4347]/60 transition-all shrink-0 cursor-pointer shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#0D4347]/15 dark:bg-[#0D4347]/40 text-[#082428] dark:text-[#E5B95C] border border-[#0D4347]/40 dark:border-[#0D4347] hover:border-[#0D4347] dark:hover:border-[#E5B95C]/60 hover:bg-[#0D4347]/25 dark:hover:bg-[#0D4347]/60 transition-all shrink-0 cursor-pointer shadow-sm"
                 >
-                  <span>⏱</span>
+                  <span className="text-[#082428] dark:text-[#E5B95C]">⏱</span>
                   <span>{focusHrs} / {goalHrs}h</span>
                 </button>
 
@@ -325,13 +328,26 @@ function Index() {
                   <span>{pendingTasks} Tasks</span>
                 </button>
 
-                {/* Pill 3: Homies Live */}
+                {/* Pill 3: Study Together (Navigates directly to Study Rooms) */}
                 <Link
                   to="/homies"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shrink-0 shadow-sm"
+                  search={{ tab: "rooms" }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-500/15 dark:bg-[#E5B95C]/15 text-amber-900 dark:text-[#E5B95C] border border-amber-600/30 dark:border-[#E5B95C]/40 hover:bg-amber-500/25 dark:hover:bg-[#E5B95C]/25 transition-all shrink-0 shadow-sm"
                 >
-                  <span>👥</span>
-                  <span>{liveHomies} Homies live</span>
+                  <Flame className="h-3.5 w-3.5 text-amber-600 dark:text-[#E5B95C]" />
+                  <span>Study Together</span>
+                </Link>
+              </div>
+
+              {/* Row 2: Homies Live status pill */}
+              <div className="mt-1.5 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                <Link
+                  to="/homies"
+                  search={{ tab: "homies" }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shrink-0 shadow-xs"
+                >
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>👥 {liveHomies} Homies live</span>
                 </Link>
               </div>
             </div>

@@ -6,13 +6,9 @@ import {
   createStudyGroup,
   joinStudyGroupByCode,
   fetchUserBuddies,
-  fetchSameCollegeStudents,
-  sendBuddyRequest,
   type StudyGroup,
   type LeaderboardEntry,
 } from "@/lib/library";
-import { UserAvatar } from "@/components/common/UserAvatar";
-import { QuickPeekProfileCard } from "./QuickPeekProfileCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,13 +23,10 @@ import {
   Users,
   Plus,
   KeyRound,
-  GraduationCap,
   Sparkles,
   ArrowLeft,
-  UserPlus,
   Flame,
   ArrowRight,
-  School,
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -61,7 +54,6 @@ export function StudyTogetherView({
   const [joinCode, setJoinCode] = useState("");
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupGoalHours, setNewGroupGoalHours] = useState(4);
-  const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
 
   // Existing Groups
   const groupsQuery = useQuery({
@@ -83,13 +75,7 @@ export function StudyTogetherView({
     )
   );
 
-  // College Suggestions Query
-  const collegeSuggestionsQuery = useQuery({
-    queryKey: ["college_suggestions", currentUserId, userCollege],
-    queryFn: () =>
-      userCollege ? fetchSameCollegeStudents(currentUserId, userCollege) : Promise.resolve([]),
-    enabled: !!currentUserId && !!userCollege && userCollege.trim().length > 0,
-  });
+
 
   // Join Group Mutation
   const joinMutation = useMutation({
@@ -127,21 +113,7 @@ export function StudyTogetherView({
     },
   });
 
-  // Send Buddy Request Mutation
-  const sendBuddyMutation = useMutation({
-    mutationFn: async (targetUserId: string) => {
-      await sendBuddyRequest(targetUserId);
-      return targetUserId;
-    },
-    onSuccess: (targetUserId) => {
-      setPendingRequests((prev) => new Set([...prev, targetUserId]));
-      toast.success("Homie request sent!");
-      void qc.invalidateQueries({ queryKey: ["study_buddies"] });
-    },
-    onError: (err: any) => {
-      toast.error(err.message || "Failed to send homie request");
-    },
-  });
+
 
   // If a group/room is active, render the dedicated room session via StudyGroupsTab
   if (selectedGroup) {
@@ -160,10 +132,7 @@ export function StudyTogetherView({
     );
   }
 
-  // Filter college students to remove existing buddies and current user
-  const suggestedStudents = (collegeSuggestionsQuery.data ?? []).filter(
-    (student) => student.user_id !== currentUserId && !buddyIds.has(student.user_id)
-  );
+
 
   return (
     <div className="space-y-6">
@@ -341,120 +310,6 @@ export function StudyTogetherView({
         </div>
       )}
 
-      {/* Suggested Buddies from Your Medical College */}
-      <div className="rounded-2xl border border-[#0D4347] bg-[#082428]/90 p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0D4347] pb-3">
-          <div>
-            <h3 className="font-display font-bold text-base text-[#F7F5F0] flex items-center gap-2">
-              <School className="h-4.5 w-4.5 text-[#E5B95C]" /> Suggested Homies from Your College
-            </h3>
-            <p className="text-xs text-[#F7F5F0]/65 mt-0.5">
-              {userCollege ? (
-                <>Students studying at <span className="text-[#E5B95C] font-semibold">{userCollege}</span></>
-              ) : (
-                "Connect with batchmates and peer doctors from your medical college"
-              )}
-            </p>
-          </div>
-
-          {!userCollege && onOpenSettings && (
-            <Button
-              size="sm"
-              onClick={onOpenSettings}
-              className="h-7 text-xs font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shrink-0"
-            >
-              Add College in Settings
-            </Button>
-          )}
-        </div>
-
-        {!userCollege ? (
-          <div className="text-center py-8 px-4 rounded-xl border border-dashed border-[#0D4347] space-y-2">
-            <School className="h-8 w-8 text-[#E5B95C]/60 mx-auto" />
-            <p className="text-xs text-[#F7F5F0]/80 font-medium">
-              You haven't set your medical college in your study profile yet.
-            </p>
-            <p className="text-[11px] text-[#F7F5F0]/50 max-w-sm mx-auto">
-              Add your college name in Sanctuary Settings to see batchmates and study partners.
-            </p>
-            {onOpenSettings && (
-              <Button
-                size="sm"
-                onClick={onOpenSettings}
-                className="mt-2 h-7 text-xs font-bold bg-[#E5B95C] text-[#082428] hover:bg-[#E5B95C]/90 shadow-sm"
-              >
-                Set Medical College
-              </Button>
-            )}
-          </div>
-        ) : collegeSuggestionsQuery.isLoading ? (
-          <div className="text-center py-6 text-xs text-[#F7F5F0]/60">
-            Finding batchmates from {userCollege}...
-          </div>
-        ) : suggestedStudents.length === 0 ? (
-          <div className="text-center py-8 px-4 rounded-xl border border-dashed border-[#0D4347] space-y-1.5">
-            <GraduationCap className="h-7 w-7 text-[#E5B95C]/60 mx-auto" />
-            <p className="text-xs text-[#F7F5F0]/80 font-medium">
-              No new batchmates found yet from {userCollege}.
-            </p>
-            <p className="text-[11px] text-[#F7F5F0]/50">
-              Share your room code or invite friends to join Elixir Sanctuary!
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {suggestedStudents.map((student) => {
-              const isPending = pendingRequests.has(student.user_id);
-              return (
-                <div
-                  key={student.user_id}
-                  className="rounded-xl border border-[#0D4347] bg-[#0D4347]/30 p-3 flex items-center justify-between gap-3 hover:bg-[#0D4347]/50 transition-colors"
-                >
-                  <QuickPeekProfileCard user={{ ...student, id: student.user_id }}>
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
-                      <UserAvatar
-                        src={student.avatar_url}
-                        name={student.full_name || student.handle || "Doctor"}
-                        size={36}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-display font-semibold text-xs text-[#F7F5F0] truncate">
-                          {student.full_name || "Doctor"}
-                        </p>
-                        <p className="text-[10px] text-[#E5B95C] truncate">
-                          {student.handle ? `@${student.handle}` : student.study_year || "MBBS Student"}
-                        </p>
-                        {student.dream_specialisation && (
-                          <p className="text-[10px] text-[#F7F5F0]/50 truncate">
-                            {student.dream_specialisation}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </QuickPeekProfileCard>
-
-                  <div className="shrink-0">
-                    {isPending ? (
-                      <span className="text-[11px] font-semibold text-[#E5B95C] px-2.5 py-1 bg-[#082428] rounded-full border border-[#E5B95C]/40">
-                        Pending
-                      </span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        disabled={sendBuddyMutation.isPending}
-                        onClick={() => sendBuddyMutation.mutate(student.user_id)}
-                        className="h-7 px-2.5 text-xs font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] shadow-sm"
-                      >
-                        <UserPlus className="h-3 w-3 mr-1" /> Add Homie
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
     </div>
   );
 }

@@ -234,11 +234,44 @@ export async function sendBuddyRequest(recipientId: string) {
 }
 
 export async function respondBuddyRequest(requestId: string, status: "accepted" | "declined") {
+  // Fetch the buddy record to identify requester and recipient
+  const { data: buddyRecord } = await db
+    .from("buddies")
+    .select("id, requester_id, recipient_id")
+    .eq("id", requestId)
+    .single();
+
   const { error } = await db
     .from("buddies")
     .update({ status, updated_at: new Date().toISOString() })
     .eq("id", requestId);
   if (error) throw error;
+
+  // Notify original requester when friend request is accepted
+  if (status === "accepted" && buddyRecord?.requester_id) {
+    try {
+      const { data: recipientProfile } = await db
+        .from("profiles")
+        .select("full_name, handle")
+        .eq("id", buddyRecord.recipient_id)
+        .maybeSingle();
+
+      const accepterName =
+        recipientProfile?.full_name ||
+        (recipientProfile?.handle ? `@${recipientProfile.handle}` : "A doctor");
+
+      await db.from("notifications").insert({
+        created_by: buddyRecord.recipient_id,
+        recipient_id: buddyRecord.requester_id,
+        title: "Friend Request Accepted",
+        message: `${accepterName} accepted your friend request. You are now Homies!`,
+        type: "direct",
+        link: "/homies",
+      });
+    } catch {
+      /* non-blocking notification fallback */
+    }
+  }
 }
 
 export async function removeBuddy(buddyId: string) {
@@ -262,7 +295,11 @@ export async function searchBuddies(query: string): Promise<LeaderboardEntry[]> 
   })) as LeaderboardEntry[];
 }
 
-export async function fetchSameCollegeStudents(currentUserId: string, college: string): Promise<LeaderboardEntry[]> {
+export async function fetchSameCollegeStudents(
+  currentUserId: string,
+  college: string,
+  currentYear?: string | null
+): Promise<LeaderboardEntry[]> {
   if (!college || !college.trim()) return [];
 
   // Exclude existing/pending homies and self
@@ -283,12 +320,26 @@ export async function fetchSameCollegeStudents(currentUserId: string, college: s
     .select("id, full_name, handle, college, study_year, avatar_url, dream_specialisation, todays_mood")
     .ilike("college", college.trim())
     .neq("id", currentUserId)
-    .limit(30);
+    .limit(50);
 
   if (error) return [];
   const filtered = (data ?? []).filter((u: any) => !excludedIds.has(u.id));
 
-  return filtered.map((u: any) => ({
+  // Rank suggestions by user's College, giving top priority to students from the same year/batch
+  const normalizedYear = currentYear?.trim().toLowerCase();
+  filtered.sort((a: any, b: any) => {
+    const aSameYear = normalizedYear && a.study_year?.trim().toLowerCase() === normalizedYear ? 1 : 0;
+    const bSameYear = normalizedYear && b.study_year?.trim().toLowerCase() === normalizedYear ? 1 : 0;
+    if (aSameYear !== bSameYear) {
+      return bSameYear - aSameYear; // same batch/year first
+    }
+    return (a.full_name || "").localeCompare(b.full_name || "");
+  });
+
+  // Cap displayed suggestions to maximum 5 at once
+  const capped = filtered.slice(0, 5);
+
+  return capped.map((u: any) => ({
     user_id: u.id,
     id: u.id,
     full_name: u.full_name,

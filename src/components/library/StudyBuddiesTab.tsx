@@ -12,6 +12,7 @@ import {
   type LeaderboardEntry,
 } from "@/lib/library";
 import { fetchProfile } from "@/lib/profile";
+import { useLibraryTimer } from "@/contexts/LibraryTimerContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,6 +51,7 @@ interface StudyBuddiesTabProps {
 
 export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
   const qc = useQueryClient();
+  const { isUserOnline } = useLibraryTimer();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -60,7 +62,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
   // Unfriend dialog state
   const [unfriendTarget, setUnfriendTarget] = useState<{ id: string; name: string } | null>(null);
 
-  // Current user's profile for college recommendations
+  // Current user's profile for college & batch recommendations
   const { data: currentProfile } = useQuery({
     queryKey: ["profile", currentUserId],
     queryFn: () => fetchProfile(currentUserId),
@@ -122,12 +124,12 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
     enabled: !!currentUserId,
   });
 
-  // Query: Suggested homies from same medical college
+  // Query: Suggested homies from same medical college prioritized by same batch/year
   const { data: collegeSuggestions = [], isLoading: isLoadingSuggestions } = useQuery({
-    queryKey: ["college_homies_suggestions", currentUserId, currentProfile?.college],
+    queryKey: ["college_homies_suggestions", currentUserId, currentProfile?.college, currentProfile?.study_year],
     queryFn: () =>
       currentProfile?.college
-        ? fetchSameCollegeStudents(currentUserId, currentProfile.college)
+        ? fetchSameCollegeStudents(currentUserId, currentProfile.college, currentProfile?.study_year)
         : Promise.resolve([]),
     enabled: !!currentUserId && !!currentProfile?.college,
   });
@@ -163,6 +165,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
     onSuccess: (_, vars) => {
       toast.success(vars.status === "accepted" ? "Homie accepted!" : "Request declined");
       void qc.invalidateQueries({ queryKey: ["study_buddies"] });
+      void qc.invalidateQueries({ queryKey: ["user_notifications"] });
     },
     onError: (err: any) => {
       toast.error(err.message || "Failed to respond");
@@ -194,19 +197,6 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
       toast.error("Failed to send cheer");
     },
   });
-
-  const getCheerIcon = (reaction: string) => {
-    switch (reaction) {
-      case "coffee":
-        return <Coffee className="h-3 w-3" />;
-      case "fire":
-        return <Flame className="h-3 w-3" />;
-      case "muscle":
-        return <Dumbbell className="h-3 w-3" />;
-      default:
-        return <Sparkles className="h-3 w-3" />;
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -368,56 +358,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
         </div>
       )}
 
-      {/* Suggested Homies from Your Medical College */}
-      {currentProfile?.college && collegeSuggestions.length > 0 && (
-        <div className="rounded-2xl border border-[#0D4347] bg-[#082428]/80 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-display font-semibold text-xs text-[#E5B95C] uppercase tracking-wider flex items-center gap-1.5">
-              <GraduationCap className="h-4 w-4" /> Suggested Homies from {currentProfile.college}
-            </h4>
-            <span className="text-[10px] text-[#F7F5F0]/60 font-mono">
-              {collegeSuggestions.length} batchmate(s)
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
-            {collegeSuggestions.slice(0, 6).map((peer) => (
-              <div
-                key={peer.user_id}
-                className="flex items-center justify-between gap-2 rounded-xl bg-[#0D4347]/30 border border-[#0D4347] p-2.5 text-xs hover:bg-[#0D4347]/50 transition-colors"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <UserAvatar src={peer.avatar_url} name={peer.full_name} size={32} />
-                  <div className="min-w-0">
-                    <p className="font-semibold text-[#F7F5F0] truncate">
-                      {peer.full_name || "Batchmate"}
-                    </p>
-                    {peer.handle && (
-                      <p className="font-mono text-[10px] text-[#E5B95C] truncate">
-                        @{peer.handle}
-                      </p>
-                    )}
-                    <p className="text-[10px] text-[#F7F5F0]/60 truncate">
-                      {peer.study_year || "MBBS"}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  size="sm"
-                  disabled={addBuddyMutation.isPending}
-                  onClick={() => addBuddyMutation.mutate(peer.user_id)}
-                  className="h-7 text-[11px] font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] px-2 shrink-0 shadow-sm"
-                >
-                  <UserPlus className="mr-1 h-3 w-3 text-[#0D4347]" /> Add Homie
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Active Homies Grid */}
+      {/* 1. Active Homies Section (Displayed at the top of homies content) */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h4 className="font-display font-semibold text-xs text-[#F4F1EA]/90 uppercase tracking-wider flex items-center gap-1.5">
@@ -440,6 +381,8 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
             {activeBuddies.map((buddy) => {
               const u = buddy.other_user;
               const isStudyingNow = !!u?.is_actively_studying;
+              const hasAppOpen = u?.id ? isUserOnline(u.id) : false;
+              const isOnline = isStudyingNow || hasAppOpen;
               const visibleHours = u?.today_focus_hours ?? 0;
 
               return (
@@ -451,12 +394,30 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="relative">
                         <UserAvatar src={u?.avatar_url} name={u?.full_name} size={40} />
-                        {isStudyingNow && (
-                          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#082428] animate-pulse" />
-                        )}
+                        {isStudyingNow ? (
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-[#082428] animate-pulse"
+                            title="Studying now"
+                          />
+                        ) : isOnline ? (
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-[#082428]"
+                            title="Online"
+                          />
+                        ) : null}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-xs text-[#F7F5F0] truncate">{u?.full_name || "Doctor"}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-semibold text-xs text-[#F7F5F0] truncate">{u?.full_name || "Doctor"}</p>
+                          {isOnline ? (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              Online
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-[#F7F5F0]/40">Offline</span>
+                          )}
+                        </div>
                         {u?.handle && <p className="font-mono text-[11px] text-[#E5B95C]">@{u.handle}</p>}
                         <p className="text-[11px] text-[#F7F5F0]/60 truncate">{u?.college || "MBBS"}</p>
                       </div>
@@ -525,6 +486,11 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                           </button>
                         </div>
                       </div>
+                    ) : isOnline ? (
+                      <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium bg-emerald-500/5 px-2.5 py-1.5 rounded-lg border border-emerald-500/20">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                        <span>Online (app open) • Not studying right now</span>
+                      </div>
                     ) : (
                       <div className="text-[11px] text-[#F7F5F0]/50 italic">
                         Offline / not studying right now
@@ -537,6 +503,52 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
           </div>
         )}
       </div>
+
+      {/* 2. Suggestions Section (Below Active Homies, capped to 5, prioritized by batch) */}
+      {currentProfile?.college && collegeSuggestions.length > 0 && (
+        <div className="rounded-2xl border border-[#0D4347] bg-[#082428]/80 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-display font-semibold text-xs text-[#E5B95C] uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4" /> Suggestions
+            </h4>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {collegeSuggestions.slice(0, 5).map((peer) => (
+              <div
+                key={peer.user_id}
+                className="flex items-center justify-between gap-2 rounded-xl bg-[#0D4347]/30 border border-[#0D4347] p-2.5 text-xs hover:bg-[#0D4347]/50 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <UserAvatar src={peer.avatar_url} name={peer.full_name} size={32} />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-[#F7F5F0] truncate">
+                      {peer.full_name || "Batchmate"}
+                    </p>
+                    {peer.handle && (
+                      <p className="font-mono text-[10px] text-[#E5B95C] truncate">
+                        @{peer.handle}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-[#F7F5F0]/60 truncate">
+                      {peer.study_year || "MBBS"}
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  size="sm"
+                  disabled={addBuddyMutation.isPending}
+                  onClick={() => addBuddyMutation.mutate(peer.user_id)}
+                  className="h-7 text-[11px] font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] px-2 shrink-0 shadow-sm"
+                >
+                  <UserPlus className="mr-1 h-3 w-3 text-[#0D4347]" /> Add Homie
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Outgoing Pending Requests */}
       {pendingSent.length > 0 && (

@@ -126,8 +126,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem("elixir-appearance");var isLight=s==="light"||(!s&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches&&!window.matchMedia("(prefers-color-scheme: dark)").matches);if(isLight){document.documentElement.classList.remove("dark");document.documentElement.style.colorScheme="light";}else{document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark";}}catch(e){document.documentElement.classList.add("dark");document.documentElement.style.colorScheme="dark";}})();`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>

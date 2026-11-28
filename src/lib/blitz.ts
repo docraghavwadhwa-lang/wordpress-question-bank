@@ -5,7 +5,7 @@ import { hash } from "./daily";
 import type { Question } from "./qbank";
 
 export const BLITZ_SIZE = 10;
-export const BLITZ_TIMER = 60;
+export const BLITZ_TIMER = 200;
 
 /** Same 10 questions for everyone on a given day; changes at midnight. */
 export async function fetchBlitz(key: string): Promise<Question[]> {

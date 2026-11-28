@@ -14,15 +14,24 @@ interface ApothecaryRackProps {
 export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
   const [filter, setFilter] = useState<"all" | "completed" | "abandoned">("all");
 
+  // Filter out any active/running sessions so completed vial shelf strictly contains finished sessions.
+  // Handle any legacy or null status rows consistently so All strictly equals Sealed + Cracked.
+  const isSealed = (s: StudySession) => s.status === "completed";
+  const isCracked = (s: StudySession) => s.status !== "running" && s.status !== "completed";
+
+  const completedSessions = sessions.filter(isSealed);
+  const crackedSessions = sessions.filter(isCracked);
+
+  const completedCount = completedSessions.length;
+  const abandonedCount = crackedSessions.length;
+  const allCount = completedCount + abandonedCount;
+
   const filteredSessions = sessions.filter((s) => {
     if (s.status === "running") return false;
-    if (filter === "completed") return s.status === "completed";
-    if (filter === "abandoned") return s.status === "abandoned";
-    return true;
+    if (filter === "completed") return isSealed(s);
+    if (filter === "abandoned") return isCracked(s);
+    return isSealed(s) || isCracked(s);
   });
-
-  const completedCount = sessions.filter((s) => s.status === "completed").length;
-  const abandonedCount = sessions.filter((s) => s.status === "abandoned").length;
 
   return (
     <div className="rounded-xl border border-border/60 bg-card p-4 sm:p-5 shadow-sm space-y-4">
@@ -50,7 +59,7 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
             )}
             onClick={() => setFilter("all")}
           >
-            All ({sessions.length})
+            All ({allCount})
           </button>
           <button
             type="button"
@@ -90,7 +99,7 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
       ) : (
         /* The Wooden Apothecary Display Shelf */
         <div className="relative rounded-lg bg-gradient-to-b from-card/80 to-muted/40 p-4 border border-border/50">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {filteredSessions.slice(0, 18).map((session) => {
               const minutes = Math.floor(session.duration_seconds / 60);
               const dateStr = new Intl.DateTimeFormat("en-IN", {
@@ -113,13 +122,13 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
                     showLabels={false}
                   />
                   <div className="mt-2 w-full min-w-0 flex flex-col gap-1.5 items-center">
-                    {session.status === "abandoned" ? (
-                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-destructive/15 text-destructive border border-destructive/30 shadow-xs">
+                    {isCracked(session) ? (
+                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-destructive/15 text-destructive border border-destructive/30 shadow-xs whitespace-nowrap">
                         CRACKED VIAL
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-full bg-accent/15 text-accent-foreground border border-accent/30">
-                        SEALED ELIXIR
+                      <span className="inline-flex items-center px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider rounded-full bg-accent/15 text-accent-foreground border border-accent/30 whitespace-nowrap">
+                        SEALED VIAL
                       </span>
                     )}
                     <p className="font-semibold text-xs text-foreground truncate w-full" title={subjectLabel(session.subject)}>

@@ -1,6 +1,6 @@
 import { useState, useDeferredValue } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search, RefreshCw, ShieldCheck, Phone, Pencil, Plus, Check, X, Users, Route, SlidersHorizontal, Crown, Ticket, BookOpen, History, Bell } from "lucide-react";
+import { Search, RefreshCw, ShieldCheck, Phone, Pencil, Plus, Check, X, Users, Route, SlidersHorizontal, Crown, Ticket, BookOpen, History, Bell, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { allPlans, consoleUsers, studentDetail, allocateCustom, allocateTrial, stageLabel, type Plan, type Subscription } from "@/lib/admin";
 import { fetchFeatures } from "@/lib/features";
 import { fetchPayments, fetchCoupons, saveCoupon, money, dateLabel, allocationEnd, fetchPlanSubjects } from "@/lib/subscriptions";
@@ -63,14 +64,160 @@ function Students({ journeys = false, onDetail, onAllocate }: { journeys?: boole
   </section>;
 }
 function StudentDetail({ id, onClose, onAllocate }: { id: string; onClose: () => void; onAllocate: (id: string, name: string) => void }) {
-  const row = useQuery({ queryKey: ["admin", "detail", id], queryFn: () => studentDetail(id) }); const a = useAdminAction();
-  return <Dialog open onOpenChange={o => !o && onClose()}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl"><DialogHeader><DialogTitle className="text-2xl text-primary">Student record</DialogTitle><DialogDescription>{row.data?.email || "Contact and study history"}</DialogDescription></DialogHeader><LoadState pending={row.isPending} error={row.error} />{row.data && <><StudentForm data={row.data} busy={a.busy} save={d => void a.run(async () => { const { error } = await supabase.rpc("admin_save_student", { _user: id, _name: d.name, _phone: d.phone, _year: d.year, _college: d.college }); if (error) throw error; }, "Student details saved")} />
-      <dl className="grid grid-cols-3 gap-4 border-y py-4 text-sm">{[["Questions attempted", row.data.attempts], ["Correct answers", row.data.correct], ["Bookmarks", row.data.bookmarks]].map(([k, v]) => <div key={k}><dt className="text-xs text-muted-foreground">{k}</dt><dd className="mt-1 text-xl font-semibold text-primary">{v}</dd></div>)}</dl><p className="text-xs text-muted-foreground">Joined {dateLabel(row.data.profile.created_at)} · {row.data.profile.college_state || "State not supplied"} · Admission {row.data.profile.admission_year || "—"}</p><Button onClick={() => onAllocate(id, row.data?.email ?? id)}><Plus />Allocate subscription</Button>
-      <h3 className="font-semibold text-primary">Subscriptions</h3>{row.data.subscriptions.length ? row.data.subscriptions.map(s => <p className="text-sm" key={s.id}>{s.plan_id} · {dateLabel(s.starts_at)} → {dateLabel(s.ends_at)} · {s.amount_paid_paise === null ? "Amount not recorded" : s.amount_paid_paise === 0 ? "Free allocation" : money(s.amount_paid_paise)}{s.revoked ? " · Revoked" : ""}</p>) : <p className="text-sm text-muted-foreground">No subscriptions</p>}
-      <TrialEngagement user={id} />
-      <h3 className="font-semibold text-primary">Payments</h3>{row.data.payments.map(p => <p key={p.id} className="text-sm">{p.plan_id} · {money(p.total_paise)} · {p.status} · {dateLabel(p.created_at)}</p>)}
-      <h3 className="font-semibold text-primary">Active devices</h3>{row.data.devices.map((d, i) => <p key={i} className="text-sm">{d.device_name} · {new Date(d.updated_at).toLocaleString()}</p>)}
-      <h3 className="font-semibold text-primary">Purchase timeline</h3><div className="divide-y">{row.data.journey.length ? row.data.journey.map(j => <div key={j.id} className="flex flex-wrap justify-between gap-2 py-2 text-sm"><span>{stageLabel(j.stage)} · {j.plan_id || "Plans"}</span><span className="text-xs text-muted-foreground">{new Date(j.created_at).toLocaleString()} · {j.platform}</span></div>) : <p className="text-sm text-muted-foreground">No purchase activity recorded yet.</p>}</div></>}</DialogContent></Dialog>;
+  const row = useQuery({ queryKey: ["admin", "detail", id], queryFn: () => studentDetail(id) });
+  const a = useAdminAction();
+  const qc = useQueryClient();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const studentName = row.data?.profile.full_name || row.data?.email || "Student";
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account", {
+        body: { target_user_id: id },
+      });
+      if (error) throw new Error(error.message || "Failed to delete account");
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`Account for ${studentName} was permanently deleted`);
+      setDeleteDialogOpen(false);
+      onClose();
+      await qc.invalidateQueries({ queryKey: ["admin", "users"] });
+    } catch (err: any) {
+      toast.error(err.message || "Could not delete user account");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <>
+      <Dialog open onOpenChange={o => !o && onClose()}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-primary">Student record</DialogTitle>
+            <DialogDescription>{row.data?.email || "Contact and study history"}</DialogDescription>
+          </DialogHeader>
+          <LoadState pending={row.isPending} error={row.error} />
+          {row.data && (
+            <>
+              <StudentForm
+                data={row.data}
+                busy={a.busy || deleting}
+                save={d => void a.run(async () => {
+                  const { error } = await supabase.rpc("admin_save_student", {
+                    _user: id,
+                    _name: d.name,
+                    _phone: d.phone,
+                    _year: d.year,
+                    _college: d.college
+                  });
+                  if (error) throw error;
+                }, "Student details saved")}
+              />
+              <dl className="grid grid-cols-3 gap-4 border-y py-4 text-sm">
+                {[["Questions attempted", row.data.attempts], ["Correct answers", row.data.correct], ["Bookmarks", row.data.bookmarks]].map(([k, v]) => (
+                  <div key={k}>
+                    <dt className="text-xs text-muted-foreground">{k}</dt>
+                    <dd className="mt-1 text-xl font-semibold text-primary">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="text-xs text-muted-foreground">
+                Joined {dateLabel(row.data.profile.created_at)} · {row.data.profile.college_state || "State not supplied"} · Admission {row.data.profile.admission_year || "—"}
+              </p>
+              <Button onClick={() => onAllocate(id, row.data?.email ?? id)}>
+                <Plus />Allocate subscription
+              </Button>
+              <h3 className="font-semibold text-primary">Subscriptions</h3>
+              {row.data.subscriptions.length ? row.data.subscriptions.map(s => (
+                <p className="text-sm" key={s.id}>
+                  {s.plan_id} · {dateLabel(s.starts_at)} → {dateLabel(s.ends_at)} · {s.amount_paid_paise === null ? "Amount not recorded" : s.amount_paid_paise === 0 ? "Free allocation" : money(s.amount_paid_paise)}{s.revoked ? " · Revoked" : ""}
+                </p>
+              )) : <p className="text-sm text-muted-foreground">No subscriptions</p>}
+              <TrialEngagement user={id} />
+              <h3 className="font-semibold text-primary">Payments</h3>
+              {row.data.payments.map(p => (
+                <p key={p.id} className="text-sm">{p.plan_id} · {money(p.total_paise)} · {p.status} · {dateLabel(p.created_at)}</p>
+              ))}
+              <h3 className="font-semibold text-primary">Active devices</h3>
+              {row.data.devices.map((d, i) => (
+                <p key={i} className="text-sm">{d.device_name} · {new Date(d.updated_at).toLocaleString()}</p>
+              ))}
+              <h3 className="font-semibold text-primary">Purchase timeline</h3>
+              <div className="divide-y">
+                {row.data.journey.length ? row.data.journey.map(j => (
+                  <div key={j.id} className="flex flex-wrap justify-between gap-2 py-2 text-sm">
+                    <span>{stageLabel(j.stage)} · {j.plan_id || "Plans"}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(j.created_at).toLocaleString()} · {j.platform}</span>
+                  </div>
+                )) : <p className="text-sm text-muted-foreground">No purchase activity recorded yet.</p>}
+              </div>
+
+              {/* Danger Zone: Admin-only Account Deletion */}
+              <div className="mt-8 rounded-xl border border-destructive/40 bg-destructive/5 p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-semibold text-destructive text-sm flex items-center gap-1.5">
+                      <Trash2 className="h-4 w-4" /> Danger Zone: Delete Student Account
+                    </h4>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Permanently delete this user from auth, profiles, test attempts, study sessions, and buddy connections.
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={a.busy || deleting}
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="shrink-0 gap-1.5"
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete user account
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog for Permanent User Deletion */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Permanently Delete User Account?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 text-xs text-muted-foreground">
+              <p>
+                Are you sure you want to permanently delete the account for{" "}
+                <strong className="text-foreground">{studentName}</strong> ({row.data?.email || id})?
+              </p>
+              <p className="text-destructive font-medium">
+                This will delete their auth credentials, study history, subscriptions, and all related database records. This action cannot be reversed.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
+              disabled={deleting}
+              onClick={(e) => {
+                e.preventDefault();
+                void handleDeleteAccount();
+              }}
+            >
+              {deleting ? "Deleting…" : "Yes, permanently delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
 }
 function StudentForm({ data, busy, save }: { data: Awaited<ReturnType<typeof studentDetail>>; busy: boolean; save: (d: { name: string; phone: string; year: string; college: string }) => void }) {
   const [form, setForm] = useState({ name: data.profile.full_name ?? "", phone: data.profile.phone ?? "", year: data.profile.study_year ?? "", college: data.profile.college ?? "" });

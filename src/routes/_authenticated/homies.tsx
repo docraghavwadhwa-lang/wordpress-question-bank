@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProfile } from "@/lib/profile";
@@ -12,6 +12,9 @@ import { LibraryLeaderboards } from "@/components/library/LibraryLeaderboards";
 import { Users, Flame, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/homies")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: (search.tab as "homies" | "rooms" | "leaderboard") || undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Homies & Study Together — Elixir" },
@@ -28,7 +31,16 @@ export const Route = createFileRoute("/_authenticated/homies")({
 function HomiesRouteComponent() {
   const { user } = useAuth();
   const { openOverlay } = useLibraryTimer();
-  const [activeTab, setActiveTab] = useState<"rooms" | "homies" | "leaderboard">("rooms");
+  const search = Route.useSearch();
+  const [activeTab, setActiveTab] = useState<"homies" | "rooms" | "leaderboard">(
+    search.tab || "homies"
+  );
+
+  useEffect(() => {
+    if (search.tab) {
+      setActiveTab(search.tab);
+    }
+  }, [search.tab]);
 
   const profileQuery = useQuery({
     queryKey: ["profile", user?.id],
@@ -54,25 +66,12 @@ function HomiesRouteComponent() {
             </p>
           </div>
 
-          {/* Segmented Filter Control */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#0D4347]/50 border border-[#0D4347]">
-            <button
-              type="button"
-              onClick={() => setActiveTab("rooms")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === "rooms"
-                  ? "bg-[#E5B95C] text-[#082428] shadow-sm font-bold"
-                  : "text-[#F7F5F0]/70 hover:text-[#F7F5F0] hover:bg-[#0D4347]"
-              }`}
-            >
-              <Flame className="h-3.5 w-3.5" />
-              <span>Study Rooms</span>
-            </button>
-
+          {/* Segmented Filter Control - 3 Equal Width Tabs (Homies -> Study Rooms -> Leaderboards) */}
+          <div className="grid grid-cols-3 w-full sm:w-96 gap-1 p-1 rounded-xl bg-[#0D4347]/50 border border-[#0D4347]">
             <button
               type="button"
               onClick={() => setActiveTab("homies")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === "homies"
                   ? "bg-[#E5B95C] text-[#082428] shadow-sm font-bold"
                   : "text-[#F7F5F0]/70 hover:text-[#F7F5F0] hover:bg-[#0D4347]"
@@ -84,8 +83,21 @@ function HomiesRouteComponent() {
 
             <button
               type="button"
+              onClick={() => setActiveTab("rooms")}
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === "rooms"
+                  ? "bg-[#E5B95C] text-[#082428] shadow-sm font-bold"
+                  : "text-[#F7F5F0]/70 hover:text-[#F7F5F0] hover:bg-[#0D4347]"
+              }`}
+            >
+              <Flame className="h-3.5 w-3.5" />
+              <span>Study Rooms</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab("leaderboard")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
                 activeTab === "leaderboard"
                   ? "bg-[#E5B95C] text-[#082428] shadow-sm font-bold"
                   : "text-[#F7F5F0]/70 hover:text-[#F7F5F0] hover:bg-[#0D4347]"
@@ -98,16 +110,16 @@ function HomiesRouteComponent() {
         </div>
 
         {/* Tab Content */}
+        {activeTab === "homies" && (
+          <StudyBuddiesTab currentUserId={user.id} />
+        )}
+
         {activeTab === "rooms" && (
           <StudyTogetherView
             currentUserId={user.id}
             userCollege={profileQuery.data?.college ?? null}
             onBackToTimer={openOverlay}
           />
-        )}
-
-        {activeTab === "homies" && (
-          <StudyBuddiesTab currentUserId={user.id} />
         )}
 
         {activeTab === "leaderboard" && (

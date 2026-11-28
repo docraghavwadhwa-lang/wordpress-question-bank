@@ -53,8 +53,10 @@ export function Quiz({
   const [chosen, setChosen] = useState<string | null>(null);
   const [done, setDone] = useState(review);
   const [timedOut, setTimedOut] = useState(false);
-  const testTotal = timer * questions.length;
-  const [left, setLeft] = useState(test ? testTotal : timer);
+  const isBlitz = mode === "blitz";
+  const isTotalTimer = test || isBlitz;
+  const totalTimerSeconds = isBlitz ? timer : timer * questions.length;
+  const [left, setLeft] = useState(isTotalTimer ? totalTimerSeconds : timer);
   const testStart = useRef(Date.now());
   const [score, setScore] = useState(initial?.score ?? 0);
   const [answered, setAnswered] = useState(initial?.answered ?? 0);
@@ -75,7 +77,7 @@ export function Quiz({
     setChosen(saved?.[q?.id] ?? null);
     setDone(review || (!test && Object.prototype.hasOwnProperty.call(saved ?? {}, q?.id)));
     setTimedOut(false);
-    if (!test) setLeft(timer);
+    if (!isTotalTimer) setLeft(timer);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [i, timer, review]);
 
@@ -85,8 +87,15 @@ export function Quiz({
   }, [i, score, answered, spent, choices]);
 
   useEffect(() => {
-    if (!timer || (done && !test) || finished || review) return;
-    if (left <= 0 && test) { submitTest(); return; }
+    if (!timer || (done && !isTotalTimer) || finished || review) return;
+    if (left <= 0 && isTotalTimer) {
+      if (test) {
+        submitTest();
+      } else {
+        finish(false);
+      }
+      return;
+    }
     if (left <= 0) {
       setTimedOut(true);
       answer(null);
@@ -99,7 +108,8 @@ export function Quiz({
 
   function finish(reachedEnd = i + 1 === questions.length && done) {
     setFinished(true);
-    onFinish?.({ score, answered, seconds: spent.total, choices, completed: reachedEnd });
+    const totalSeconds = isBlitz ? Math.min(timer, Math.round((Date.now() - testStart.current) / 1000)) : spent.total;
+    onFinish?.({ score, answered, seconds: totalSeconds, choices, completed: reachedEnd });
   }
 
   /** Move on without answering; a skipped question isn't scored or recorded. */
@@ -218,7 +228,7 @@ export function Quiz({
         </span>
         {timer > 0 && !review && (
           <span className={cn("inline-flex items-center gap-1 font-semibold", left <= 10 && "text-destructive")}>
-            <Timer className="h-4 w-4" /> {test ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : `${left}s`}
+            <Timer className="h-4 w-4" /> {isTotalTimer ? `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : `${left}s`}
           </span>
         )}
         <span className="min-w-0 flex-1 truncate">{crumbs}</span>
@@ -238,7 +248,7 @@ export function Quiz({
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
             className={cn("h-full rounded-full bg-accent transition-all duration-1000 ease-linear", left <= 10 && "bg-destructive")}
-            style={{ width: `${(100 * left) / (test ? testTotal : timer)}%` }}
+            style={{ width: `${(100 * left) / totalTimerSeconds}%` }}
           />
         </div>
       )}

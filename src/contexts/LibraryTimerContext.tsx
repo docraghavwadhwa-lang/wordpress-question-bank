@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import React, { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { abandonStudySession, completeStudySession, createStudySession } from "@/lib/library";
 import { toast } from "sonner";
@@ -28,6 +28,8 @@ export interface LibraryTimerState {
 export interface LibraryTimerContextValue {
   state: LibraryTimerState;
   isOverlayOpen: boolean;
+  onlineUserIds: Set<string>;
+  isUserOnline: (userId: string) => boolean;
   openOverlay: () => void;
   closeOverlay: () => void;
   startTimer: (config: {
@@ -75,6 +77,8 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const openOverlay = () => setIsOverlayOpen(true);
   const closeOverlay = () => setIsOverlayOpen(false);
+
+  const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
   const [state, setState] = useState<LibraryTimerState>(() => {
     if (typeof window === "undefined") return defaultState;
@@ -128,6 +132,28 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     const channel = client.channel("elixir-presence", {
       config: { presence: { key: user.id } },
     });
+
+    const syncPresenceState = () => {
+      try {
+        const stateObj = channel.presenceState();
+        const activeIds = new Set<string>();
+        Object.values(stateObj).forEach((presenceList: any) => {
+          if (Array.isArray(presenceList)) {
+            presenceList.forEach((p: any) => {
+              if (p?.user_id) activeIds.add(p.user_id);
+            });
+          }
+        });
+        setOnlineUserIds(activeIds);
+      } catch {
+        /* ignore presence sync error */
+      }
+    };
+
+    channel
+      .on("presence", { event: "sync" }, syncPresenceState)
+      .on("presence", { event: "join" }, syncPresenceState)
+      .on("presence", { event: "leave" }, syncPresenceState);
 
     channel.subscribe(async (status: string) => {
       if (status === "SUBSCRIBED") {
@@ -377,11 +403,18 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const isUserOnline = useCallback(
+    (userId: string) => onlineUserIds.has(userId),
+    [onlineUserIds]
+  );
+
   return (
     <LibraryTimerContext.Provider
       value={{
         state,
         isOverlayOpen,
+        onlineUserIds,
+        isUserOnline,
         openOverlay,
         closeOverlay,
         startTimer,

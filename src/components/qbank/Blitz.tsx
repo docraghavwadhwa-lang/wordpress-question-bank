@@ -15,7 +15,7 @@ export function BlitzCard({ day, loading, onStart }: { day: string; loading: boo
           <span className="text-sm text-muted-foreground">
             {rank.data
               ? `Today: ${rank.data.my_score}/${BLITZ_SIZE} · ranked #${rank.data.my_rank} of ${rank.data.players}`
-              : `${BLITZ_SIZE} questions · ${BLITZ_TIMER}s each · new set every midnight`}
+              : `${BLITZ_SIZE} questions · ${BLITZ_TIMER}s to finish · new set every midnight`}
           </span>
         </span>
       </span>

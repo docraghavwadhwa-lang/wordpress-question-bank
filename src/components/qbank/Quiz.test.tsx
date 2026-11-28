@@ -83,3 +83,18 @@ it("jumping to an answered quiz question does not score it again", () => {
   fireEvent.click(screen.getByRole("button", { name: "Finish" }));
   expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 2, answered: 2, choices: { 1: "A", 2: "A" } }));
 });
+
+describe("blitz mode timer", () => {
+  it("uses the total 200s session finish timer across questions rather than per-question reset", () => {
+    const onFinish = vi.fn();
+    render(<Quiz mode="blitz" timer={200} questions={questions} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
+    expect(screen.getByText("3:20")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "A. First" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    // Still displays countdown (not reset)
+    expect(screen.queryByText("200s")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
+    fireEvent.click(screen.getByRole("button", { name: "Finish" }));
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 2, completed: true }));
+  });
+});
