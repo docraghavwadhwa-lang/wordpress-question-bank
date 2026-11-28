@@ -47,69 +47,93 @@ export function LibraryLeaderboards({ currentUserId, currentUserProfile }: Libra
 
   return (
     <div className="space-y-4">
-      {/* Controls: Daily / Weekly + Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border/60 shadow-sm">
+      {/* Controls: Daily / Weekly + Filters with Crisp Contrast */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-4 rounded-xl border border-border/70 shadow-sm">
         {/* Period Selector */}
-        <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg border border-border/40">
-          <Button
-            size="sm"
-            variant={period === "daily" ? "default" : "ghost"}
-            className="h-7 text-xs px-3"
+        <div className="flex items-center gap-1 bg-muted p-1 rounded-lg border border-border text-xs">
+          <button
+            type="button"
+            className={cn(
+              "h-7 text-xs px-3 font-semibold rounded-md transition-all",
+              period === "daily"
+                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                : "bg-transparent text-foreground/80 hover:text-foreground hover:bg-muted/80"
+            )}
             onClick={() => setPeriod("daily")}
           >
             Today (IST)
-          </Button>
-          <Button
-            size="sm"
-            variant={period === "weekly" ? "default" : "ghost"}
-            className="h-7 text-xs px-3"
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "h-7 text-xs px-3 font-semibold rounded-md transition-all",
+              period === "weekly"
+                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                : "bg-transparent text-foreground/80 hover:text-foreground hover:bg-muted/80"
+            )}
             onClick={() => setPeriod("weekly")}
           >
             This Week (Mon-Sun IST)
-          </Button>
+          </button>
         </div>
 
         {/* Category Filters */}
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <Button
-            size="sm"
-            variant={filter === "global" ? "default" : "outline"}
-            className="h-7 text-xs px-2.5"
+          <button
+            type="button"
+            className={cn(
+              "h-7 text-xs px-3 rounded-md font-semibold inline-flex items-center transition-all border",
+              filter === "global"
+                ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] font-bold shadow-sm"
+                : "bg-card text-foreground/85 border-border hover:text-foreground hover:bg-muted"
+            )}
             onClick={() => setFilter("global")}
           >
             <Trophy className="h-3 w-3 mr-1" /> Global
-          </Button>
+          </button>
 
-          <Button
-            size="sm"
-            variant={filter === "college" ? "default" : "outline"}
-            className="h-7 text-xs px-2.5"
+          <button
+            type="button"
             disabled={!currentUserProfile?.college}
             title={!currentUserProfile?.college ? "Set your college in Profile first" : undefined}
+            className={cn(
+              "h-7 text-xs px-3 rounded-md font-semibold inline-flex items-center transition-all border",
+              filter === "college"
+                ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] font-bold shadow-sm"
+                : "bg-card text-foreground/85 border-border hover:text-foreground hover:bg-muted disabled:opacity-40"
+            )}
             onClick={() => setFilter("college")}
           >
             <GraduationCap className="h-3 w-3 mr-1" /> My College
-          </Button>
+          </button>
 
-          <Button
-            size="sm"
-            variant={filter === "year" ? "default" : "outline"}
-            className="h-7 text-xs px-2.5"
+          <button
+            type="button"
             disabled={!currentUserProfile?.study_year}
             title={!currentUserProfile?.study_year ? "Set your study year in Profile first" : undefined}
+            className={cn(
+              "h-7 text-xs px-3 rounded-md font-semibold inline-flex items-center transition-all border",
+              filter === "year"
+                ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] font-bold shadow-sm"
+                : "bg-card text-foreground/85 border-border hover:text-foreground hover:bg-muted disabled:opacity-40"
+            )}
             onClick={() => setFilter("year")}
           >
             <Calendar className="h-3 w-3 mr-1" /> My Year
-          </Button>
+          </button>
 
-          <Button
-            size="sm"
-            variant={filter === "buddies" ? "default" : "outline"}
-            className="h-7 text-xs px-2.5"
+          <button
+            type="button"
+            className={cn(
+              "h-7 text-xs px-3 rounded-md font-semibold inline-flex items-center transition-all border",
+              filter === "buddies"
+                ? "bg-[#E5B95C] text-[#082428] border-[#E5B95C] font-bold shadow-sm"
+                : "bg-card text-foreground/85 border-border hover:text-foreground hover:bg-muted"
+            )}
             onClick={() => setFilter("buddies")}
           >
-            <Users className="h-3 w-3 mr-1" /> Buddies
-          </Button>
+            <Users className="h-3 w-3 mr-1" /> Homies
+          </button>
         </div>
       </div>
 

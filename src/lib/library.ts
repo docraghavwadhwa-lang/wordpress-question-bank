@@ -678,3 +678,87 @@ export function formatTodoDateGroupLabel(isoDate: string): string {
     return "Today";
   }
 }
+
+
+export interface StudyTogetherInvite {
+  id: string;
+  group_id: string;
+  group_code: string;
+  group_name: string;
+  inviter_id: string;
+  recipient_id: string;
+  status: "pending" | "accepted" | "declined";
+  created_at: string;
+  inviter_profile?: {
+    full_name?: string | null;
+    handle?: string | null;
+    avatar_url?: string | null;
+    college?: string | null;
+  };
+}
+
+export async function sendStudyTogetherInvite(groupId: string, targetUserId: string): Promise<string> {
+  const { data, error } = await db.rpc("send_study_together_invite", {
+    p_group_id: groupId,
+    p_target_user_id: targetUserId,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+export async function fetchStudyTogetherInvites(userId: string): Promise<StudyTogetherInvite[]> {
+  const { data, error } = await db
+    .from("study_together_invites")
+    .select("*")
+    .eq("recipient_id", userId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    // If table does not exist or query fails gracefully return empty
+    return [];
+  }
+  if (!data || data.length === 0) return [];
+
+  const inviterIds = Array.from(new Set(data.map((i: any) => i.inviter_id)));
+  const { data: profiles } = await db
+    .from("profiles")
+    .select("id, full_name, handle, avatar_url, college")
+    .in("id", inviterIds);
+
+  const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
+
+  return data.map((inv: any) => ({
+    ...inv,
+    inviter_profile: profileMap.get(inv.inviter_id),
+  }));
+}
+
+export async function respondToStudyTogetherInvite(
+  inviteId: string,
+  status: "accepted" | "declined",
+  groupCode?: string,
+  userId?: string
+): Promise<void> {
+  const { error } = await db
+    .from("study_together_invites")
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq("id", inviteId);
+  if (error) throw error;
+
+  if (status === "accepted" && groupCode && userId) {
+    await joinStudyGroupByCode(groupCode, userId);
+  }
+}
+
+
+export const fetchUserSessions = fetchUserStudySessions;
+
+export async function fetchDailyFocusTime(userId: string): Promise<number> {
+  const sessions = await fetchUserStudySessions(userId);
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return sessions
+    .filter((s) => s.status === "completed" && new Date(s.completed_at || s.started_at).getTime() >= startOfDay)
+    .reduce((sum, s) => sum + (s.duration_seconds || 0), 0);
+}

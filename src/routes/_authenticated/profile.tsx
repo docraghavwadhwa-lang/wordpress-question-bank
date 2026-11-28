@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { Camera, Shield, Sparkles } from "lucide-react";
+import { Camera, Shield, Sparkles, AlertTriangle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader, UserAvatar } from "@/components/qbank/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,18 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { fetchProfile, photoToDataUrl, updateProfile, type Profile } from "@/lib/profile";
 import { SubscriptionStatus } from "@/components/qbank/SubscriptionStatus";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -31,6 +43,38 @@ function ProfilePage() {
   const profile = useQuery({ queryKey: ["profile", user?.id], queryFn: () => user ? fetchProfile(user.id) : Promise.resolve(null), enabled: !!user });
   const [form, setForm] = useState<Partial<Profile>>({});
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
+  async function handleDeleteAccount() {
+    if (deleteConfirmationText.trim() !== "DELETE") {
+      toast.error('Please type DELETE to confirm account deletion.');
+      return;
+    }
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) {
+        throw new Error(error.message || "Failed to delete account");
+      }
+
+      toast.success("Your account has been deleted permanently.");
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch { /* ignore */ }
+
+      await supabase.auth.signOut({ scope: "local" });
+      void navigate({ to: "/", replace: true });
+    } catch (err: any) {
+      toast.error(err.message || "Could not delete account. Please try again.");
+    } finally {
+      setDeletingAccount(false);
+      setDeleteDialogOpen(false);
+    }
+  }
   const file = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -190,6 +234,68 @@ function ProfilePage() {
         <div className="mt-6 flex justify-end">
           <Button size="lg" onClick={save} disabled={saving || !profile.data}>{saving ? "Saving…" : "Save changes"}</Button>
         </div>
+
+        {/* Danger Zone: Delete Account */}
+        <section className="mt-10 rounded-2xl border border-destructive/40 bg-destructive/5 p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-destructive" />
+            <h2 className="text-lg font-display font-semibold text-destructive">Danger Zone</h2>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-xl">
+            Permanently delete your account, clinical progress, mistake vault, daily study streaks, focus sessions, and active subscriptions. This cannot be undone.
+          </p>
+
+          <div className="mt-4">
+            <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteConfirmationText("");
+            }}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="gap-1.5">
+                  <Trash2 className="h-4 w-4" /> Delete Account
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="bg-card border-border text-foreground max-w-md p-6">
+                <AlertDialogHeader className="text-left">
+                  <AlertDialogTitle className="text-destructive font-display text-xl flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5" /> Permanently Delete Account?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-xs text-muted-foreground pt-1 leading-relaxed">
+                    All your Q-Bank attempts, mistake reviews, study streak history, saved bookmarks, Apothecary vials, and active subscription access will be completely wiped from Elixir servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <div className="my-4 space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">
+                    Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm:
+                  </Label>
+                  <Input
+                    value={deleteConfirmationText}
+                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                    placeholder="DELETE"
+                    className="font-mono text-sm tracking-widest text-destructive border-destructive/40 bg-background"
+                    autoCapitalize="characters"
+                  />
+                </div>
+
+                <AlertDialogFooter className="gap-2">
+                  <AlertDialogCancel disabled={deletingAccount} className="text-xs">
+                    Cancel
+                  </AlertDialogCancel>
+                  <Button
+                    variant="destructive"
+                    disabled={deleteConfirmationText.trim() !== "DELETE" || deletingAccount}
+                    onClick={handleDeleteAccount}
+                    className="text-xs font-semibold"
+                  >
+                    {deletingAccount ? "Deleting..." : "Permanently Delete My Account"}
+                  </Button>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </section>
+
       </main>
     </div>
   );

@@ -1,3 +1,7 @@
+import { useLibraryTimer } from "@/contexts/LibraryTimerContext";
+import { TodayTodoListSheet } from "@/components/library/TodayTodoListSheet";
+import { fetchDailyFocusTime, fetchStudyTodos, fetchUserBuddies } from "@/lib/library";
+import { fetchProfile } from "@/lib/profile";
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -193,6 +197,46 @@ function Index() {
   if (!ready) return <OpeningScreen />;
   if (isApp && user && decks.isPending) return <OpeningScreen />;
   if (!user) return <Landing />;
+  const { openOverlay } = useLibraryTimer();
+  const [todoSheetOpen, setTodoSheetOpen] = useState(false);
+
+  const homeProfile = useQuery({
+    queryKey: ["home_profile", user?.id],
+    queryFn: () => (user ? fetchProfile(user.id) : Promise.resolve(null)),
+    enabled: !!user,
+  });
+
+  const dailyFocus = useQuery({
+    queryKey: ["daily_focus_time", user?.id],
+    queryFn: () => (user ? fetchDailyFocusTime(user.id) : Promise.resolve(0)),
+    enabled: !!user,
+  });
+
+  const todosQuery = useQuery({
+    queryKey: ["study_todos_pill", user?.id],
+    queryFn: () => (user ? fetchStudyTodos(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+
+  const homiesQuery = useQuery({
+    queryKey: ["homies_live_pill", user?.id],
+    queryFn: () => (user ? fetchUserBuddies(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+
+  const focusHrs = ((dailyFocus.data ?? 0) / 3600).toFixed(1);
+  const goalHrs = homeProfile.data?.daily_focus_goal_minutes
+    ? Math.round(homeProfile.data.daily_focus_goal_minutes / 60)
+    : 4;
+
+  const todayStr = new Date().toISOString().split("T")[0];
+  const pendingTasks = (todosQuery.data ?? []).filter((t: any) => {
+    const d = t.created_at ? t.created_at.split("T")[0] : todayStr;
+    return d === todayStr && !t.completed;
+  }).length;
+
+  const liveHomies = (homiesQuery.data ?? []).filter((b: any) => b.is_studying).length;
+  const firstName = ((homeProfile.data?.full_name || user?.user_metadata?.["full_name"] || "Doctor") as string).split(" ")[0];
 
   const tier = tierFor(streak.goal);
   const hoursLeft = Math.ceil((24 * 60 - (now.getHours() * 60 + now.getMinutes())) / 60);
@@ -255,6 +299,53 @@ function Index() {
           </>
         ) : (
           <>
+                        {/* Home Greeting & 3 Slim Inline Action Pills */}
+            <div className="mb-5">
+              <h1 className="font-display text-2xl sm:text-3xl text-primary">
+                Hi, {firstName}
+              </h1>
+
+              <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                {/* Pill 1: Focus Timer */}
+                <button
+                  type="button"
+                  onClick={openOverlay}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#0D4347]/30 text-[#E5B95C] border border-[#0D4347] hover:border-[#E5B95C]/60 hover:bg-[#0D4347]/60 transition-all shrink-0 cursor-pointer shadow-sm"
+                >
+                  <span>⏱</span>
+                  <span>{focusHrs} / {goalHrs}h</span>
+                </button>
+
+                {/* Pill 2: Today's To Do List */}
+                <button
+                  type="button"
+                  onClick={() => setTodoSheetOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-card text-foreground border border-border/80 hover:bg-muted/80 transition-all shrink-0 cursor-pointer shadow-sm"
+                >
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span>{pendingTasks} Tasks</span>
+                </button>
+
+                {/* Pill 3: Homies Live */}
+                <Link
+                  to="/homies"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all shrink-0 shadow-sm"
+                >
+                  <span>👥</span>
+                  <span>{liveHomies} Homies live</span>
+                </Link>
+              </div>
+            </div>
+
+            {/* Slide-up bottom sheet for Today's To Do List */}
+            {user && (
+              <TodayTodoListSheet
+                isOpen={todoSheetOpen}
+                onClose={() => setTodoSheetOpen(false)}
+                currentUserId={user.id}
+              />
+            )}
+
             {lateNight && (
               <div className="mb-4 flex items-center gap-3 rounded-xl border border-destructive/40 bg-danger-soft px-5 py-4">
                 <Clock className="h-5 w-5 shrink-0 text-destructive" />

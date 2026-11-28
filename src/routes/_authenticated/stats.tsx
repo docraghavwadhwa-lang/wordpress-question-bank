@@ -1,3 +1,12 @@
+import {
+  fetchDailyFocusTime,
+  fetchUserSessions,
+  fetchStudyTodos,
+  type StudySession,
+} from "@/lib/library";
+import { formatFocusDuration } from "@/lib/apothecary";
+import { ShareableStudyCard } from "@/components/library/ShareableStudyCard";
+import { Sparkles, CheckCircle2, ListTodo, Share2 } from "lucide-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -45,6 +54,37 @@ function StatsPage() {
   const s = useStreak(user?.id);
   const tier = tierFor(s.goal);
   const target = s.profile.data?.streak_target_days ?? 30;
+  const [shareCardOpen, setShareCardOpen] = useState(false);
+
+  const dailyFocus = useQuery({
+    queryKey: ["daily_focus_time", user?.id],
+    queryFn: () => (user ? fetchDailyFocusTime(user.id) : Promise.resolve(0)),
+    enabled: !!user,
+  });
+
+  const sessionsQuery = useQuery({
+    queryKey: ["user_study_sessions_stats", user?.id],
+    queryFn: () => (user ? fetchUserSessions(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+
+  const todosQuery = useQuery({
+    queryKey: ["study_todos_stats", user?.id],
+    queryFn: () => (user ? fetchStudyTodos(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+
+  const todayFocusSecs = dailyFocus.data ?? 0;
+  const todayFocusHours = (todayFocusSecs / 3600).toFixed(1);
+
+  const completedSessions = (sessionsQuery.data ?? []).filter((s) => s.status === "completed");
+  const crackedSessions = (sessionsQuery.data ?? []).filter((s) => s.status === "abandoned");
+  const totalFocusSecs = (sessionsQuery.data ?? []).reduce((acc, s) => acc + (s.duration_seconds || 0), 0);
+  const totalFocusHours = (totalFocusSecs / 3600).toFixed(1);
+
+  const allTodos = todosQuery.data ?? [];
+  const completedTodos = allTodos.filter((t) => t.completed).length;
+  const todoCompletionPct = allTodos.length > 0 ? Math.round((completedTodos / allTodos.length) * 100) : 0;
 
   return (
     <div className="min-h-screen">
@@ -55,6 +95,63 @@ function StatsPage() {
         <h1 className="text-5xl text-primary">Progress & <em>streak</em></h1>
 
         <StreakSettings userId={user?.id} profile={s.profile.data} />
+
+                {/* Focus & Sanctuary Analytics */}
+        <section className="mt-8 rounded-2xl border bg-card p-6 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4">
+            <div>
+              <h2 className="font-display text-2xl text-primary flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-accent" /> Focus & Habit Analytics
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your deep work focus sessions, sealed apothecary vials, and daily task completion.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShareCardOpen(true)}
+              className="h-8 text-xs font-semibold gap-1.5 border-accent/40 text-accent hover:bg-accent/10"
+            >
+              <Share2 className="h-3.5 w-3.5" /> Share Focus Card
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              icon={Clock}
+              label="Today's focus"
+              value={`${todayFocusHours} hrs`}
+              bar={Math.min(1, todayFocusSecs / (4 * 3600))}
+            />
+            <StatCard
+              icon={Sparkles}
+              label="Total focus time"
+              value={`${totalFocusHours} hrs`}
+            />
+            <StatCard
+              icon={Target}
+              label="Apothecary vials"
+              value={`${completedSessions.length} sealed`}
+            />
+            <StatCard
+              icon={ListTodo}
+              label="Task completion"
+              value={`${completedTodos}/${allTodos.length} (${todoCompletionPct}%)`}
+              bar={todoCompletionPct / 100}
+            />
+          </div>
+        </section>
+
+        {shareCardOpen && (
+          <ShareableStudyCard
+            onClose={() => setShareCardOpen(false)}
+            todayFocusHours={parseFloat(todayFocusHours)}
+            sealedVialsCount={completedSessions.length}
+            currentStreak={s.streak.current}
+            currentSubject="Focus"
+          />
+        )}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={Flame} label="Current streak" value={`${s.streak.current} days`} />

@@ -19,6 +19,7 @@ import { AppearanceProvider } from "@/components/AppearanceProvider";
 import { DeviceGate } from "@/components/qbank/DeviceGate";
 import { LibraryTimerProvider } from "@/contexts/LibraryTimerContext";
 import { FloatingMiniTimer } from "@/components/library/FloatingMiniTimer";
+import { FocusTimerOverlay } from "@/components/library/FocusTimerOverlay";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -154,6 +155,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <DeviceGate><OnboardingGate><FeatureRouteGate><Outlet /></FeatureRouteGate></OnboardingGate></DeviceGate>
           <FloatingMiniTimer />
+          <FocusTimerOverlay />
           <Toaster />
         </LibraryTimerProvider>
       </AppearanceProvider>

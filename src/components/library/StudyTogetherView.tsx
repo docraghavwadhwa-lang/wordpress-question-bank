@@ -1,3 +1,4 @@
+import { StudyTogetherRequestsSection } from "./StudyTogetherRequestsSection";
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -298,6 +299,14 @@ export function StudyTogetherView({
           </DialogContent>
         </Dialog>
       </div>
+
+            {/* Incoming Study Together Requests */}
+      <StudyTogetherRequestsSection
+        currentUserId={currentUserId}
+        onJoinRoomSuccess={(code) => {
+          void qc.invalidateQueries({ queryKey: ["user_study_groups"] });
+        }}
+      />
 
       {/* Active User Study Rooms Grid */}
       {(groupsQuery.data ?? []).length > 0 && (

@@ -63,8 +63,6 @@ export function Quiz({
   const [marks, setMarks] = useState(bookmarks);
   const [finished, setFinished] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
-  const [revisiting, setRevisiting] = useState(false);
-  const [revisitList, setRevisitList] = useState<number[]>([]);
   const skipped = questions.map((question, index) => ({ question, index })).filter(({ question }) => !Object.prototype.hasOwnProperty.call(choices, question.id));
   const [today, setToday] = useState(todayCount);
   const [xp, setXp] = useState<number[]>([]);
@@ -100,20 +98,13 @@ export function Quiz({
   }, [left, timer, done, finished]);
 
   function finish(reachedEnd = i + 1 === questions.length && done) {
-    if (!reachedEnd && revisiting && mode === "practice") {
-      if (skipped.length) { setSubmitOpen(true); return; }
-      reachedEnd = true;
-    }
     setFinished(true);
     onFinish?.({ score, answered, seconds: spent.total, choices, completed: reachedEnd });
   }
 
   /** Move on without answering; a skipped question isn't scored or recorded. */
   function skip() {
-    if (revisiting) {
-      const after = revisitList.find(index => index > i && skipped.some(row => row.index === index));
-      if (after !== undefined) setI(after); else setSubmitOpen(true);
-    } else if (i + 1 === questions.length) setSubmitOpen(true);
+    if (i + 1 === questions.length) setSubmitOpen(true);
     else setI(i + 1);
   }
   function complete() {
@@ -121,10 +112,8 @@ export function Quiz({
     else finish(true);
   }
   function next() {
-    if (revisiting) {
-      const after = revisitList.find(index => index > i && skipped.some(row => row.index === index && index !== i));
-      if (after !== undefined) setI(after); else complete();
-    } else if (i + 1 === questions.length) complete(); else setI(i + 1);
+    if (i + 1 === questions.length) complete();
+    else setI(i + 1);
   }
 
   /** Score every answer at once, record the attempts, then show results. */
@@ -212,7 +201,6 @@ export function Quiz({
       <QuestionBrand />
       <div className="mb-5 flex gap-1.5 overflow-x-auto pb-2" aria-label="Question palette">
         {questions.map((question, n) => {
-          if (revisiting && !revisitList.includes(n)) return null;
           const saved = review ? reviewChoices : choices;
           const attempted = Object.prototype.hasOwnProperty.call(saved ?? {}, question.id);
           const correct = saved?.[question.id] === question.answer;
@@ -226,7 +214,7 @@ export function Quiz({
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
         <span className="font-semibold text-primary">
-          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}{test && "Test · "}{revisiting ? <>Skipped question {Math.max(1, revisitList.indexOf(i) + 1)} of {revisitList.length}</> : <>Question {i + 1} of {questions.length}</>}
+          {mode === "blitz" && "Daily Blitz · "}{review && "Reading · "}{test && "Test · "}<>Question {i + 1} of {questions.length}</>
         </span>
         {timer > 0 && !review && (
           <span className={cn("inline-flex items-center gap-1 font-semibold", left <= 10 && "text-destructive")}>
@@ -318,10 +306,10 @@ export function Quiz({
         </div>
         <div className="flex gap-2">
           {!done && !review && <Button variant="ghost" onClick={skip}>Skip</Button>}
-          <Button disabled={!done} onClick={next}>{last && !revisiting ? "Finish" : "Next"}</Button>
+          <Button disabled={!done} onClick={next}>{last ? "Finish" : "Next"}</Button>
         </div>
       </div>
-      <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { const first = skipped[0]; if (first) { setRevisiting(true); setRevisitList(skipped.map(row => row.index)); setI(first.index); } setSubmitOpen(false); }}>Revisit skipped questions</Button><Button variant="outline" onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button></DialogContent></Dialog>
+      <Dialog open={submitOpen} onOpenChange={setSubmitOpen}><DialogContent className="max-w-sm"><DialogTitle className="font-display text-2xl text-primary">Ready to submit?</DialogTitle><DialogDescription>{skipped.length} skipped {skipped.length === 1 ? "question" : "questions"} left in this Q-bank.</DialogDescription><Button onClick={() => { setSubmitOpen(false); finish(true); }}>Submit</Button><Button variant="outline" onClick={() => setSubmitOpen(false)}>Cancel</Button></DialogContent></Dialog>
       </>}
     </div>
   );

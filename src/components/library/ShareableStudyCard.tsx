@@ -430,3 +430,31 @@ export function ShareableStudyCardModal({
     </Dialog>
   );
 }
+
+
+export function ShareableStudyCard({
+  onClose,
+  todayFocusHours,
+  sealedVialsCount,
+  currentStreak,
+  currentSubject,
+}: {
+  onClose: () => void;
+  todayFocusHours: number;
+  sealedVialsCount: number;
+  currentStreak?: number;
+  currentSubject?: string;
+}) {
+  return (
+    <ShareableStudyCardModal
+      userName="Doctor"
+      todaySeconds={Math.round(todayFocusHours * 3600)}
+      completedVials={sealedVialsCount}
+      mcqsSolvedToday={0}
+      open={true}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    />
+  );
+}

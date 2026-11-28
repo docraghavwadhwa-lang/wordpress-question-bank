@@ -1,17 +1,14 @@
 import React from "react";
-import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useLibraryTimer } from "@/contexts/LibraryTimerContext";
-import { subjectLabel } from "@/lib/subjects";
 import { formatFocusDuration } from "@/lib/apothecary";
-import { Play, Pause, Flame, ChevronRight } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 
+/** Slim floating focus pill above bottom nav when timer is running and minimized */
 export function FloatingMiniTimer() {
-  const { state, pauseTimer, resumeTimer } = useLibraryTimer();
-  const loc = useLocation();
-  const navigate = useNavigate();
+  const { state, isOverlayOpen, openOverlay, pauseTimer, resumeTimer } = useLibraryTimer();
 
-  // Only show when timer is active or running, and NOT currently on the library page
-  if ((!state.isRunning && state.elapsedSeconds === 0) || loc.pathname.startsWith("/library")) {
+  // Only show when timer is active/running/paused, and overlay is minimized/closed
+  if ((!state.isRunning && !state.isPaused) || isOverlayOpen) {
     return null;
   }
 
@@ -20,43 +17,24 @@ export function FloatingMiniTimer() {
     ? Math.max(0, state.targetSeconds - state.elapsedSeconds)
     : state.elapsedSeconds;
 
-  const progressPercent = isPomodoro
-    ? Math.min(100, Math.floor((state.elapsedSeconds / state.targetSeconds) * 100))
-    : Math.min(100, Math.floor((state.elapsedSeconds / 3600) * 100));
-
   return (
     <div
       role="region"
       aria-label="Active Focus Timer"
-      className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full border border-primary/25 bg-card/95 px-3 py-1.5 shadow-xl backdrop-blur-md transition-all duration-300 hover:border-primary/50 sm:bottom-6 sm:right-6"
+      onClick={openOverlay}
+      className="fixed bottom-20 right-4 z-40 flex items-center gap-2 rounded-full border border-[#E5B95C]/40 bg-[#082428]/95 px-3.5 py-1.5 shadow-2xl backdrop-blur-md transition-all duration-200 hover:border-[#E5B95C] hover:scale-105 cursor-pointer sm:bottom-20 sm:right-6"
     >
-      {/* Mini glowing apothecary indicator */}
-      <div
-        className="relative flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 overflow-hidden cursor-pointer"
-        onClick={() => navigate({ to: "/library" })}
-      >
-        <div
-          className="absolute bottom-0 w-full bg-accent/60 transition-all duration-300"
-          style={{ height: `${progressPercent}%` }}
-        />
-        <Flame className={`relative z-10 h-3.5 w-3.5 ${state.isRunning ? "text-accent animate-pulse" : "text-muted-foreground"}`} />
-      </div>
+      <span className="relative flex h-2 w-2">
+        {state.isRunning && (
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#E5B95C] opacity-75" />
+        )}
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-[#E5B95C]" />
+      </span>
 
-      {/* Info & Timer */}
-      <button
-        type="button"
-        onClick={() => navigate({ to: "/library" })}
-        className="flex flex-col text-left cursor-pointer pr-1"
-      >
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground truncate max-w-[100px]">
-          {subjectLabel(state.subject)}
-        </span>
-        <span className="font-mono text-xs font-bold text-foreground">
-          {formatFocusDuration(displaySeconds)}
-        </span>
-      </button>
+      <span className="font-mono text-xs font-bold text-[#E5B95C] tracking-wide">
+        ⏱ {formatFocusDuration(displaySeconds)}
+      </span>
 
-      {/* Quick Pause / Play Button */}
       <button
         type="button"
         onClick={(e) => {
@@ -64,19 +42,10 @@ export function FloatingMiniTimer() {
           if (state.isRunning) pauseTimer();
           else resumeTimer();
         }}
-        aria-label={state.isRunning ? "Pause study timer" : "Resume study timer"}
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+        aria-label={state.isRunning ? "Pause focus timer" : "Resume focus timer"}
+        className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0D4347] text-[#F7F5F0] hover:bg-[#165E63] transition-colors ml-0.5"
       >
-        {state.isRunning ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3 ml-0.5" />}
-      </button>
-
-      <button
-        type="button"
-        onClick={() => navigate({ to: "/library" })}
-        aria-label="Open Library"
-        className="text-muted-foreground hover:text-foreground"
-      >
-        <ChevronRight className="h-4 w-4" />
+        {state.isRunning ? <Pause className="h-2.5 w-2.5" /> : <Play className="h-2.5 w-2.5 ml-0.5" />}
       </button>
     </div>
   );

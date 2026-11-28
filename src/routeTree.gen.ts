@@ -17,6 +17,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as PlansRouteImport } from './routes/plans'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedHomiesRouteImport } from './routes/_authenticated/homies'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated/library'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedStatsRouteImport } from './routes/_authenticated/stats'
@@ -63,6 +64,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedHomiesRoute = AuthenticatedHomiesRouteImport.update({
+  id: '/homies',
+  path: '/homies',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLibraryRoute = AuthenticatedLibraryRouteImport.update({
   id: '/library',
   path: '/library',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/homies': typeof AuthenticatedHomiesRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/homies': typeof AuthenticatedHomiesRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/stats': typeof AuthenticatedStatsRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/plans': typeof PlansRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/homies': typeof AuthenticatedHomiesRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/stats': typeof AuthenticatedStatsRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/admin'
+    | '/homies'
     | '/library'
     | '/profile'
     | '/stats'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/admin'
+    | '/homies'
     | '/library'
     | '/profile'
     | '/stats'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/guide'
     | '/plans'
     | '/_authenticated/admin'
+    | '/_authenticated/homies'
     | '/_authenticated/library'
     | '/_authenticated/profile'
     | '/_authenticated/stats'
@@ -263,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/homies': {
+      id: '/_authenticated/homies'
+      path: '/homies'
+      fullPath: '/homies'
+      preLoaderRoute: typeof AuthenticatedHomiesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/library': {
       id: '/_authenticated/library'
       path: '/library'
@@ -310,6 +329,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedHomiesRoute: typeof AuthenticatedHomiesRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedStatsRoute: typeof AuthenticatedStatsRoute
@@ -317,6 +337,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedHomiesRoute: AuthenticatedHomiesRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedStatsRoute: AuthenticatedStatsRoute,

@@ -9,7 +9,7 @@ import { ClipboardCheck, Lightbulb } from "lucide-react";
 import { TrialRequestButton } from "./TrialRequest";
 
 const MODES = [
-  { id: "quiz", label: "Quiz mode", icon: Lightbulb, how: ["See the answer and explanation right after each question", "Skip and revisit skipped questions before submitting"] },
+  { id: "quiz", label: "Quiz mode", icon: Lightbulb, how: ["See the answer and explanation right after each question", "Skip questions whenever you want before submitting"] },
   { id: "test", label: "Test mode", icon: ClipboardCheck, how: ["Answers and explanations stay hidden until you submit", "Change answers, jump between questions, then submit", "Timer counts down for the whole test"] },
 ] as const;
 

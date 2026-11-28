@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import type { StudySession } from "@/lib/library";
 import { ApothecaryFlask } from "./ApothecaryFlask";
@@ -37,32 +38,44 @@ export function ApothecaryRack({ sessions }: ApothecaryRackProps) {
           </span>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/40 text-xs">
-          <Button
-            size="sm"
-            variant={filter === "all" ? "default" : "ghost"}
-            className="h-6 px-2.5 text-[11px]"
+        {/* High-Contrast Segmented Filter Pills */}
+        <div className="flex items-center gap-1 bg-[#013c44] p-1 rounded-lg border border-[#0D4347] text-xs">
+          <button
+            type="button"
+            className={cn(
+              "h-7 px-3 text-xs font-semibold rounded-md transition-all",
+              filter === "all"
+                ? "bg-[#E5B95C] text-[#082428] font-bold shadow-sm"
+                : "bg-transparent text-[#F7F5F0]/80 hover:text-[#F7F5F0] hover:bg-[#0D4347]/80"
+            )}
             onClick={() => setFilter("all")}
           >
             All ({sessions.length})
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "completed" ? "default" : "ghost"}
-            className="h-6 px-2.5 text-[11px]"
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "h-7 px-3 text-xs font-semibold rounded-md transition-all",
+              filter === "completed"
+                ? "bg-[#E5B95C] text-[#082428] font-bold shadow-sm"
+                : "bg-transparent text-[#F7F5F0]/80 hover:text-[#F7F5F0] hover:bg-[#0D4347]/80"
+            )}
             onClick={() => setFilter("completed")}
           >
             Sealed ({completedCount})
-          </Button>
-          <Button
-            size="sm"
-            variant={filter === "abandoned" ? "default" : "ghost"}
-            className="h-6 px-2.5 text-[11px] text-destructive hover:text-destructive"
+          </button>
+          <button
+            type="button"
+            className={cn(
+              "h-7 px-3 text-xs font-semibold rounded-md transition-all",
+              filter === "abandoned"
+                ? "bg-destructive text-white font-bold shadow-sm"
+                : "bg-transparent text-rose-300 hover:text-rose-100 hover:bg-destructive/20"
+            )}
             onClick={() => setFilter("abandoned")}
           >
             Cracked ({abandonedCount})
-          </Button>
+          </button>
         </div>
       </div>
 

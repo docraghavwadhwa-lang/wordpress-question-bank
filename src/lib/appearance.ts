@@ -1,2 +1,5 @@
 export type Appearance = "light" | "dark";
-export function resolveAppearance(saved: string | null): Appearance { return saved === "dark" ? "dark" : "light"; }
+export function resolveAppearance(saved: string | null): Appearance {
+  if (saved === "light") return "light";
+  return "dark";
+}

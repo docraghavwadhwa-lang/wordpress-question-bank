@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import React, { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { abandonStudySession, completeStudySession, createStudySession } from "@/lib/library";
@@ -24,8 +25,11 @@ export interface LibraryTimerState {
   pauseSecondsElapsed: number; // Capped at 300s (5m)
 }
 
-interface LibraryTimerContextValue {
+export interface LibraryTimerContextValue {
   state: LibraryTimerState;
+  isOverlayOpen: boolean;
+  openOverlay: () => void;
+  closeOverlay: () => void;
   startTimer: (config: {
     mode: TimerMode;
     subject: string;
@@ -68,6 +72,34 @@ const LibraryTimerContext = createContext<LibraryTimerContextValue | null>(null)
 
 export function LibraryTimerProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+  const openOverlay = () => setIsOverlayOpen(true);
+  const closeOverlay = () => setIsOverlayOpen(false);
+
+  // Sync live presence and active study status to supabase realtime presence channel
+  useEffect(() => {
+    if (!user?.id) return;
+    const client = supabase as any;
+    const channel = client.channel("elixir-presence", {
+      config: { presence: { key: user.id } },
+    });
+
+    channel.subscribe(async (status: string) => {
+      if (status === "SUBSCRIBED") {
+        await channel.track({
+          user_id: user.id,
+          online_at: new Date().toISOString(),
+          is_studying: state.isRunning,
+          active_subject: state.isRunning ? state.subject : null,
+          active_seconds: state.elapsedSeconds,
+        });
+      }
+    });
+
+    return () => {
+      try { channel.unsubscribe(); } catch {}
+    };
+  }, [user?.id, state.isRunning, state.subject]);
   const [state, setState] = useState<LibraryTimerState>(() => {
     if (typeof window === "undefined") return defaultState;
     try {
@@ -202,7 +234,7 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
 
   const startTimer: LibraryTimerContextValue["startTimer"] = async (config) => {
     let createdId: string | null = null;
-    const targetSec = (config.targetMinutes ?? 25) * 60;
+    const targetSec = Math.max(15, Math.min(180, config.targetMinutes ?? 25)) * 60;
     const breakSec = (config.breakMinutes ?? 5) * 60;
 
     const now = Date.now();
@@ -338,7 +370,7 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
   };
 
   const setTargetMinutes = (minutes: number) => {
-    const clamped = Math.max(10, Math.min(180, minutes));
+    const clamped = Math.max(15, Math.min(180, minutes));
     setState((prev) => ({
       ...prev,
       targetSeconds: clamped * 60,
@@ -349,6 +381,9 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     <LibraryTimerContext.Provider
       value={{
         state,
+        isOverlayOpen,
+        openOverlay,
+        closeOverlay,
         startTimer,
         pauseTimer,
         resumeTimer,

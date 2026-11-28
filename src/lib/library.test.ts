@@ -59,26 +59,23 @@ describe("Library Feature Flag & Ambience Tracks", () => {
     expect(featureAvailable([{ key: "library", enabled: false }], "library", true)).toBe(true);
   });
 
-  it("provides 7 seamless loopable ambience tracks matching custom audio assets", () => {
-    expect(AMBIENCE_TRACKS).toHaveLength(7);
-    expect(SOUNDSCAPES).toHaveLength(7);
+  it("provides 6 seamless loopable ambience tracks matching custom audio assets", () => {
+    expect(AMBIENCE_TRACKS).toHaveLength(6);
+    expect(SOUNDSCAPES).toHaveLength(6);
     const ids = AMBIENCE_TRACKS.map((s) => s.id);
     expect(ids).toEqual([
       "rain",
       "library",
       "cafe",
-      "lofi",
       "whitenoise",
       "fireplace",
       "keyboard",
     ]);
-
-    const filenames = AMBIENCE_TRACKS.map((s) => s.filename);
-    expect(filenames).toEqual([
+    const urls = AMBIENCE_TRACKS.map((s) => s.filename);
+    expect(urls).toEqual([
       "/sounds/rain%20loop.mp3",
       "/sounds/library%20sounds.mp3",
       "/sounds/km007-cafe-ambience-9263.mp3",
-      "/sounds/lofi%20loop.mp3",
       "/sounds/blendertimer-white-noise-8117.mp3",
       "/sounds/king_of_the_christmas-fireplace-loop-original-noise-178209.mp3",
       "/sounds/Typing%20On%20Keyboard.mp3",

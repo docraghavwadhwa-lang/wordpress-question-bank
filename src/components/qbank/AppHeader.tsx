@@ -1,6 +1,6 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, BookOpen, LogOut, Smartphone, UserRound, Crown, ShieldCheck, Phone, Moon, Sun } from "lucide-react";
+import { BarChart3, LogOut, Smartphone, UserRound, Crown, ShieldCheck, Phone, Moon, Sun, Users } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,16 +15,20 @@ import { fetchProfile } from "@/lib/profile";
 import { isNativeApp } from "@/lib/native-auth";
 import { BottomNav } from "@/components/qbank/BottomNav";
 import { fetchAccess } from "@/lib/subscriptions";
-
 import { useAppearance } from "@/components/AppearanceProvider";
 import { ProControl } from "./ProControl";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-
+import { AmbiencePopover } from "@/components/ambience/AmbiencePopover";
 
 function AppearanceItem() {
   const { appearance, toggle } = useAppearance();
   const dark = appearance === "dark";
-  return <DropdownMenuItem onClick={toggle}>{dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}{dark ? "Light mode" : "Dark mode"}</DropdownMenuItem>;
+  return (
+    <DropdownMenuItem onClick={toggle}>
+      {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {dark ? "Light Mode" : "Dark Mode"}
+    </DropdownMenuItem>
+  );
 }
 
 export function UserAvatar({ src, name, size = 36 }: { src?: string | null | undefined; name?: string | null | undefined; size?: number }) {
@@ -51,6 +55,7 @@ function GetHelpItem() {
   );
 }
 
+/** Unified persistent AppHeader: Elixir Logo (left) and Headphones, Bell, Crown, Avatar (right) */
 export function AppHeader({ onHome }: { onHome?: () => void }) {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -59,9 +64,6 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
   const access = useQuery({ queryKey: ["access", user?.id], queryFn: fetchAccess, enabled: !!user });
   const isApp = isNativeApp();
   const name = profile.data?.full_name || user?.email;
-  const loc = useLocation();
-  // Native screens have no website logo bar; Home gets a personal study toolbar.
-  const hideTop = isApp;
 
   async function signOut() {
     try { await supabase.rpc("release_account_device"); } catch { /* still sign out */ }
@@ -73,79 +75,75 @@ export function AppHeader({ onHome }: { onHome?: () => void }) {
 
   return (
     <>
-    {isApp && user && loc.pathname === "/" && loc.hash !== "qbanks" && <section aria-label="Your study dashboard" className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-2 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <div className="flex min-w-0 items-center gap-3">
-      <img src="/icon-512.png" alt="Elixir" width={44} height={44} className="h-11 w-11 shrink-0 rounded-[14px] object-cover" />
-      <div className="min-w-0">
-        <h1 className="truncate font-display text-2xl text-primary">Hi, {((profile.data?.full_name || user.user_metadata?.["full_name"] || "doctor") as string).split(" ")[0]}</h1>
-      </div>
-      </div>
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-        <NotificationBell compact />
-        <ProControl compact />
-        <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
-            <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={40} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Sanctuary & focus</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}><BarChart3 className="h-4 w-4" /> Progress & streak</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
-            {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
-            <GetHelpItem />
-            <AppearanceItem />
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </section>}
-    {!hideTop && <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-header">
-      <div className={`mx-auto grid max-w-5xl items-center gap-2 px-4 py-2 ${isApp ? "grid-cols-[1fr_auto_1fr]" : "grid-cols-[minmax(0,1fr)_auto]"}`}>
-        {isApp && <span />}
-        <Link to="/" onClick={onHome} className={`flex min-w-0 items-center gap-2.5 ${isApp ? "justify-center" : "text-left"}`}>
-          <img src="/elixir-header-latest.webp" alt="Elixir by Nirmaya Care" width={725} height={187} className="h-auto w-40 max-w-full object-contain sm:w-48" />
-        </Link>
-        <div className="flex shrink-0 items-center justify-end gap-1 sm:gap-3">
-        {!isApp && (
-          <Link to="/app" aria-label="Get the app" className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-brand-foreground hover:bg-brand-foreground/10" activeProps={{ className: "bg-brand-foreground/15" }}>
-            <Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Get the app</span>
+      <header className="sticky top-0 z-30 border-b border-brand-foreground/15 bg-header pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-2.5 sm:py-3">
+          {/* Left: Elixir Logo */}
+          <Link to="/" onClick={onHome} className="flex min-w-0 items-center gap-2.5">
+            <img
+              src="/elixir-header-latest.webp"
+              alt="Elixir by Nirmaya Care"
+              width={725}
+              height={187}
+              className="h-auto w-36 max-w-full object-contain sm:w-44"
+            />
           </Link>
-        )}
-        {user ? (
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <NotificationBell />
-            <ProControl />
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring" aria-label="Account menu">
-                <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate({ to: "/library" })}><BookOpen className="h-4 w-4" /> Sanctuary & focus</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}><BarChart3 className="h-4 w-4" /> Progress & streak</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}><UserRound className="h-4 w-4" /> Profile</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}><Crown className="h-4 w-4" /> Subscription plans</DropdownMenuItem>
-                {access.data?.admin && <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}><ShieldCheck className="h-4 w-4" /> Administration</DropdownMenuItem>}
-                <GetHelpItem />
-                <AppearanceItem />
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut}><LogOut className="h-4 w-4" /> Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Right Action Icons: Headphones, Bell, Crown, Avatar */}
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+            {!isApp && !user && (
+              <Link to="/app" aria-label="Get the app" className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-brand-foreground hover:bg-brand-foreground/10">
+                <Smartphone className="h-4 w-4" /><span className="hidden sm:inline">Get the app</span>
+              </Link>
+            )}
+
+            {user ? (
+              <>
+                <AmbiencePopover compact />
+                <NotificationBell compact />
+                <ProControl compact />
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring ml-0.5" aria-label="Account menu">
+                    <UserAvatar src={profile.data?.avatar_url ?? (user.user_metadata?.["avatar_url"] as string | undefined)} name={name} size={34} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{name}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate({ to: "/homies" })}>
+                      <Users className="h-4 w-4" /> Homies & study rooms
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/stats" })}>
+                      <BarChart3 className="h-4 w-4" /> Progress & streak
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
+                      <UserRound className="h-4 w-4" /> Profile & Settings
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/plans" })}>
+                      <Crown className="h-4 w-4" /> Subscription plans
+                    </DropdownMenuItem>
+                    {access.data?.admin && (
+                      <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
+                        <ShieldCheck className="h-4 w-4" /> Administration
+                      </DropdownMenuItem>
+                    )}
+                    <GetHelpItem />
+                    <AppearanceItem />
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
+                      <LogOut className="h-4 w-4" /> Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Link to="/auth" className="rounded-md bg-primary px-3 py-1.5 text-xs sm:text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                Sign in
+              </Link>
+            )}
           </div>
-        ) : (
-          <Link to="/auth" className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">Sign in</Link>
-        )}
         </div>
-      </div>
-    </header>}
-    {user && <BottomNav onHome={onHome} />}
+      </header>
+      {user && <BottomNav onHome={onHome} />}
     </>
   );
 }

@@ -1,6 +1,6 @@
 /**
- * Ambient Audio Engine for Elixir Sanctuary ("Ambience").
- * Supports 7 seamless loopable audio tracks with immediate user-gesture unlocking
+ * Ambient Audio Engine for Elixir ("Ambience").
+ * Supports 6 seamless loopable audio tracks with immediate user-gesture unlocking
  * and automatic fallback to Web Audio procedural synthesis.
  */
 
@@ -8,7 +8,6 @@ export type SoundscapePreset =
   | "rain"
   | "library"
   | "cafe"
-  | "lofi"
   | "whitenoise"
   | "fireplace"
   | "keyboard";
@@ -48,14 +47,6 @@ export const AMBIENCE_TRACKS: AmbienceTrackInfo[] = [
     filename: "/sounds/km007-cafe-ambience-9263.mp3",
     description: "Warm background murmurs and coffeehouse warmth",
     iconName: "Coffee",
-  },
-  {
-    id: "lofi",
-    slug: "lofi-loop",
-    label: "Lofi",
-    filename: "/sounds/lofi%20loop.mp3",
-    description: "Calm study beats and gentle mellow melodies",
-    iconName: "Music",
   },
   {
     id: "whitenoise",
@@ -250,7 +241,7 @@ class AmbientSoundEngine {
       try {
         const audio = new Audio();
         audio.src = audioPath;
-        audio.loop = true; // Mandatory seamless continuous infinite loop
+        audio.loop = true; // Continuous loop
         audio.volume = this.volume;
         audio.preload = "auto";
 
@@ -303,8 +294,6 @@ class AmbientSoundEngine {
         this.setupWhiteNoise(ctx, this.masterGain);
       } else if (preset === "fireplace") {
         this.setupFireplace(ctx, this.masterGain);
-      } else if (preset === "lofi") {
-        this.setupLofi(ctx, this.masterGain);
       } else if (preset === "keyboard") {
         this.setupKeyboard(ctx, this.masterGain);
       }
@@ -414,32 +403,10 @@ class AmbientSoundEngine {
     this.activeNodes.push({ stop: () => src.stop() });
   }
 
-  private setupLofi(ctx: AudioContext, dest: GainNode) {
-    const brown = this.createBrownNoiseBuffer(ctx, 5);
-    const src = ctx.createBufferSource();
-    src.buffer = brown;
-    src.loop = true;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(400, ctx.currentTime);
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.35, ctx.currentTime);
-
-    src.connect(filter);
-    filter.connect(gain);
-    gain.connect(dest);
-
-    src.start();
-    this.activeNodes.push({ stop: () => src.stop() });
-  }
-
   private setupKeyboard(ctx: AudioContext, dest: GainNode) {
     const bufferSize = ctx.sampleRate * 3;
     const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    // Procedural mechanical key clatter
     for (let i = 0; i < bufferSize; i++) {
       if (Math.random() < 0.0006) {
         const clickLen = Math.floor(Math.random() * 40 + 20);

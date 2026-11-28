@@ -23,17 +23,15 @@ describe("completed attempt capture", () => {
     fireEvent.click(screen.getByRole("button", { name: "End session" }));
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ completed: false }));
   });
-  it("lets students revisit skipped questions before submitting without scoring skips", () => {
+  it("submits with skipped questions without forcing a revisit", () => {
     const onFinish = vi.fn();
     render(<Quiz questions={questions} timer={0} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     fireEvent.click(screen.getByRole("button", { name: "A. First" }));
     fireEvent.click(screen.getByRole("button", { name: "Finish" }));
     expect(onFinish).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Revisit skipped questions" }));
-    fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 2, choices: { 1: "B", 2: "A" }, completed: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Submit$/ }));
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 1, choices: { 2: "A" }, completed: true }));
   });
   it("submits with skipped questions only after the student chooses Submit", () => {
     const onFinish = vi.fn();
@@ -64,17 +62,14 @@ describe("test mode", () => {
     expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ score: 1, answered: 2, choices: { 1: "A", 2: "B" }, completed: true }));
   });
 });
-it("submitting a finished skipped-only revisit captures a completed review", () => {
+it("submitting with skipped questions records completed state upon user confirmation", () => {
   const onFinish = vi.fn();
   render(<Quiz questions={questions} timer={0} userId={null} bookmarks={new Set()} onFinish={onFinish} onExit={() => {}} />);
   fireEvent.click(screen.getByRole("button", { name: "Skip" }));
   fireEvent.click(screen.getByRole("button", { name: "A. First" }));
   fireEvent.click(screen.getByRole("button", { name: "Finish" }));
-  fireEvent.click(screen.getByRole("button", { name: "Revisit skipped questions" }));
-  expect(screen.queryByRole("button", { name: "Go to question 2" })).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "B. Second" }));
-  fireEvent.click(screen.getByRole("button", { name: "End session" }));
-  expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ completed: true, answered: 2, score: 1, choices: { 1: "B", 2: "A" } }));
+  fireEvent.click(screen.getByRole("button", { name: /^Submit$/ }));
+  expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ completed: true, answered: 1, score: 1, choices: { 2: "A" } }));
 });
 it("jumping to an answered quiz question does not score it again", () => {
   const onFinish = vi.fn();
