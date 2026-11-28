@@ -76,30 +76,6 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
   const openOverlay = () => setIsOverlayOpen(true);
   const closeOverlay = () => setIsOverlayOpen(false);
 
-  // Sync live presence and active study status to supabase realtime presence channel
-  useEffect(() => {
-    if (!user?.id) return;
-    const client = supabase as any;
-    const channel = client.channel("elixir-presence", {
-      config: { presence: { key: user.id } },
-    });
-
-    channel.subscribe(async (status: string) => {
-      if (status === "SUBSCRIBED") {
-        await channel.track({
-          user_id: user.id,
-          online_at: new Date().toISOString(),
-          is_studying: state.isRunning,
-          active_subject: state.isRunning ? state.subject : null,
-          active_seconds: state.elapsedSeconds,
-        });
-      }
-    });
-
-    return () => {
-      try { channel.unsubscribe(); } catch {}
-    };
-  }, [user?.id, state.isRunning, state.subject]);
   const [state, setState] = useState<LibraryTimerState>(() => {
     if (typeof window === "undefined") return defaultState;
     try {
@@ -145,6 +121,30 @@ export function LibraryTimerProvider({ children }: { children: ReactNode }) {
     }
     return defaultState;
   });
+  // Sync live presence and active study status to supabase realtime presence channel
+  useEffect(() => {
+    if (!user?.id) return;
+    const client = supabase as any;
+    const channel = client.channel("elixir-presence", {
+      config: { presence: { key: user.id } },
+    });
+
+    channel.subscribe(async (status: string) => {
+      if (status === "SUBSCRIBED") {
+        await channel.track({
+          user_id: user.id,
+          online_at: new Date().toISOString(),
+          is_studying: state.isRunning,
+          active_subject: state.isRunning ? state.subject : null,
+          active_seconds: state.elapsedSeconds,
+        });
+      }
+    });
+
+    return () => {
+      try { channel.unsubscribe(); } catch {}
+    };
+  }, [user?.id, state.isRunning, state.subject]);
 
   const stateRef = useRef(state);
   stateRef.current = state;
