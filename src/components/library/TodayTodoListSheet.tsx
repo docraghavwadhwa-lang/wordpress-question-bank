@@ -104,7 +104,9 @@ export function TodayTodoListSheet({
     if (targetIndex < 0 || targetIndex >= todayItems.length) return;
 
     const temp = todayItems[index];
-    todayItems[index] = todayItems[targetIndex];
+    const target = todayItems[targetIndex];
+    if (!temp || !target) return;
+    todayItems[index] = target;
     todayItems[targetIndex] = temp;
 
     const orderedIds = todayItems.map((t) => t.id);
@@ -128,7 +130,7 @@ export function TodayTodoListSheet({
     if (!olderGroupsMap.has(label)) {
       olderGroupsMap.set(label, []);
     }
-    olderGroupsMap.get(label)!.push(t);
+    olderGroupsMap.get(label)?.push(t);
   });
   const olderDateGroups = Array.from(olderGroupsMap.entries()).map(([label, items]) => ({
     label,

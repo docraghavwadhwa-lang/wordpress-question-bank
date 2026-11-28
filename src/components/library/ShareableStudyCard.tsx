@@ -248,6 +248,7 @@ export function ShareableStudyCardModal({
       if (Capacitor.isNativePlatform()) {
         try {
           const base64Data = dataUrl.split(",")[1];
+          if (!base64Data) throw new Error("Could not generate image data");
           const writeResult = await Filesystem.writeFile({
             path: fileName,
             data: base64Data,
@@ -340,7 +341,7 @@ export function ShareableStudyCardModal({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...(open === undefined ? {} : { open })} {...(onOpenChange ? { onOpenChange } : {})}>
       <DialogContent className="max-w-md p-6 bg-[#082428] border border-[#0D4347] text-[#F7F5F0]">
         <DialogHeader className="border-b border-[#0D4347] pb-3">
           <DialogTitle className="font-display text-xl text-[#E5B95C] flex items-center gap-2">

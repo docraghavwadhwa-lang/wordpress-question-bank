@@ -79,7 +79,7 @@ export function StudyTogetherView({
 
   const buddyIds = new Set(
     (buddiesQuery.data ?? []).map((b) =>
-      b.requester_id === currentUserId ? b.addressee_id : b.requester_id
+      b.requester_id === currentUserId ? b.recipient_id : b.requester_id
     )
   );
 
@@ -109,12 +109,12 @@ export function StudyTogetherView({
   // Create Group Mutation
   const createMutation = useMutation({
     mutationFn: () =>
-      createStudyGroup(
-        newGroupName.trim(),
-        "Study Together Room",
-        newGroupGoalHours * 60,
-        currentUserId
-      ),
+      createStudyGroup({
+        name: newGroupName.trim(),
+        description: "Study Together Room",
+        dailyGoalMinutes: newGroupGoalHours * 60,
+        userId: currentUserId,
+      }),
     onSuccess: (newGroup) => {
       toast.success(`Study Room "${newGroup.name}" created! Code: ${newGroup.invite_code}`);
       setCreateModalOpen(false);
@@ -324,7 +324,7 @@ export function StudyTogetherView({
                 <div className="min-w-0 flex-1">
                   <h4 className="font-display font-bold text-sm text-[#F7F5F0] truncate">{grp.name}</h4>
                   <div className="flex items-center gap-2 mt-1 text-[11px] text-[#F7F5F0]/65">
-                    <span>{grp.members_count || 1} members</span>
+                    <span>Study room</span>
                     <span>•</span>
                     <span className="font-mono text-[#E5B95C]">Code: {grp.invite_code}</span>
                   </div>
@@ -410,7 +410,7 @@ export function StudyTogetherView({
                   key={student.user_id}
                   className="rounded-xl border border-[#0D4347] bg-[#0D4347]/30 p-3 flex items-center justify-between gap-3 hover:bg-[#0D4347]/50 transition-colors"
                 >
-                  <QuickPeekProfileCard userId={student.user_id}>
+                  <QuickPeekProfileCard user={{ ...student, id: student.user_id }}>
                     <div className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer">
                       <UserAvatar
                         src={student.avatar_url}

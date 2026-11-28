@@ -320,7 +320,7 @@ export function FocusTimerOverlay() {
                     : 15
                 }
                 durationMinutes={currentDurationMinutes}
-                status={timerState.isRunning ? "running" : "idle"}
+                status="running"
                 size={74}
                 showLabels={false}
               />

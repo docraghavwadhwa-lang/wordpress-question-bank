@@ -12,6 +12,16 @@ import { LibraryLeaderboards } from "@/components/library/LibraryLeaderboards";
 import { Users, Flame, Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/homies")({
+  head: () => ({
+    meta: [
+      { title: "Homies & Study Together — Elixir" },
+      { name: "description", content: "Connect with medical students, join study rooms and track your focus with Elixir." },
+      { property: "og:title", content: "Homies & Study Together — Elixir" },
+      { property: "og:description", content: "Connect with medical students, join study rooms and track your focus with Elixir." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: HomiesRouteComponent,
 });
 
@@ -91,7 +101,7 @@ function HomiesRouteComponent() {
         {activeTab === "rooms" && (
           <StudyTogetherView
             currentUserId={user.id}
-            userCollege={profileQuery.data?.college}
+            userCollege={profileQuery.data?.college ?? null}
             onBackToTimer={openOverlay}
           />
         )}
@@ -101,7 +111,7 @@ function HomiesRouteComponent() {
         )}
 
         {activeTab === "leaderboard" && (
-          <LibraryLeaderboards currentUserId={user.id} />
+          <LibraryLeaderboards currentUserId={user.id} currentUserProfile={profileQuery.data ?? null} />
         )}
       </main>
 

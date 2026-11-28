@@ -35,6 +35,9 @@ export interface Buddy {
     avatar_url: string | null;
     dream_specialisation: string | null;
     todays_mood: string | null;
+    is_actively_studying?: boolean;
+    today_focus_hours?: number;
+    active_subject?: string | null;
   };
 }
 
@@ -759,6 +762,6 @@ export async function fetchDailyFocusTime(userId: string): Promise<number> {
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   return sessions
-    .filter((s) => s.status === "completed" && new Date(s.completed_at || s.started_at).getTime() >= startOfDay)
+    .filter((s) => s.status === "completed" && new Date(s.ended_at || s.started_at).getTime() >= startOfDay)
     .reduce((sum, s) => sum + (s.duration_seconds || 0), 0);
 }

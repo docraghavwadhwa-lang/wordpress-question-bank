@@ -9,7 +9,7 @@ import {
   sendStudyCheer,
   fetchSameCollegeStudents,
   type Buddy,
-  type StudyBuddySearchUser,
+  type LeaderboardEntry,
 } from "@/lib/library";
 import { fetchProfile } from "@/lib/profile";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<StudyBuddySearchUser[]>([]);
+  const [searchResults, setSearchResults] = useState<LeaderboardEntry[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -99,7 +99,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
     searchBuddies(debouncedQuery)
       .then((results) => {
         if (isMounted) {
-          setSearchResults(results as unknown as StudyBuddySearchUser[]);
+          setSearchResults(results);
           setIsDropdownOpen(true);
         }
       })
@@ -246,7 +246,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
         {isDropdownOpen && searchResults.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1.5 z-40 max-h-72 overflow-y-auto rounded-xl border border-[#0D4347] bg-[#082428] shadow-2xl divide-y divide-[#0D4347]">
             {searchResults.map((user) => {
-              const targetId = (user.id || user.user_id || "") as string;
+              const targetId = user.user_id;
               const isSelf = targetId === currentUserId;
               const isAlreadyBuddy = buddies.some(
                 (b) =>
@@ -383,7 +383,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {collegeSuggestions.slice(0, 6).map((peer) => (
               <div
-                key={peer.id}
+                key={peer.user_id}
                 className="flex items-center justify-between gap-2 rounded-xl bg-[#0D4347]/30 border border-[#0D4347] p-2.5 text-xs hover:bg-[#0D4347]/50 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -406,7 +406,7 @@ export function StudyBuddiesTab({ currentUserId }: StudyBuddiesTabProps) {
                 <Button
                   size="sm"
                   disabled={addBuddyMutation.isPending}
-                  onClick={() => addBuddyMutation.mutate(peer.id)}
+                  onClick={() => addBuddyMutation.mutate(peer.user_id)}
                   className="h-7 text-[11px] font-semibold text-[#0D4347] border border-[#0D4347]/30 bg-[#F4F1EA] hover:bg-[#E8E2D5] px-2 shrink-0 shadow-sm"
                 >
                   <UserPlus className="mr-1 h-3 w-3 text-[#0D4347]" /> Add Homie

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Trophy, Medal, UserPlus, Check, UserCheck, Flame, Users, GraduationCap, Calendar, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import type { Profile } from "@/lib/profile";
+import { cn } from "@/lib/utils";
 
 interface LibraryLeaderboardsProps {
   currentUserId: string;

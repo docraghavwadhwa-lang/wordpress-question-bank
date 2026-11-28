@@ -46,7 +46,6 @@ import {
 import {
   sendStudyTogetherInvite,
   fetchUserBuddies,
-  type StudyBuddy,
 } from "@/lib/library";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -523,7 +522,7 @@ function GroupRoomView({
   // Filter homies not already in group
   const memberUserIds = new Set(members.map((m) => m.user_id));
   const availableHomiesToInvite = homies.filter((h) => {
-    const friendId = h.requester_id === currentUserId ? h.addressee_id : h.requester_id;
+    const friendId = h.requester_id === currentUserId ? h.recipient_id : h.requester_id;
     return !memberUserIds.has(friendId);
   });
 
@@ -867,8 +866,8 @@ function GroupRoomView({
               </div>
             ) : (
               availableHomiesToInvite.map((h) => {
-                const friendId = h.requester_id === currentUserId ? h.addressee_id : h.requester_id;
-                const friendProfile = h.profile;
+                const friendId = h.requester_id === currentUserId ? h.recipient_id : h.requester_id;
+                const friendProfile = h.other_user;
                 const friendName = friendProfile?.full_name || friendProfile?.handle || "Doctor";
                 const isInvited = invitedHomies.has(friendId);
 

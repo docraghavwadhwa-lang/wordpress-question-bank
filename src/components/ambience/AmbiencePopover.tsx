@@ -20,15 +20,16 @@ export function AmbiencePopover({ compact }: { compact?: boolean }) {
   const [volume, setVolume] = useState(0.7);
 
   useEffect(() => {
-    if (!ambientSound) return;
-    setIsPlaying(ambientSound.getIsPlaying());
-    setCurrentPreset(ambientSound.getCurrentPreset() || "rain");
-    setVolume(ambientSound.getVolume());
+    const sound = ambientSound;
+    if (!sound) return;
+    setIsPlaying(sound.getIsPlaying());
+    setCurrentPreset(sound.getCurrentPreset() || "rain");
+    setVolume(sound.getVolume());
 
-    const unsubscribe = ambientSound.subscribe(() => {
-      setIsPlaying(ambientSound.getIsPlaying());
-      setCurrentPreset(ambientSound.getCurrentPreset() || "rain");
-      setVolume(ambientSound.getVolume());
+    const unsubscribe = sound.subscribe(() => {
+      setIsPlaying(sound.getIsPlaying());
+      setCurrentPreset(sound.getCurrentPreset() || "rain");
+      setVolume(sound.getVolume());
     });
 
     return () => unsubscribe();

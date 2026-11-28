@@ -1,10 +1,11 @@
+// @refresh reset
 import { useLibraryTimer } from "@/contexts/LibraryTimerContext";
 import { TodayTodoListSheet } from "@/components/library/TodayTodoListSheet";
 import { fetchDailyFocusTime, fetchStudyTodos, fetchUserBuddies } from "@/lib/library";
 import { fetchProfile } from "@/lib/profile";
 import { createFileRoute, Link, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpenCheck, Bookmark, CircleAlert, History, Clock, Flame, PlayCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,30 @@ function Index() {
   const day = todayKey(now);
   const qbanks = useLocation().hash === "qbanks";
   const [isApp, setIsApp] = useState(false);
+  // Keep every hook together, before any loading or signed-out return.
+  // Reset Fast Refresh state above so older mounted hook layouts cannot survive an edit.
+  const { openOverlay } = useLibraryTimer();
+  const [todoSheetOpen, setTodoSheetOpen] = useState(false);
+  const homeProfile = useQuery({
+    queryKey: ["home_profile", user?.id],
+    queryFn: () => (user ? fetchProfile(user.id) : Promise.resolve(null)),
+    enabled: !!user,
+  });
+  const dailyFocus = useQuery({
+    queryKey: ["daily_focus_time", user?.id],
+    queryFn: () => (user ? fetchDailyFocusTime(user.id) : Promise.resolve(0)),
+    enabled: !!user,
+  });
+  const todosQuery = useQuery({
+    queryKey: ["study_todos_pill", user?.id],
+    queryFn: () => (user ? fetchStudyTodos(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
+  const homiesQuery = useQuery({
+    queryKey: ["homies_live_pill", user?.id],
+    queryFn: () => (user ? fetchUserBuddies(user.id) : Promise.resolve([])),
+    enabled: !!user,
+  });
   useEffect(() => setIsApp(isNativeApp()), []);
   useEffect(() => {
     if (!ready || (user && decks.isPending)) return;
@@ -194,33 +219,7 @@ function Index() {
     finally { setLoading(false); }
   }
   
-  const { openOverlay } = useLibraryTimer();
-  const [todoSheetOpen, setTodoSheetOpen] = useState(false);
-
-  const homeProfile = useQuery({
-    queryKey: ["home_profile", user?.id],
-    queryFn: () => (user ? fetchProfile(user.id) : Promise.resolve(null)),
-    enabled: !!user,
-  });
-
-  const dailyFocus = useQuery({
-    queryKey: ["daily_focus_time", user?.id],
-    queryFn: () => (user ? fetchDailyFocusTime(user.id) : Promise.resolve(0)),
-    enabled: !!user,
-  });
-
-  const todosQuery = useQuery({
-    queryKey: ["study_todos_pill", user?.id],
-    queryFn: () => (user ? fetchStudyTodos(user.id) : Promise.resolve([])),
-    enabled: !!user,
-  });
-
-  const homiesQuery = useQuery({
-    queryKey: ["homies_live_pill", user?.id],
-    queryFn: () => (user ? fetchUserBuddies(user.id) : Promise.resolve([])),
-    enabled: !!user,
-  });
-if (!ready) return <OpeningScreen />;
+  if (!ready) return <OpeningScreen />;
   if (isApp && user && decks.isPending) return <OpeningScreen />;
   if (!user) return <Landing />;
 
