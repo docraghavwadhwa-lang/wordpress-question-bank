@@ -173,7 +173,7 @@ export type Database = {
           created_at?: string
           id?: string
           recipient_id: string
-          requester_id: string
+          requester_id?: string
           status: string
           updated_at?: string
         }
@@ -286,6 +286,65 @@ export type Database = {
           label?: string
           updated_at?: string
           updated_by?: string | null
+        }
+        Relationships: []
+      }
+      notification_reads: {
+        Row: {
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_reads_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          link: string | null
+          message: string
+          recipient_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link?: string | null
+          message: string
+          recipient_id?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          link?: string | null
+          message?: string
+          recipient_id?: string | null
+          title?: string
+          type?: string
         }
         Relationships: []
       }
@@ -709,12 +768,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string
           daily_goal_minutes?: number
           description?: string | null
           id?: string
           invite_code: string
-          name: string
+          name?: string
           updated_at?: string
         }
         Update: {
@@ -773,6 +832,94 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      study_todos: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          task: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          task: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          task?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_together_invites: {
+        Row: {
+          created_at: string
+          group_code: string
+          group_id: string
+          group_name: string
+          id: string
+          inviter_id: string
+          recipient_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          group_code: string
+          group_id: string
+          group_name: string
+          id?: string
+          inviter_id: string
+          recipient_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          group_code?: string
+          group_id?: string
+          group_name?: string
+          id?: string
+          inviter_id?: string
+          recipient_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_together_invites_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_together_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_together_invites_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_visibility_allowlist: {
         Row: {
@@ -1172,6 +1319,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_send_notification: {
+        Args: {
+          p_link?: string
+          p_message: string
+          p_recipient_id?: string
+          p_title: string
+          p_type?: string
+        }
+        Returns: string
+      }
       admin_students: {
         Args: { _offset?: number; _search?: string }
         Returns: {
@@ -1219,6 +1376,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      delete_user_account: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       device_session_active: { Args: never; Returns: boolean }
       feature_enabled: { Args: { _key: string }; Returns: boolean }
       get_library_leaderboard: {
@@ -1245,6 +1406,7 @@ export type Database = {
         Returns: boolean
       }
       has_subject_access: { Args: { _subject: string }; Returns: boolean }
+      is_study_group_member: { Args: { p_group_id: string }; Returns: boolean }
       join_study_group: {
         Args: { _code: string }
         Returns: {
@@ -1326,6 +1488,10 @@ export type Database = {
       }
       reject_payment: { Args: { _request: string }; Returns: undefined }
       release_account_device: { Args: never; Returns: undefined }
+      remove_study_group_member: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: boolean
+      }
       request_trial: { Args: never; Returns: string }
       reserve_cashfree_payment: {
         Args: {
@@ -1376,6 +1542,11 @@ export type Database = {
           study_year: string
           todays_mood: string
         }[]
+      }
+      send_buddy_request: { Args: { target_user_id: string }; Returns: string }
+      send_study_together_invite: {
+        Args: { p_group_id: string; p_target_user_id: string }
+        Returns: string
       }
       submit_payment_request: {
         Args: {
