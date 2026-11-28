@@ -398,6 +398,27 @@ class AmbientSoundEngine {
     this.activeNodes.push({ stop: () => src.stop() });
   }
 
+  private setupLofi(ctx: AudioContext, dest: GainNode) {
+    const brown = this.createBrownNoiseBuffer(ctx, 5);
+    const src = ctx.createBufferSource();
+    src.buffer = brown;
+    src.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(400, ctx.currentTime);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+
+    src.start();
+    this.activeNodes.push({ stop: () => src.stop() });
+  }
+
   private setupWhiteNoise(ctx: AudioContext, dest: GainNode) {
     const white = this.createWhiteNoiseBuffer(ctx, 4);
     const src = ctx.createBufferSource();
